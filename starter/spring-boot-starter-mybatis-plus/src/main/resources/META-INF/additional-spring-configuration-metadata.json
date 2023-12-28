@@ -1,0 +1,15 @@
+{
+  "groups": [
+    {
+      "name": "net.healthan"
+    }
+  ],
+  "properties": [
+    {
+      "name": "healthan.mybatis.plus.enabled",
+      "type": "java.lang.Boolean",
+      "description": "enabled mybatis-plus support .",
+      "defaultValue": true
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.github.dactiv.healthan.spring.security.SpringSecurityAutoConfiguration,\
+com.github.dactiv.healthan.spring.security.WebSecurityDefaultConfigurerAdapter,\
+com.github.dactiv.healthan.spring.security.OperationDataTraceAuditConfiguration, \
+com.github.dactiv.healthan.spring.security.CaptchaExtendConfiguration

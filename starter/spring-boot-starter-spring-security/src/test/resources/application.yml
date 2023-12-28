@@ -1,0 +1,4 @@
+healthan:
+  authentication:
+    audit:
+      type: memory

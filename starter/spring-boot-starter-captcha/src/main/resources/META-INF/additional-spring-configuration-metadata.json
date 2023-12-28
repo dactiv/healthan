@@ -1,0 +1,21 @@
+{
+  "groups": [
+    {
+      "name": "net.healthan"
+    }
+  ],
+  "properties": [
+    {
+      "name": "healthan.captcha.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否开启验证码支持 .",
+      "defaultValue": true
+    },
+    {
+      "name": "healthan.captcha.constrooler.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否开启验证码控制器支持 .",
+      "defaultValue": true
+    }
+  ]
+}

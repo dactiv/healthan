@@ -1,0 +1,1 @@
+CREATE TABLE tb_all_type_entity (id int NOT NULL AUTO_INCREMENT, device json DEFAULT NULL, entities json DEFAULT NULL, status tinyint DEFAULT '0', executes json DEFAULT NULL) ENGINE=InnoDB;

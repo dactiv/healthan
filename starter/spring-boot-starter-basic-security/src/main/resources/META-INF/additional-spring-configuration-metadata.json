@@ -1,0 +1,15 @@
+{
+  "groups": [
+    {
+      "name": "net.healthan"
+    }
+  ],
+  "properties": [
+    {
+      "name": "healthan.authentication.audit.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否开启审计支持 .",
+      "defaultValue": true
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "groups": [
+    {
+      "name": "net.healthan"
+    }
+  ],
+  "properties": [
+    {
+      "name": "healthan.spring.web.mvc.enabled",
+      "type": "java.lang.Boolean",
+      "description": "enabled spring web mvc support .",
+      "defaultValue": true
+    }
+  ]
+}

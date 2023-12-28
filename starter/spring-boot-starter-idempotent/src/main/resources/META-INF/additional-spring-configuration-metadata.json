@@ -1,0 +1,15 @@
+{
+  "groups": [
+    {
+      "name": "net.healthan"
+    }
+  ],
+  "properties": [
+    {
+      "name": "healthan.idempotent.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否开启幂等性支持.",
+      "defaultValue": true
+    }
+  ]
+}

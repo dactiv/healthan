@@ -1,0 +1,5 @@
+healthan:
+  spring:
+    web:
+      mvc:
+        filter-view-base-packages: net.healthan.mdm.spring.web.test.result.entity
