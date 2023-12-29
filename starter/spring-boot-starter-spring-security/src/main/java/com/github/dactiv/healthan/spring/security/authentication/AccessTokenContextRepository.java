@@ -94,7 +94,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
     public SecurityContext getSecurityContext(String token) {
         
-        if (StringUtils.isEmpty(token)) {
+        if (StringUtils.isEmpty(token) || !Base64.isBase64(token.getBytes())) {
             return null;
         }
 
@@ -137,7 +137,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
             return context;
 
         } catch (CryptoException e) {
-            LOGGER.error("通过密钥:" + authenticationProperties.getAccessToken().getKey() + "解密token:" + token + "失败", e);
+            LOGGER.warn("通过密钥:" + authenticationProperties.getAccessToken().getKey() + "解密token:" + token + "失败");
         }
 
         return null;

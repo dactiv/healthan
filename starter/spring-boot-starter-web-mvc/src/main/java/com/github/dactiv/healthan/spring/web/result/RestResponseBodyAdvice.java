@@ -47,7 +47,8 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     /**
      * 不需要格式化的属性名称
      */
-    public static final String DEFAULT_NOT_FORMAT_ATTR_NAME = "REST_RESULT_NOT_FORMAT";
+    public static final String DEFAULT_NOT_FORMAT_ATTR_NAME = "X-REST-RESULT-NOT-FORMAT";
+
     /**
      * 默认过滤属性的 id 头名称
      */
