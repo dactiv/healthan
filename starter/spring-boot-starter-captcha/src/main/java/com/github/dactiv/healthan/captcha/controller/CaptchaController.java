@@ -13,9 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -121,10 +119,7 @@ public class CaptchaController {
         String text = IOUtils.toString(resource.getInputStream(), Charset.defaultCharset());
         String content = text.replace(TianaiCaptchaProperties.JS_BASE_URL_TOKEN, tianaiCaptchaService.getTianaiCaptchaProperties().getApiBaseUrl());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.TEXT_PLAIN);
-
-        return new ResponseEntity<>(content, headers, HttpStatus.OK);
+        return new ResponseEntity<>(content, HttpStatus.OK);
     }
 
     /**
