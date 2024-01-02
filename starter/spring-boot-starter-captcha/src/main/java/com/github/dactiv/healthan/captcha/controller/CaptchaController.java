@@ -33,8 +33,10 @@ import java.util.Objects;
  * @author maurice.chen
  */
 @Controller
-@RequestMapping("captcha")
+@RequestMapping(CaptchaController.CONTROLLER_NAME)
 public class CaptchaController {
+
+    public static final String CONTROLLER_NAME = "captcha";
 
     private final Interceptor interceptor;
 
