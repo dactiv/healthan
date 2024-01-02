@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -33,6 +34,8 @@ import java.util.Objects;
 @Controller
 @RequestMapping(CaptchaController.CONTROLLER_NAME)
 public class CaptchaController {
+
+    public static final String APPLICATION_JAVASCRIPT_UTF8 = "application/javascript;charset=UTF-8";
 
     public static final String CONTROLLER_NAME = "captcha";
 
@@ -118,8 +121,9 @@ public class CaptchaController {
 
         String text = IOUtils.toString(resource.getInputStream(), Charset.defaultCharset());
         String content = text.replace(TianaiCaptchaProperties.JS_BASE_URL_TOKEN, tianaiCaptchaService.getTianaiCaptchaProperties().getApiBaseUrl());
-
-        return new ResponseEntity<>(content, HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JAVASCRIPT_UTF8);
+        return new ResponseEntity<>(content, headers, HttpStatus.OK);
     }
 
     /**

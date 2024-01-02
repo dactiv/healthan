@@ -17,7 +17,7 @@ public class TianaiCaptchaProperties {
     public static final String JS_URL_KEY = "jsUrl";
 
 
-    public static final String JS_CONTROLLER = "tianai-js";
+    public static final String JS_CONTROLLER = "tianai.js";
 
     public static final String JS_BASE_URL_TOKEN = "_$_[baseUrlToken]_$_";
 
