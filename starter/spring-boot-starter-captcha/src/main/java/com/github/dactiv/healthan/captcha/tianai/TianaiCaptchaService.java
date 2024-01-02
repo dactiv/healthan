@@ -18,6 +18,7 @@ import cloud.tianai.captcha.validator.ImageCaptchaValidator;
 import cloud.tianai.captcha.validator.common.model.dto.ImageCaptchaTrack;
 import cloud.tianai.captcha.validator.impl.BasicCaptchaTrackValidator;
 import com.github.dactiv.healthan.captcha.*;
+import com.github.dactiv.healthan.captcha.controller.CaptchaController;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.captcha.tianai.body.TianaiRequestBody;
 import com.github.dactiv.healthan.captcha.tianai.config.ResourceProperties;
@@ -36,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.env.RandomValuePropertySource;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
 import org.springframework.validation.Validator;
@@ -122,7 +124,13 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
     @Override
     protected Map<String, Object> createGenerateArgs() {
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put(TianaiCaptchaProperties.JS_URL_KEY, tianaiCaptchaProperties.getApiBaseUrl() + TianaiCaptchaProperties.JS_CONTROLLER);
+        String url = tianaiCaptchaProperties.getApiBaseUrl()
+                + AntPathMatcher.DEFAULT_PATH_SEPARATOR
+                + CaptchaController.CONTROLLER_NAME
+                + AntPathMatcher.DEFAULT_PATH_SEPARATOR
+                + TianaiCaptchaProperties.JS_CONTROLLER;
+
+        result.put(TianaiCaptchaProperties.JS_URL_KEY, url);
 
         return result;
     }
