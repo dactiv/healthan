@@ -3,27 +3,27 @@ function me(t, e) {
     return t.apply(e, arguments);
   };
 }
-const { toString: ke } = Object.prototype, { getPrototypeOf: Q } = Object, U = ((t) => (e) => {
+const { toString: ke } = Object.prototype, { getPrototypeOf: Q } = Object, M = ((t) => (e) => {
   const n = ke.call(e);
   return t[n] || (t[n] = n.slice(8, -1).toLowerCase());
-})(/* @__PURE__ */ Object.create(null)), S = (t) => (t = t.toLowerCase(), (e) => U(e) === t), H = (t) => (e) => typeof e === t, { isArray: x } = Array, N = H("undefined");
+})(/* @__PURE__ */ Object.create(null)), S = (t) => (t = t.toLowerCase(), (e) => M(e) === t), H = (t) => (e) => typeof e === t, { isArray: x } = Array, N = H("undefined");
 function De(t) {
   return t !== null && !N(t) && t.constructor !== null && !N(t.constructor) && w(t.constructor.isBuffer) && t.constructor.isBuffer(t);
 }
 const ge = S("ArrayBuffer");
-function Me(t) {
+function Ue(t) {
   let e;
   return typeof ArrayBuffer < "u" && ArrayBuffer.isView ? e = ArrayBuffer.isView(t) : e = t && t.buffer && ge(t.buffer), e;
 }
-const Ue = H("string"), w = H("function"), ye = H("number"), V = (t) => t !== null && typeof t == "object", He = (t) => t === !0 || t === !1, I = (t) => {
-  if (U(t) !== "object")
+const Me = H("string"), w = H("function"), ye = H("number"), V = (t) => t !== null && typeof t == "object", He = (t) => t === !0 || t === !1, I = (t) => {
+  if (M(t) !== "object")
     return !1;
   const e = Q(t);
   return (e === null || e === Object.prototype || Object.getPrototypeOf(e) === null) && !(Symbol.toStringTag in t) && !(Symbol.iterator in t);
 }, Ve = S("Date"), je = S("File"), qe = S("Blob"), ze = S("FileList"), We = (t) => V(t) && w(t.pipe), Xe = (t) => {
   let e;
-  return t && (typeof FormData == "function" && t instanceof FormData || w(t.append) && ((e = U(t)) === "formdata" || // detect form-data instance
-      e === "object" && w(t.toString) && t.toString() === "[object FormData]"));
+  return t && (typeof FormData == "function" && t instanceof FormData || w(t.append) && ((e = M(t)) === "formdata" || // detect form-data instance
+  e === "object" && w(t.toString) && t.toString() === "[object FormData]"));
 }, $e = S("URLSearchParams"), Je = (t) => t.trim ? t.trim() : t.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
 function B(t, e, { allOwnKeys: n = !1 } = {}) {
   if (t === null || typeof t > "u")
@@ -105,10 +105,10 @@ const Ye = (t, e, n, { allOwnKeys: i } = {}) => (B(e, (r, s) => {
     i.push(n);
   return i;
 }, rt = S("HTMLFormElement"), st = (t) => t.toLowerCase().replace(
-    /[-_\s]([a-z\d])(\w*)/g,
-    function(n, i, r) {
-      return i.toUpperCase() + r;
-    }
+  /[-_\s]([a-z\d])(\w*)/g,
+  function(n, i, r) {
+    return i.toUpperCase() + r;
+  }
 ), re = (({ hasOwnProperty: t }) => (e, n) => t.call(e, n))(Object.prototype), ot = S("RegExp"), Te = (t, e) => {
   const n = Object.getOwnPropertyDescriptors(t), i = {};
   B(n, (r, s) => {
@@ -174,8 +174,8 @@ const ht = (t) => {
   isArrayBuffer: ge,
   isBuffer: De,
   isFormData: Xe,
-  isArrayBufferView: Me,
-  isString: Ue,
+  isArrayBufferView: Ue,
+  isString: Me,
   isNumber: ye,
   isBoolean: He,
   isObject: V,
@@ -197,7 +197,7 @@ const ht = (t) => {
   stripBOM: Ke,
   inherits: Ge,
   toFlatObject: Qe,
-  kindOf: U,
+  kindOf: M,
   kindOfTest: S,
   endsWith: Ze,
   toArray: et,
@@ -321,9 +321,9 @@ function j(t, e, n) {
       else if (a.isArray(f) && yt(f) || (a.isFileList(f) || a.endsWith(p, "[]")) && (b = a.toArray(f)))
         return p = Re(p), b.forEach(function(L, Fe) {
           !(a.isUndefined(L) || L === null) && e.append(
-              // eslint-disable-next-line no-nested-ternary
-              o === !0 ? oe([p], Fe, s) : o === null ? p : p + "[]",
-              l(L)
+            // eslint-disable-next-line no-nested-ternary
+            o === !0 ? oe([p], Fe, s) : o === null ? p : p + "[]",
+            l(L)
           );
         }), !1;
     }
@@ -340,11 +340,11 @@ function j(t, e, n) {
         throw Error("Circular reference detected in " + p.join("."));
       h.push(f), a.forEach(f, function(b, O) {
         (!(a.isUndefined(b) || b === null) && r.call(
-            e,
-            b,
-            a.isString(O) ? O.trim() : O,
-            p,
-            E
+          e,
+          b,
+          a.isString(O) ? O.trim() : O,
+          p,
+          E
         )) === !0 && g(b, p ? p.concat(O) : [O]);
       }), h.pop();
     }
@@ -458,7 +458,7 @@ const ce = bt, xe = {
   let t;
   return typeof navigator < "u" && ((t = navigator.product) === "ReactNative" || t === "NativeScript" || t === "NS") ? !1 : typeof window < "u" && typeof document < "u";
 })(), Rt = (() => typeof WorkerGlobalScope < "u" && // eslint-disable-next-line no-undef
-    self instanceof WorkerGlobalScope && typeof self.importScripts == "function")(), T = {
+self instanceof WorkerGlobalScope && typeof self.importScripts == "function")(), T = {
   isBrowser: !0,
   classes: {
     URLSearchParams: Tt,
@@ -532,9 +532,9 @@ const ee = {
       if ((c = a.isFileList(e)) || i.indexOf("multipart/form-data") > -1) {
         const d = this.env && this.env.FormData;
         return j(
-            c ? { "files[]": e } : e,
-            d && new d(),
-            this.formSerializer
+          c ? { "files[]": e } : e,
+          d && new d(),
+          this.formSerializer
         );
       }
     }
@@ -783,84 +783,84 @@ a.inherits(P, m, {
 function kt(t, e, n) {
   const i = n.config.validateStatus;
   !n.status || !i || i(n.status) ? t(n) : e(new m(
-      "Request failed with status code " + n.status,
-      [m.ERR_BAD_REQUEST, m.ERR_BAD_RESPONSE][Math.floor(n.status / 100) - 4],
-      n.config,
-      n.request,
-      n
+    "Request failed with status code " + n.status,
+    [m.ERR_BAD_REQUEST, m.ERR_BAD_RESPONSE][Math.floor(n.status / 100) - 4],
+    n.config,
+    n.request,
+    n
   ));
 }
 const Dt = T.isStandardBrowserEnv ? (
-    // Standard browser envs support document.cookie
-    function() {
-      return {
-        write: function(n, i, r, s, o, c) {
-          const d = [];
-          d.push(n + "=" + encodeURIComponent(i)), a.isNumber(r) && d.push("expires=" + new Date(r).toGMTString()), a.isString(s) && d.push("path=" + s), a.isString(o) && d.push("domain=" + o), c === !0 && d.push("secure"), document.cookie = d.join("; ");
-        },
-        read: function(n) {
-          const i = document.cookie.match(new RegExp("(^|;\\s*)(" + n + ")=([^;]*)"));
-          return i ? decodeURIComponent(i[3]) : null;
-        },
-        remove: function(n) {
-          this.write(n, "", Date.now() - 864e5);
-        }
-      };
-    }()
+  // Standard browser envs support document.cookie
+  function() {
+    return {
+      write: function(n, i, r, s, o, c) {
+        const d = [];
+        d.push(n + "=" + encodeURIComponent(i)), a.isNumber(r) && d.push("expires=" + new Date(r).toGMTString()), a.isString(s) && d.push("path=" + s), a.isString(o) && d.push("domain=" + o), c === !0 && d.push("secure"), document.cookie = d.join("; ");
+      },
+      read: function(n) {
+        const i = document.cookie.match(new RegExp("(^|;\\s*)(" + n + ")=([^;]*)"));
+        return i ? decodeURIComponent(i[3]) : null;
+      },
+      remove: function(n) {
+        this.write(n, "", Date.now() - 864e5);
+      }
+    };
+  }()
 ) : (
-    // Non standard browser env (web workers, react-native) lack needed support.
-    function() {
-      return {
-        write: function() {
-        },
-        read: function() {
-          return null;
-        },
-        remove: function() {
-        }
-      };
-    }()
+  // Non standard browser env (web workers, react-native) lack needed support.
+  function() {
+    return {
+      write: function() {
+      },
+      read: function() {
+        return null;
+      },
+      remove: function() {
+      }
+    };
+  }()
 );
-function Mt(t) {
+function Ut(t) {
   return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(t);
 }
-function Ut(t, e) {
+function Mt(t, e) {
   return e ? t.replace(/\/+$/, "") + "/" + e.replace(/^\/+/, "") : t;
 }
 function Be(t, e) {
-  return t && !Mt(e) ? Ut(t, e) : e;
+  return t && !Ut(e) ? Mt(t, e) : e;
 }
 const Ht = T.isStandardBrowserEnv ? (
-    // Standard browser envs have full support of the APIs needed to test
-    // whether the request URL is of the same origin as current location.
-    function() {
-      const e = /(msie|trident)/i.test(navigator.userAgent), n = document.createElement("a");
-      let i;
-      function r(s) {
-        let o = s;
-        return e && (n.setAttribute("href", o), o = n.href), n.setAttribute("href", o), {
-          href: n.href,
-          protocol: n.protocol ? n.protocol.replace(/:$/, "") : "",
-          host: n.host,
-          search: n.search ? n.search.replace(/^\?/, "") : "",
-          hash: n.hash ? n.hash.replace(/^#/, "") : "",
-          hostname: n.hostname,
-          port: n.port,
-          pathname: n.pathname.charAt(0) === "/" ? n.pathname : "/" + n.pathname
-        };
-      }
-      return i = r(window.location.href), function(o) {
-        const c = a.isString(o) ? r(o) : o;
-        return c.protocol === i.protocol && c.host === i.host;
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+  function() {
+    const e = /(msie|trident)/i.test(navigator.userAgent), n = document.createElement("a");
+    let i;
+    function r(s) {
+      let o = s;
+      return e && (n.setAttribute("href", o), o = n.href), n.setAttribute("href", o), {
+        href: n.href,
+        protocol: n.protocol ? n.protocol.replace(/:$/, "") : "",
+        host: n.host,
+        search: n.search ? n.search.replace(/^\?/, "") : "",
+        hash: n.hash ? n.hash.replace(/^#/, "") : "",
+        hostname: n.hostname,
+        port: n.port,
+        pathname: n.pathname.charAt(0) === "/" ? n.pathname : "/" + n.pathname
       };
-    }()
+    }
+    return i = r(window.location.href), function(o) {
+      const c = a.isString(o) ? r(o) : o;
+      return c.protocol === i.protocol && c.host === i.host;
+    };
+  }()
 ) : (
-    // Non standard browser envs (web workers, react-native) lack needed support.
-    function() {
-      return function() {
-        return !0;
-      };
-    }()
+  // Non standard browser envs (web workers, react-native) lack needed support.
+  function() {
+    return function() {
+      return !0;
+    };
+  }()
 );
 function Vt(t) {
   const e = /^([-+\w]{1,25})(:?\/\/|:)/.exec(t);
@@ -920,7 +920,7 @@ const qt = typeof XMLHttpRequest < "u", zt = qt && function(t) {
       if (!l)
         return;
       const g = A.from(
-          "getAllResponseHeaders" in l && l.getAllResponseHeaders()
+        "getAllResponseHeaders" in l && l.getAllResponseHeaders()
       ), p = {
         data: !o || o === "text" || o === "json" ? l.responseText : l.response,
         status: l.status,
@@ -945,10 +945,10 @@ const qt = typeof XMLHttpRequest < "u", zt = qt && function(t) {
       let f = t.timeout ? "timeout of " + t.timeout + "ms exceeded" : "timeout exceeded";
       const p = t.transitional || xe;
       t.timeoutErrorMessage && (f = t.timeoutErrorMessage), i(new m(
-          f,
-          p.clarifyTimeoutError ? m.ETIMEDOUT : m.ECONNABORTED,
-          t,
-          l
+        f,
+        p.clarifyTimeoutError ? m.ETIMEDOUT : m.ECONNABORTED,
+        t,
+        l
       )), l = null;
     }, T.isStandardBrowserEnv) {
       const g = (t.withCredentials || Ht(u)) && t.xsrfCookieName && Dt.read(t.xsrfCookieName);
@@ -988,10 +988,10 @@ const Pe = {
       ;
     if (!i)
       throw i === !1 ? new m(
-          `Adapter ${n} is not supported by the environment`,
-          "ERR_NOT_SUPPORT"
+        `Adapter ${n} is not supported by the environment`,
+        "ERR_NOT_SUPPORT"
       ) : new Error(
-          a.hasOwnProp(k, n) ? `Adapter '${n}' is not available in the build` : `Unknown adapter '${n}'`
+        a.hasOwnProp(k, n) ? `Adapter '${n}' is not available in the build` : `Unknown adapter '${n}'`
       );
     if (!a.isFunction(i))
       throw new TypeError("adapter is not a function");
@@ -1005,19 +1005,19 @@ function $(t) {
 }
 function de(t) {
   return $(t), t.headers = A.from(t.headers), t.data = X.call(
-      t,
-      t.transformRequest
+    t,
+    t.transformRequest
   ), ["post", "put", "patch"].indexOf(t.method) !== -1 && t.headers.setContentType("application/x-www-form-urlencoded", !1), Pe.getAdapter(t.adapter || te.adapter)(t).then(function(i) {
     return $(t), i.data = X.call(
-        t,
-        t.transformResponse,
-        i
+      t,
+      t.transformResponse,
+      i
     ), i.headers = A.from(i.headers), i;
   }, function(i) {
     return Ne(i) || ($(t), i && i.response && (i.response.data = X.call(
-        t,
-        t.transformResponse,
-        i.response
+      t,
+      t.transformResponse,
+      i.response
     ), i.response.headers = A.from(i.response.headers))), Promise.reject(i);
   });
 }
@@ -1101,14 +1101,14 @@ ne.transitional = function(e, n, i) {
   return (s, o, c) => {
     if (e === !1)
       throw new m(
-          r(o, " has been removed" + (n ? " in " + n : "")),
-          m.ERR_DEPRECATED
+        r(o, " has been removed" + (n ? " in " + n : "")),
+        m.ERR_DEPRECATED
       );
     return n && !he[o] && (he[o] = !0, console.warn(
-        r(
-            o,
-            " has been deprecated since v" + n + " and will be removed in the near future"
-        )
+      r(
+        o,
+        " has been deprecated since v" + n + " and will be removed in the near future"
+      )
     )), e ? e(s, o, c) : !0;
   };
 };
@@ -1133,7 +1133,7 @@ const K = {
   assertOptions: Wt,
   validators: ne
 }, R = K.validators;
-class M {
+class U {
   constructor(e) {
     this.defaults = e, this.interceptors = {
       request: new ce(),
@@ -1162,14 +1162,14 @@ class M {
       serialize: R.function
     }, !0)), n.method = (n.method || this.defaults.method || "get").toLowerCase();
     let o = s && a.merge(
-        s.common,
-        s[n.method]
+      s.common,
+      s[n.method]
     );
     s && a.forEach(
-        ["delete", "get", "head", "post", "put", "patch", "common"],
-        (f) => {
-          delete s[f];
-        }
+      ["delete", "get", "head", "post", "put", "patch", "common"],
+      (f) => {
+        delete s[f];
+      }
     ), n.headers = A.concat(o, s);
     const c = [];
     let d = !0;
@@ -1214,7 +1214,7 @@ class M {
   }
 }
 a.forEach(["delete", "get", "head", "options"], function(e) {
-  M.prototype[e] = function(n, i) {
+  U.prototype[e] = function(n, i) {
     return this.request(C(i || {}, {
       method: e,
       url: n,
@@ -1235,9 +1235,9 @@ a.forEach(["post", "put", "patch"], function(e) {
       }));
     };
   }
-  M.prototype[e] = n(), M.prototype[e + "Form"] = n(!0);
+  U.prototype[e] = n(), U.prototype[e + "Form"] = n(!0);
 });
-const D = M;
+const D = U;
 class ie {
   constructor(e) {
     if (typeof e != "function")
@@ -1413,12 +1413,10 @@ y.default = y;
 const pe = y;
 class Kt {
   constructor(e) {
-    if (this.config = e, this.config.postConfig = this.config.postConfig || {
+    this.config = e, this.config.postConfig = this.config.postConfig || {
       captchaParamName: "_tianaiCaptcha",
       tokenParamName: "_tianaiCaptchaToken"
-    }, this.config.slider = this.config.slider || this.sliderConfig(), this.config.rotate = this.config.rotate || this.rotateConfig(), this.config.concat = this.config.concat || this.concatConfig(), this.config.dateFormat = this.config.dateFormat || "yyyy-MM-dd HH:mm:ss'", this.config.loadingText = this.config.loadingText || "", this.config.title = this.config.title || "安全验证", this.config.validText = this.config.validText || "", this.config.width = this.config.width || 400, this.config.showMerchantName = this.config.showMerchantName === void 0 ? !0 : this.config.showMerchantName, this.config.success = this.config.success || console.info, this.config.fail = this.config.fail || console.error, this.config.failRefreshCaptcha = this.config.failRefreshCaptcha === void 0 ? !0 : this.config.failRefreshCaptcha, !this.config.baseUrl)
-      throw new Error("baseUrl 不能为空");
-    this.http = pe.create({ baseURL: this.config.baseUrl }), this.containerTemplate = '<div class="__tianai-container" id="tianai-container"></div>', this.contentTemplate = `
+    }, this.config.slider = this.config.slider || this.sliderConfig(), this.config.rotate = this.config.rotate || this.rotateConfig(), this.config.concat = this.config.concat || this.concatConfig(), this.config.dateFormat = this.config.dateFormat || "yyyy-MM-dd HH:mm:ss'", this.config.loadingText = this.config.loadingText || "", this.config.title = this.config.title || "安全验证", this.config.validText = this.config.validText || "", this.config.width = this.config.width || 400, this.config.showMerchantName = this.config.showMerchantName === void 0 ? !0 : this.config.showMerchantName, this.config.success = this.config.success || console.info, this.config.fail = this.config.fail || console.error, this.config.failRefreshCaptcha = this.config.failRefreshCaptcha === void 0 ? !0 : this.config.failRefreshCaptcha, this.config.baseUrl || (this.config.baseUrl = "_$_[baseUrlToken]_$_"), this.http = pe.create({ baseURL: this.config.baseUrl }), this.containerTemplate = '<div class="__tianai-container" id="tianai-container"></div>', this.contentTemplate = `
         <div class="__tianai-content" style="width:${this.config.width}px" id="tianai-content">
           <div class="__tianai-content-title" id="tianai-content-title">
             <div class="__tianai-content-title-text">${this.config.title}</div>

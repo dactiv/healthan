@@ -58,8 +58,6 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
 
     public static final String DEFAULT_TYPE = "tianai";
 
-    public static final String DEFAULT_APP_ID_PARAM_NAME = "appIdParamName";
-
     private static final String TYPE_TAG_SPLIT_FLAG = "|";
 
     private final ImageCaptchaGenerator imageCaptchaGenerator;
@@ -124,7 +122,7 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
     @Override
     protected Map<String, Object> createGenerateArgs() {
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put(TianaiCaptchaProperties.JS_URL_KEY, tianaiCaptchaProperties.getJsUrl());
+        result.put(TianaiCaptchaProperties.JS_URL_KEY, tianaiCaptchaProperties.getApiBaseUrl() + TianaiCaptchaProperties.JS_CONTROLLER);
 
         return result;
     }

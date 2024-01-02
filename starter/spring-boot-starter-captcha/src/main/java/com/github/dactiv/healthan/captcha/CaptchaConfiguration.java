@@ -21,6 +21,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.validation.Validator;
 
 import java.util.stream.Collectors;
@@ -52,8 +53,9 @@ public class CaptchaConfiguration {
     public CaptchaController captchaController(@Lazy Interceptor interceptor,
                                                CaptchaProperties captchaProperties,
                                                TianaiCaptchaService captchaService,
+                                               ResourceLoader resourceLoader,
                                                DelegateCaptchaService delegateCaptchaService) {
-        return new CaptchaController(delegateCaptchaService, interceptor, captchaProperties, captchaService);
+        return new CaptchaController(delegateCaptchaService, interceptor, resourceLoader, captchaProperties, captchaService);
     }
 
     @Bean

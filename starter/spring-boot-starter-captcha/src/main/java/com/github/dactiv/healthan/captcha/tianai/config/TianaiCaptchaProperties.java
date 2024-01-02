@@ -16,6 +16,12 @@ public class TianaiCaptchaProperties {
 
     public static final String JS_URL_KEY = "jsUrl";
 
+
+    public static final String JS_CONTROLLER = "/tianai-js";
+
+    public static final String JS_BASE_URL_TOKEN = "_$_[baseUrlToken]_$_";
+
+
     /**
      * 短信验证码的超时时间
      */
@@ -23,7 +29,12 @@ public class TianaiCaptchaProperties {
 
     private List<String> randomCaptchaType = Arrays.asList(CaptchaTypeConstant.SLIDER, CaptchaTypeConstant.ROTATE, CaptchaTypeConstant.CONCAT);
 
-    private String jsUrl = "http://localhost:8080/tianai-captcha.js";
+    private String jsPath = "classpath:tianai/js/tianai-captcha.js";
+
+    /**
+     * 接口基础 url 路径
+     */
+    private String apiBaseUrl = "http://localhost:8080";
 
     /**
      * 提交短信验证码的参数名称
@@ -57,12 +68,20 @@ public class TianaiCaptchaProperties {
         this.randomCaptchaType = randomCaptchaType;
     }
 
-    public String getJsUrl() {
-        return jsUrl;
+    public String getJsPath() {
+        return jsPath;
     }
 
-    public void setJsUrl(String jsUrl) {
-        this.jsUrl = jsUrl;
+    public void setJsPath(String jsPath) {
+        this.jsPath = jsPath;
+    }
+
+    public String getApiBaseUrl() {
+        return apiBaseUrl;
+    }
+
+    public void setApiBaseUrl(String apiBaseUrl) {
+        this.apiBaseUrl = apiBaseUrl;
     }
 
     public String getCaptchaParamName() {
