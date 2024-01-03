@@ -2,6 +2,11 @@ package com.github.dactiv.healthan.captcha.tianai.config;
 
 import java.io.Serializable;
 
+/**
+ * 模版配置信息，用于 tianai 模版配置使用
+ *
+ * @author maurice.chen
+ */
 public class TemplateProperties implements Serializable {
     private static final long serialVersionUID = -2399006088823656944L;
 

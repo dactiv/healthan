@@ -10,25 +10,42 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-
+/**
+ * tianai 验证码配置
+ *
+ * @author maurice.chen
+ */
 @ConfigurationProperties("healthan.captcha.tianai")
 public class TianaiCaptchaProperties {
 
+    /**
+     * js url key
+     */
     public static final String JS_URL_KEY = "jsUrl";
 
-
+    /**
+     * js controller 名称
+     */
     public static final String JS_CONTROLLER = "tianai.js";
 
+    /**
+     * 基础链接的 token 值，用于替换 js 里的 http 请求基础链接。
+     */
     public static final String JS_BASE_URL_TOKEN = "_$_[baseUrlToken]_$_";
-
 
     /**
      * 短信验证码的超时时间
      */
     private TimeProperties captchaExpireTime = new TimeProperties(5, TimeUnit.MINUTES);
 
+    /**
+     * 随机验证码类型
+     */
     private List<String> randomCaptchaType = Arrays.asList(CaptchaTypeConstant.SLIDER, CaptchaTypeConstant.ROTATE, CaptchaTypeConstant.CONCAT);
 
+    /**
+     *  js 路径
+     */
     private String jsPath = "classpath:tianai/js/tianai-captcha.js";
 
     /**
@@ -41,12 +58,24 @@ public class TianaiCaptchaProperties {
      */
     private String captchaParamName = "_tianaiCaptcha";
 
+    /**
+     * 偏差值映射
+     */
     private Map<String, Float> tolerantMap = new LinkedHashMap<>();
 
+    /**
+     * 资源图片映射
+     */
     private Map<String, List<ResourceProperties>> resourceMap = new LinkedHashMap<>();
 
+    /**
+     * 模版映射
+     */
     private Map<String, List<TemplateProperties>> templateMap = new LinkedHashMap<>();
 
+    /**
+     * 服务器校验的超时时间，用于行为验证要在什么时间范围内校验才有效
+     */
     private TimeProperties serverVerifyTimeout = TimeProperties.of(2,TimeUnit.MINUTES);
 
     public TianaiCaptchaProperties() {

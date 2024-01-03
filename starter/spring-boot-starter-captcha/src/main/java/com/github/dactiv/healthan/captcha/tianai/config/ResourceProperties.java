@@ -4,6 +4,12 @@ import cloud.tianai.captcha.resource.ResourceProvider;
 
 import java.io.Serializable;
 
+/**
+ * 资源配置信息，用于 tianai 配置行为验证图片使用
+ *
+ * @author maurice.chen
+ *
+ */
 public class ResourceProperties implements Serializable {
 
     public static final String DEFAULT_TAG_NAME = "default";
