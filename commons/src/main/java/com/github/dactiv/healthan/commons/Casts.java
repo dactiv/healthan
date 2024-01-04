@@ -84,6 +84,8 @@ public abstract class Casts {
 
     public static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<Map<String, Object>>() {};
 
+    public static final TypeReference<List<Map<String, Object>>> LIST_MAP_TYPE_REFERENCE = new TypeReference<List<Map<String, Object>>>() {};
+
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private static JsonInclude.Value jsonDefaultPropertyInclusion;
