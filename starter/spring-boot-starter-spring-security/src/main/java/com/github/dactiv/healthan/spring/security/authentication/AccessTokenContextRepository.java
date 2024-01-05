@@ -149,6 +149,10 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     }
 
     public String generatePlaintextString(SecurityUserDetails userDetails) {
+        return generatePlaintextString(userDetails, authenticationProperties.getAccessToken().getKey());
+    }
+
+    public String generatePlaintextString(SecurityUserDetails userDetails, String aesKey) {
         Map<String, Object> json = new LinkedHashMap<>();
 
         json.put(IdEntity.ID_FIELD_NAME, userDetails.getId());
@@ -164,7 +168,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         String plaintext = Casts.writeValueAsString(json);
 
         CipherService cipherService = cipherAlgorithmService.getCipherService(authenticationProperties.getAccessToken().getCipherAlgorithmName());
-        byte[] key = Base64.decode(authenticationProperties.getAccessToken().getKey());
+        byte[] key = Base64.decode(aesKey);
         ByteSource source = cipherService.encrypt(plaintext.getBytes(Charset.defaultCharset()), key);
 
         return source.getBase64();
