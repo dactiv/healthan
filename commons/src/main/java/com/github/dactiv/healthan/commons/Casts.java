@@ -675,11 +675,12 @@ public abstract class Casts {
                 continue;
             }
 
-            ReflectionUtils.setFieldValue(result, field.getName(), entry.getValue());
+            ReflectionUtils.setFieldValue(result, field.getName(), cast(entry.getValue(), field.getType()));
         }
 
         return result;
     }
+
 
     public static List<Field> getIgnoreField(Class<?> targetClass) {
         List<Field> fields = new LinkedList<>();
