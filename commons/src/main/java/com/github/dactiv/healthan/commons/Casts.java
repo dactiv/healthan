@@ -11,6 +11,7 @@ import com.github.dactiv.healthan.commons.exception.SystemException;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.Converter;
 import org.apache.commons.beanutils.converters.DateConverter;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.objenesis.instantiator.util.ClassUtils;
@@ -658,6 +659,24 @@ public abstract class Casts {
         T result = ClassUtils.newInstance(targetClass);
 
         BeanUtils.copyProperties(source, result, ignoreProperties);
+
+        return result;
+    }
+
+    public static <T> T ofMap(Map<String,Object> source, Class<T> targetClass, String... ignoreProperties) {
+        T result = ClassUtils.newInstance(targetClass);
+
+        for (Map.Entry<String, Object> entry : source.entrySet()) {
+            if (ArrayUtils.contains(ignoreProperties, entry.getKey())) {
+                continue;
+            }
+            Field field = ReflectionUtils.findFiled(result, entry.getKey());
+            if (Objects.isNull(field)) {
+                continue;
+            }
+
+            ReflectionUtils.setFieldValue(result, field.getName(), entry.getValue());
+        }
 
         return result;
     }
