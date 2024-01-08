@@ -15,6 +15,7 @@ import com.github.dactiv.healthan.spring.security.authentication.service.Default
 import com.github.dactiv.healthan.spring.security.authentication.service.DefaultUserDetailsService;
 import com.github.dactiv.healthan.spring.security.authentication.service.feign.FeignAuthenticationTypeTokenResolver;
 import com.github.dactiv.healthan.spring.security.authentication.service.feign.FeignExceptionResultResolver;
+import com.github.dactiv.healthan.spring.security.controller.TokenController;
 import com.github.dactiv.healthan.spring.security.plugin.PluginEndpoint;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
@@ -65,6 +66,14 @@ public class SpringSecurityAutoConfiguration {
     @ConditionalOnMissingBean(PasswordEncoder.class)
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "healthan.authentication.access-token", value = "enable-controller", havingValue = "true")
+    TokenController accessTokenController(AccessTokenContextRepository accessTokenContextRepository,
+                                          RedissonClient redissonClient,
+                                          AuthenticationProperties authenticationProperties) {
+        return new TokenController(accessTokenContextRepository, redissonClient, authenticationProperties);
     }
 
     @Bean

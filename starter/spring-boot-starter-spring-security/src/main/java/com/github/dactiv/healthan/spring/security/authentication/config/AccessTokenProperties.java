@@ -24,6 +24,8 @@ public class AccessTokenProperties {
      */
     public final static String DEFAULT_SPRING_SECURITY_CONTEXT_KEY = "spring:security:context:access-token:";
 
+    public static final String DEFAULT_REFRESH_TOKEN_KEY = "spring:security:context:refresh-token:";
+
     /**
      * 加解密算法名称
      */
@@ -35,9 +37,19 @@ public class AccessTokenProperties {
     private String key;
 
     /**
-     * 缓存配置
+     * 是否开启令牌控制器
      */
-    private CacheProperties cache = CacheProperties.of(DEFAULT_SPRING_SECURITY_CONTEXT_KEY, TimeProperties.ofDay(1));
+    private boolean enableController = false;
+
+    /**
+     * 访问令牌缓存配置
+     */
+    private CacheProperties accessTokenCache = CacheProperties.of(DEFAULT_SPRING_SECURITY_CONTEXT_KEY, TimeProperties.ofDay(1));
+
+    /**
+     * 刷新令牌缓存配置
+     */
+    private CacheProperties refreshTokenCache = CacheProperties.of(DEFAULT_REFRESH_TOKEN_KEY);
 
     /**
      * 访问 token 头名称
@@ -78,12 +90,20 @@ public class AccessTokenProperties {
         this.key = key;
     }
 
-    public CacheProperties getCache() {
-        return cache;
+    public CacheProperties getAccessTokenCache() {
+        return accessTokenCache;
     }
 
-    public void setCache(CacheProperties cache) {
-        this.cache = cache;
+    public void setAccessTokenCache(CacheProperties accessTokenCache) {
+        this.accessTokenCache = accessTokenCache;
+    }
+
+    public CacheProperties getRefreshTokenCache() {
+        return refreshTokenCache;
+    }
+
+    public void setRefreshTokenCache(CacheProperties refreshTokenCache) {
+        this.refreshTokenCache = refreshTokenCache;
     }
 
     public String getAccessTokenHeaderName() {
@@ -116,5 +136,13 @@ public class AccessTokenProperties {
 
     public void setRefreshTokenParamName(String refreshTokenParamName) {
         this.refreshTokenParamName = refreshTokenParamName;
+    }
+
+    public boolean isEnableController() {
+        return enableController;
+    }
+
+    public void setEnableController(boolean enableController) {
+        this.enableController = enableController;
     }
 }

@@ -67,7 +67,7 @@ public class SecurityUserDetails implements UserDetails, BasicIdentification<Obj
     private UserStatus status;
     private String type;
 
-    private Map<String, Object> meta;
+    private Map<String, Object> meta = new LinkedHashMap<>();
 
     public SecurityUserDetails() {
     }

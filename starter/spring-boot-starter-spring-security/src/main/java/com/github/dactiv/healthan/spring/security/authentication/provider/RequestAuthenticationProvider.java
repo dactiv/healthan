@@ -93,22 +93,26 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         SimpleAuthenticationToken token = Casts.cast(authentication);
 
         SecurityUserDetails userDetails;
-        if (authentication instanceof RequestAuthenticationToken) {
-            RequestAuthenticationToken requestAuthenticationToken = Casts.cast(authentication);
-            // 开始授权，如果失败抛出异常
-            userDetails = doPrincipalAuthenticate(requestAuthenticationToken);
-        } else if (authentication instanceof RememberMeAuthenticationToken) {
-            RememberMeAuthenticationToken rememberMeAuthenticationToken = Casts.cast(authentication);
-            userDetails = doRememberMeAuthentication(rememberMeAuthenticationToken);
-        } else {
-            String error = messages.getMessage(
-                    "PrincipalAuthenticationProvider.authenticateNotFound",
-                    "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
-            );
-            throw new AuthenticationServiceException(error);
-        }
+        try {
+            if (authentication instanceof RequestAuthenticationToken) {
+                RequestAuthenticationToken requestAuthenticationToken = Casts.cast(authentication);
+                // 开始授权，如果失败抛出异常
+                userDetails = doPrincipalAuthenticate(requestAuthenticationToken);
+            } else if (authentication instanceof RememberMeAuthenticationToken) {
+                RememberMeAuthenticationToken rememberMeAuthenticationToken = Casts.cast(authentication);
+                userDetails = doRememberMeAuthentication(rememberMeAuthenticationToken);
+            } else {
+                String error = messages.getMessage(
+                        "PrincipalAuthenticationProvider.authenticateNotFound",
+                        "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
+                );
+                throw new AuthenticationServiceException(error);
+            }
 
-        return createSuccessAuthentication(userDetails, token);
+            return createSuccessAuthentication(userDetails, token);
+        } catch (Exception e) {
+            throw new AuthenticationServiceException(e.getMessage());
+        }
     }
 
     protected SecurityUserDetails doRememberMeAuthentication(RememberMeAuthenticationToken token) {

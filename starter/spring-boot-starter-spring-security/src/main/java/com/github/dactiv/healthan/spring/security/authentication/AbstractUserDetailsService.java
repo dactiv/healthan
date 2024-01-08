@@ -18,10 +18,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class AbstractUserDetailsService implements UserDetailsService {
 
-    private final AuthenticationProperties properties;
+    private final AuthenticationProperties authenticationProperties;
 
-    public AbstractUserDetailsService(AuthenticationProperties properties) {
-        this.properties = properties;
+    public AbstractUserDetailsService(AuthenticationProperties authenticationProperties) {
+        this.authenticationProperties = authenticationProperties;
     }
 
     @Override
@@ -46,7 +46,7 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
      * @return true 记住我，否则 false
      */
     protected boolean obtainRememberMe(HttpServletRequest request) {
-        return BooleanUtils.toBoolean(request.getParameter(properties.getRememberMe().getParamName()));
+        return BooleanUtils.toBoolean(request.getParameter(authenticationProperties.getRememberMe().getParamName()));
     }
 
     /**
@@ -57,7 +57,7 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
      * @return 登陆账户
      */
     protected String obtainUsername(HttpServletRequest request) {
-        return request.getParameter(properties.getUsernameParamName());
+        return request.getParameter(authenticationProperties.getUsernameParamName());
     }
 
     /**
@@ -68,6 +68,15 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
      * @return 登陆密码
      */
     protected String obtainPassword(HttpServletRequest request) {
-        return request.getParameter(properties.getPasswordParamName());
+        return request.getParameter(authenticationProperties.getPasswordParamName());
+    }
+
+    /**
+     * 获取配置信息
+     *
+     * @return 配置信息
+     */
+    public AuthenticationProperties getAuthenticationProperties() {
+        return authenticationProperties;
     }
 }
