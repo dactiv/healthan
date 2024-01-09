@@ -138,7 +138,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
             ListView<String> view = namingService.getServicesOfServer(1, Integer.MAX_VALUE, discoveryProperties.getGroup());
 
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.info("当前 nacos 中的所有服务为:" + view.getData());
+                LOGGER.debug("当前 nacos 组 [{}] 中的所有服务为 {}", discoveryProperties.getGroup(), view.getData());
             }
 
             for (String s : view.getData()) {
