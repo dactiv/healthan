@@ -27,20 +27,16 @@ public class LoggingClientHttpRequestInterceptor implements CustomClientHttpRequ
     }
 
     private void traceRequest(HttpRequest request, byte[] body)  {
-        LOGGER.debug("===========================request begin================================================");
-        LOGGER.debug("URI         : {}", request.getURI());
-        LOGGER.debug("Method      : {}", request.getMethod());
-        LOGGER.debug("Headers     : {}", request.getHeaders());
-        LOGGER.debug("Request body: {}", new String(body, Charset.defaultCharset()));
-        LOGGER.debug("==========================request end================================================");
+        LOGGER.debug("URI           : {}", request.getURI());
+        LOGGER.debug("Method        : {}", request.getMethod());
+        LOGGER.debug("Headers       : {}", request.getHeaders());
+        LOGGER.debug("Request body  : {}", new String(body, Charset.defaultCharset()));
     }
 
     private void traceResponse(ClientHttpResponse response) throws IOException {
-        LOGGER.debug("============================response begin==========================================");
         LOGGER.debug("Status code  : {}", response.getStatusCode());
         LOGGER.debug("Status text  : {}", response.getStatusText());
         LOGGER.debug("Headers      : {}", response.getHeaders());
-        LOGGER.debug("=======================response end=================================================");
     }
 
 }
