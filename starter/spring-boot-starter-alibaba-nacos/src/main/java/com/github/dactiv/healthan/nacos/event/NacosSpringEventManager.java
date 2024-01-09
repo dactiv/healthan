@@ -142,9 +142,6 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
             }
 
             for (String s : view.getData()) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("获取 [{}] 组的 [{}] 服务信息", discoveryProperties.getGroup(), s);
-                }
                 // 通过服务名获取服务信息
                 Service service = namingMaintainService.queryService(s, discoveryProperties.getGroup());
                 // 通过服务名获取所有服务实例
