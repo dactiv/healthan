@@ -27,7 +27,10 @@ public class NacosDiscoveryEventProperties {
      */
     private String unsubscribeScanCron = DEFAULT_UNSUBSCRIBE_SERVICE_CRON;
 
-    private boolean instanceRegisteredSubscribe = true;
+    /**
+     * 是否实例注册后马上广播事件
+     */
+    private boolean instanceRegisteredSubscribe = false;
 
     /**
      * 过期取消订阅时间
