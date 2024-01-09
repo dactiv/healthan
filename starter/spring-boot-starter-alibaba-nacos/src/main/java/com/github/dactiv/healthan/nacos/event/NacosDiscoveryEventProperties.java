@@ -27,6 +27,8 @@ public class NacosDiscoveryEventProperties {
      */
     private String unsubscribeScanCron = DEFAULT_UNSUBSCRIBE_SERVICE_CRON;
 
+    private boolean instanceRegisteredSubscribe = true;
+
     /**
      * 过期取消订阅时间
      */
@@ -87,5 +89,13 @@ public class NacosDiscoveryEventProperties {
      */
     public void setExpireUnsubscribeTime(TimeProperties expireUnsubscribeTime) {
         this.expireUnsubscribeTime = expireUnsubscribeTime;
+    }
+
+    public boolean isInstanceRegisteredSubscribe() {
+        return instanceRegisteredSubscribe;
+    }
+
+    public void setInstanceRegisteredSubscribe(boolean instanceRegisteredSubscribe) {
+        this.instanceRegisteredSubscribe = instanceRegisteredSubscribe;
     }
 }
