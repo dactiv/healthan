@@ -119,7 +119,16 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
             }
 
             SecurityUserDetails userDetails = Casts.cast(context.getAuthentication().getDetails());
-            String existToken = userDetails.getMeta().getOrDefault(authenticationProperties.getAccessToken().getAccessTokenParamName(), StringUtils.EMPTY).toString();
+            Object tokenValue = userDetails.getMeta().get(authenticationProperties.getAccessToken().getAccessTokenParamName());
+            if (Objects.isNull(tokenValue)) {
+                return null;
+            }
+
+            String existToken = tokenValue.toString();
+            if (AccessToken.class.isAssignableFrom(tokenValue.getClass())) {
+                AccessToken accessToken = Casts.cast(tokenValue);
+                existToken = accessToken.getToken();
+            }
 
             if (!StringUtils.equals(existToken, token)) {
                 return null;
