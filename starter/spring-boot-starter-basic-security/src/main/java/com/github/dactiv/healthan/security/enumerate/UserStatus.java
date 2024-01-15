@@ -16,12 +16,12 @@ public enum UserStatus implements NameValueEnum<Integer> {
     /**
      * 禁用
      */
-    Disabled(2, "禁用"),
+    Disabled(0, "禁用"),
 
     /**
      * 锁定
      */
-    Lock(3, "锁定");
+    Lock(99, "锁定");
 
     /**
      * 用户状态
