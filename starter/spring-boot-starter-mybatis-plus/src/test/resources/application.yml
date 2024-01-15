@@ -8,6 +8,7 @@ mybatis-plus:
       id-type: auto
     banner: off
 
+
 spring:
   datasource:
     url: jdbc:h2:mem:mybatis;INIT=create domain if not exists jsonb as other;MODE=MYSQL;DB_CLOSE_DELAY=-1
@@ -19,3 +20,8 @@ spring:
     init:
       schema-locations: classpath:sql/schema.sql
       data-locations: classpath:sql/data.sql
+healthan:
+  mybatis:
+    plus:
+      crypto:
+        data-aes-crypto-key: jmUFt7sqMPXf+c8w69OpIg==

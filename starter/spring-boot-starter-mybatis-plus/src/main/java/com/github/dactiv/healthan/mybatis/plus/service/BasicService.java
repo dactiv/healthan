@@ -2,8 +2,10 @@ package com.github.dactiv.healthan.mybatis.plus.service;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.mapper.Mapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.ExceptionUtils;
+import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,11 @@ import java.util.stream.Collectors;
  * @param <T> 映射 BaseMapper dao 实体实现
  */
 public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
+
+    /**
+     * entity类缓存
+     */
+    private static final Map<String, Class<?>> ENTITY_CLASS_CACHE = new ConcurrentHashMap<>();
 
     /**
      * mapper 实例
@@ -52,6 +60,22 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
     public BasicService() {
         mapperClass = ReflectionUtils.getGenericClass(this, BigDecimal.ZERO.intValue());
         entityClass = ReflectionUtils.getGenericClass(this, BigDecimal.ONE.intValue());
+    }
+
+    public static Class<?> getEntityClass(String msId) {
+        Class<?> entityClass = ENTITY_CLASS_CACHE.get(msId);
+        if (null == entityClass) {
+            try {
+                final String className = msId.substring(0, msId.lastIndexOf(Casts.DOT));
+                entityClass = ReflectionKit.getSuperClassGenericType(Class.forName(className), Mapper.class, 0);
+                ENTITY_CLASS_CACHE.put(msId, entityClass);
+                return entityClass;
+            } catch (ClassNotFoundException e) {
+                throw ExceptionUtils.mpe(e);
+            }
+        }
+
+        return null;
     }
 
     /**

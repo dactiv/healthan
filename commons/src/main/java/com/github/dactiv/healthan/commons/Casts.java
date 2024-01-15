@@ -83,8 +83,24 @@ public abstract class Casts {
      */
     public static final String HTTP_PATH_VARIABLE_END = "}";
 
+    /**
+     * 左括号
+     */
+    public static final String LEFT_BRACKET = "(";
+
+    /**
+     * 有括号
+     */
+    public static final String RIGHT_BRACKET = ")";
+
+    /**
+     *  map 类型范型引用
+     */
     public static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<Map<String, Object>>() {};
 
+    /**
+     * list map 类型范型引用
+     */
     public static final TypeReference<List<Map<String, Object>>> LIST_MAP_TYPE_REFERENCE = new TypeReference<List<Map<String, Object>>>() {};
 
     private static ObjectMapper objectMapper = new ObjectMapper();
@@ -353,14 +369,9 @@ public abstract class Casts {
             return name;
         }
         StringBuilder result = new StringBuilder();
-        boolean isFirst = true;
         for (char c : name.toCharArray()) {
             if (Character.isUpperCase(c)) {
-                if (!isFirst) {
-                    result.append(UNDERSCORE);
-                }
-                result.append(Character.toLowerCase(c));
-                isFirst = false;
+                result.append(UNDERSCORE).append(Character.toLowerCase(c));
             } else {
                 result.append(c);
             }

@@ -9,7 +9,6 @@ import com.github.dactiv.healthan.commons.id.BasicIdentification;
 import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import com.github.dactiv.healthan.mybatis.handler.JacksonJsonTypeHandler;
 import com.github.dactiv.healthan.mybatis.handler.NameValueEnumTypeHandler;
-import com.github.dactiv.healthan.mybatis.plus.annotation.Decryption;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.Collections;
@@ -38,9 +37,6 @@ public class AllTypeEntity implements BasicIdentification<Integer> {
     @TableField(typeHandler = JacksonJsonTypeHandler.class)
     @JsonCollectionGenericType(ExecuteStatus.class)
     private List<ExecuteStatus> executes = Collections.singletonList(ExecuteStatus.Processing);
-
-    @Decryption()
-    private String decryptField;
 
     public AllTypeEntity() {
     }

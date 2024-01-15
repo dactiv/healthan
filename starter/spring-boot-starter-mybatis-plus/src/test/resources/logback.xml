@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="net.healthan.mdm.mybatis.plus" level="DEBUG"/>
+    <logger name="com.github.dactiv.healthan.mybatis.plus" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE-APPENDER"/>

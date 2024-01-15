@@ -11,12 +11,14 @@ import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTra
 import com.github.dactiv.healthan.mybatis.plus.config.CryptoProperties;
 import com.github.dactiv.healthan.mybatis.plus.crypto.DataAesCryptoService;
 import com.github.dactiv.healthan.mybatis.plus.crypto.DataRsaCryptoService;
+import com.github.dactiv.healthan.mybatis.plus.interceptor.EncryptInnerInterceptor;
 import com.github.dactiv.healthan.mybatis.plus.interceptor.LastModifiedDateInnerInterceptor;
 import com.github.dactiv.healthan.spring.web.query.QueryGenerator;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -47,13 +49,14 @@ public class MybatisPlusAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(MybatisPlusInterceptor.class)
-    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+    public MybatisPlusInterceptor mybatisPlusInterceptor(ApplicationContext applicationContext) {
 
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
 
         interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor(true));
         interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
         interceptor.addInnerInterceptor(new LastModifiedDateInnerInterceptor(true));
+        interceptor.addInnerInterceptor(new EncryptInnerInterceptor(true, applicationContext));
         return interceptor;
     }
 

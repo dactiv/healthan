@@ -2,14 +2,12 @@ package com.github.dactiv.healthan.mybatis.plus.interceptor;
 
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.Update;
-import com.baomidou.mybatisplus.core.mapper.Mapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.baomidou.mybatisplus.core.toolkit.ExceptionUtils;
-import com.baomidou.mybatisplus.core.toolkit.ReflectionKit;
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.ReflectionUtils;
 import com.github.dactiv.healthan.mybatis.plus.annotation.LastModifiedDate;
+import com.github.dactiv.healthan.mybatis.plus.service.BasicService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -23,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -32,10 +29,6 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  */
 public class LastModifiedDateInnerInterceptor implements InnerInterceptor {
-    /**
-     * entity类缓存
-     */
-    private static final Map<String, Class<?>> ENTITY_CLASS_CACHE = new ConcurrentHashMap<>();
 
     private boolean snakeCase = true;
 
@@ -90,16 +83,7 @@ public class LastModifiedDateInnerInterceptor implements InnerInterceptor {
 
         if (ew instanceof Update) {
             Update updateWrapper = Casts.cast(ew);
-            Class<?> entityClass = ENTITY_CLASS_CACHE.get(msId);
-            if (null == entityClass) {
-                try {
-                    final String className = msId.substring(0, msId.lastIndexOf(Casts.DOT));
-                    entityClass = ReflectionKit.getSuperClassGenericType(Class.forName(className), Mapper.class, 0);
-                    ENTITY_CLASS_CACHE.put(msId, entityClass);
-                } catch (ClassNotFoundException e) {
-                    throw ExceptionUtils.mpe(e);
-                }
-            }
+            Class<?> entityClass = BasicService.getEntityClass(msId);
 
             List<Field> fields = this.getLastModifiedDateField(entityClass);
             if (CollectionUtils.isEmpty(fields)) {
