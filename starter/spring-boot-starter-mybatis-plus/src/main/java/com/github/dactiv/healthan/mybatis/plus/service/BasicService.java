@@ -64,18 +64,19 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
 
     public static Class<?> getEntityClass(String msId) {
         Class<?> entityClass = ENTITY_CLASS_CACHE.get(msId);
-        if (null == entityClass) {
+        if (Objects.isNull(entityClass)) {
             try {
                 final String className = msId.substring(0, msId.lastIndexOf(Casts.DOT));
                 entityClass = ReflectionKit.getSuperClassGenericType(Class.forName(className), Mapper.class, 0);
-                ENTITY_CLASS_CACHE.put(msId, entityClass);
-                return entityClass;
+                if (Objects.nonNull(entityClass)) {
+                    ENTITY_CLASS_CACHE.put(msId, entityClass);
+                }
             } catch (ClassNotFoundException e) {
                 throw ExceptionUtils.mpe(e);
             }
         }
 
-        return null;
+        return entityClass;
     }
 
     /**
