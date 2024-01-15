@@ -11,8 +11,8 @@ public class CryptoEntity implements BasicIdentification<Integer> {
 
     private Integer id;
 
-    @Decryption
-    @Encryption(serviceClass = DataAesCryptoService.class)
+    @Decryption(serviceClass = DataAesCryptoService.class, beanName = "aesEcbCryptoService")
+    @Encryption(serviceClass = DataAesCryptoService.class, beanName = "aesEcbCryptoService")
     private String cryptoValue;
 
     public CryptoEntity() {

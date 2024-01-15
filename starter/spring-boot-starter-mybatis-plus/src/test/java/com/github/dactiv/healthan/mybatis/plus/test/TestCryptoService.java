@@ -26,5 +26,6 @@ public class TestCryptoService {
 
         entity = cryptoEntityService.lambdaQuery().eq(CryptoEntity::getCryptoValue, "18776974353").eq(CryptoEntity::getId, "1").one();
         Assertions.assertNotNull(entity);
+        Assertions.assertEquals(entity.getCryptoValue(), "18776974353");
     }
 }

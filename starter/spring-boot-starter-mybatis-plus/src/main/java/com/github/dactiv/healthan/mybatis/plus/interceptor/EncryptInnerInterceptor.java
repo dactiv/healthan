@@ -32,20 +32,14 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * 加解密内部拦截器实现
+ * 加密内部拦截器实现
  *
  * @author maurice.chen
  */
 public class EncryptInnerInterceptor implements InnerInterceptor {
-
-    /**
-     * entity类缓存
-     */
-    private static final Map<String, Class<?>> ENTITY_CLASS_CACHE = new ConcurrentHashMap<>();
 
     public static final List<SqlCommandType> SUPPORT_COMMANDS = Arrays.asList(SqlCommandType.UPDATE, SqlCommandType.INSERT);
 
@@ -108,7 +102,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         encryptAndReplaceParamNameValuePairs(queryWrapper, conditional, cryptoServiceListMap);
     }
 
-    private void encrypt(Map<String, Object> map, MappedStatement ms) {
+    public void encrypt(Map<String, Object> map, MappedStatement ms) {
         Object et = map.getOrDefault(Constants.ENTITY, null);
         if (Objects.nonNull(et)) {
 
@@ -123,7 +117,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         }
     }
 
-    private void doEncrypt(Object entity, Map<CryptoService, List<Field>> fields) {
+    public void doEncrypt(Object entity, Map<CryptoService, List<Field>> fields) {
         for (Map.Entry<CryptoService, List<Field>> entry : fields.entrySet()) {
             EncryptService encryptService = Casts.cast(entry.getKey(), EncryptService.class);
             for (Field field : entry.getValue()) {
@@ -138,7 +132,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         }
     }
 
-    private void doEncrypt(Map<String, Object> map, MappedStatement ms) {
+    public void doEncrypt(Map<String, Object> map, MappedStatement ms) {
         Object ew = map.get(Constants.WRAPPER);
 
         if (Objects.isNull(ew) || !AbstractWrapper.class.isAssignableFrom(ew.getClass())) {
@@ -158,7 +152,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
 
     }
 
-    private void encryptAndReplaceParamNameValuePairs(AbstractWrapper<?,?,?> wrapper, List<String> sqlExpressions, Map<CryptoService, List<Field>> fields) {
+    public void encryptAndReplaceParamNameValuePairs(AbstractWrapper<?,?,?> wrapper, List<String> sqlExpressions, Map<CryptoService, List<Field>> fields) {
         Map<String, Object> paramNameValuePairs = Casts.cast(ReflectionUtils.getFieldValue(wrapper, PARAM_VALUE_PAIRS_NAME));
 
         for (Map.Entry<CryptoService, List<Field>> entry : fields.entrySet()) {
@@ -181,14 +175,14 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         }
     }
 
-    private List<String> findSqlSetField(String field, List<String> sqlSet) {
+    public List<String> findSqlSetField(String field, List<String> sqlSet) {
         return sqlSet.stream().filter(set -> StringUtils.contains(set, field)).collect(Collectors.toList());
     }
 
     public EncryptService getEncryptService(String beanName, Class<? extends EncryptService> serviceClass) {
         EncryptService encryptService = null;
         if (Objects.nonNull(applicationContext)) {
-            encryptService = getCryptoService(serviceClass, beanName);
+            encryptService = getCryptoService(applicationContext, serviceClass, beanName);
         }
 
         if (Objects.isNull(encryptService) && serviceClass != CryptoNullClass.class) {
@@ -198,7 +192,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         return encryptService;
     }
 
-    public <T extends CryptoService> T getCryptoService(Class<T> cryptoService, String beanName) {
+    public static <T extends CryptoService> T getCryptoService(ApplicationContext applicationContext, Class<T> cryptoService, String beanName) {
 
         T result = null;
 
@@ -217,75 +211,13 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         return result;
     }
 
-    /*public DecryptService getDecryptService(String beanName, Class<? extends DecryptService> serviceClass) {
-
-        DecryptService encryptService = null;
-        if (Objects.nonNull(applicationContext)) {
-            encryptService = getCryptoService(serviceClass, beanName);
-        }
-
-        if (Objects.isNull(encryptService) && serviceClass != CryptoNullClass.class) {
-            encryptService = BeanUtils.instantiateClass(serviceClass);
-        }
-
-        return encryptService;
-    }*/
-
     private Map<CryptoService, List<Field>> getCryptoFields(Class<?> entityClass) {
         Map<CryptoService, List<Field>> result = new LinkedHashMap<>();
         if (Objects.isNull(entityClass)) {
             return result;
         }
         List<Field> fields = ReflectionUtils.findFields(entityClass);
-        /*if (sqlCommandType == SqlCommandType.SELECT) {
-            Set<DecryptProperties> decrypts = AnnotatedElementUtils.findAllMergedAnnotations(entityClass, DecryptProperties.class);
 
-            if (CollectionUtils.isNotEmpty(decrypts)) {
-                for (DecryptProperties properties : decrypts) {
-                    DecryptService decryptService = getDecryptService(properties.beanName(), properties.serviceClass());
-                    List<Field> fieldList = result.computeIfAbsent(decryptService, k -> new LinkedList<>());
-                    fields
-                            .stream()
-                            .filter(f -> ArrayUtils.contains(properties.value(), f.getName()))
-                            .filter(f -> fieldList.stream().noneMatch(l -> StringUtils.equals(l.getName(), f.getName())))
-                            .forEach(fieldList::add);
-                }
-            }
-
-            for (Field field : fields) {
-                Decryption decryption = AnnotatedElementUtils.findMergedAnnotation(field, Decryption.class);
-                if (Objects.isNull(decryption)) {
-                    continue;
-                }
-                DecryptService decryptService = getDecryptService(decryption.beanName(), decryption.serviceClass());
-                List<Field> fieldList = result.computeIfAbsent(decryptService, k -> new LinkedList<>());
-                fieldList.add(field);
-            }
-        } else {
-            Set<EncryptProperties> decrypts = AnnotatedElementUtils.findAllMergedAnnotations(entityClass, EncryptProperties.class);
-
-            if (CollectionUtils.isNotEmpty(decrypts)) {
-                for (EncryptProperties properties : decrypts) {
-                    EncryptService encryptService = getEncryptService(properties.beanName(), properties.serviceClass());
-                    List<Field> fieldList = result.computeIfAbsent(encryptService, k -> new LinkedList<>());
-                    fields
-                            .stream()
-                            .filter(f -> ArrayUtils.contains(properties.value(), f.getName()))
-                            .filter(f -> fieldList.stream().noneMatch(l -> StringUtils.equals(l.getName(), f.getName())))
-                            .forEach(fieldList::add);
-                }
-            }
-
-            for (Field field : fields) {
-                Encryption encryption = AnnotatedElementUtils.findMergedAnnotation(field, Encryption.class);
-                if (Objects.isNull(encryption)) {
-                    continue;
-                }
-                EncryptService encryptService = getEncryptService(encryption.beanName(), encryption.serviceClass());
-                List<Field> fieldList = result.computeIfAbsent(encryptService, k -> new LinkedList<>());
-                fieldList.add(field);
-            }
-        }*/
         Set<EncryptProperties> decrypts = AnnotatedElementUtils.findAllMergedAnnotations(entityClass, EncryptProperties.class);
 
         if (CollectionUtils.isNotEmpty(decrypts)) {
