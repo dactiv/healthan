@@ -94,6 +94,9 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         }
         AbstractWrapper<?,?,?> queryWrapper = Casts.cast(ew);
         String sqlSegment = queryWrapper.getExpression().getNormal().getSqlSegment();
+        if (StringUtils.isEmpty(sqlSegment)) {
+            return;
+        }
         String sql = StringUtils.substringBetween(sqlSegment, Casts.LEFT_BRACKET, Casts.RIGHT_BRACKET);
         List<String> conditional = Arrays.asList(sql.split(CONDITIONAL_SEGMENTATION_REX));
 
