@@ -341,4 +341,36 @@ public class SpringMvcUtils {
 
     }
 
+    /**
+     * 判断是否回路地址
+     *
+     * @param host host 值
+     *
+     * @return true 是，否则 false
+     */
+    public static boolean isLoopbackAddress(String host) {
+        if (!org.springframework.util.StringUtils.hasText(host)) {
+            return false;
+        }
+        // IPv6 loopback address should either be "0:0:0:0:0:0:0:1" or "::1"
+        if ("[0:0:0:0:0:0:0:1]".equals(host) || "[::1]".equals(host)) {
+            return true;
+        }
+        // IPv4 loopback address ranges from 127.0.0.1 to 127.255.255.255
+        String[] ipv4Octets = host.split("\\.");
+        if (ipv4Octets.length != 4) {
+            return false;
+        }
+        try {
+            int[] address = new int[ipv4Octets.length];
+            for (int i=0; i < ipv4Octets.length; i++) {
+                address[i] = Integer.parseInt(ipv4Octets[i]);
+            }
+            return address[0] == 127 && address[1] >= 0 && address[1] <= 255 && address[2] >= 0 &&
+                    address[2] <= 255 && address[3] >= 1 && address[3] <= 255;
+        } catch (NumberFormatException ex) {
+            return false;
+        }
+    }
+
 }
