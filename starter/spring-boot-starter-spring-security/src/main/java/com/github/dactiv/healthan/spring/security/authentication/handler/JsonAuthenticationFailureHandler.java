@@ -32,10 +32,20 @@ public class JsonAuthenticationFailureHandler implements AuthenticationFailureHa
 
     public JsonAuthenticationFailureHandler(List<JsonAuthenticationFailureResponse> failureResponses,
                                             AuthenticationProperties authenticationProperties) {
+        this(failureResponses, authenticationProperties, new LinkedList<>());
+    }
+
+    public JsonAuthenticationFailureHandler(List<JsonAuthenticationFailureResponse> failureResponses,
+                                            AuthenticationProperties authenticationProperties,
+                                            List<AntPathRequestMatcher> antPathRequestMatchers) {
+
         this.failureResponses = failureResponses;
+
+        if (CollectionUtils.isNotEmpty(antPathRequestMatchers)) {
+            this.loginRequestMatchers.addAll(antPathRequestMatchers);
+        }
+
         this.loginRequestMatchers.add(new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl(), HttpMethod.POST.name()));
-        //this.loginRequestMatchers.add(new AntPathRequestMatcher(authenticationProperties.getOauth2().getAuthEndpointUri()));
-        //this.loginRequestMatchers.add(new AntPathRequestMatcher(authenticationProperties.getOauth2().getOidcEndpointUri()));
     }
 
     @Override

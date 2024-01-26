@@ -54,20 +54,42 @@ public class SecurityUserDetails implements UserDetails, BasicIdentification<Obj
 
     @JsonIgnore
     private String password;
+
     private String username;
+
     @JsonIgnore
     private List<ResourceAuthority> resourceAuthorities = new ArrayList<>();
+
     private List<RoleAuthority> roleAuthorities = new ArrayList<>();
+
     @JsonIgnore
     private boolean accountNonExpired = true;
+
     @JsonIgnore
     private boolean accountNonLocked = true;
+
     @JsonIgnore
     private boolean credentialsNonExpired = true;
+
+    /**
+     * 状态
+     */
     private UserStatus status;
+
+    /**
+     * 用户类型
+     */
     private String type;
 
+    /**
+     * 元数据信息
+     */
     private Map<String, Object> meta = new LinkedHashMap<>();
+
+    /**
+     * 个人信息
+     */
+    private Map<String, Object> profile = new LinkedHashMap<>();
 
     public SecurityUserDetails() {
     }
@@ -329,6 +351,24 @@ public class SecurityUserDetails implements UserDetails, BasicIdentification<Obj
      */
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
+    }
+
+    /**
+     * 获取个人信息
+     *
+     * @return 个人信息
+     */
+    public Map<String, Object> getProfile() {
+        return profile;
+    }
+
+    /**
+     * 设置个人信息
+     *
+     * @param profile 个人信息
+     */
+    public void setProfile(Map<String, Object> profile) {
+        this.profile = profile;
     }
 
     /**

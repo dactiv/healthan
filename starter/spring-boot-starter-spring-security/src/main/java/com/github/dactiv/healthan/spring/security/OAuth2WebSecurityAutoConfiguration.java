@@ -8,9 +8,7 @@ import com.github.dactiv.healthan.spring.security.authentication.RedissonOAuth2A
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
-import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
-import com.github.dactiv.healthan.spring.security.authentication.handler.OAuth2JsonAuthenticationSuccessResponse;
+import com.github.dactiv.healthan.spring.security.authentication.handler.*;
 import com.github.dactiv.healthan.spring.security.authentication.oidc.OidcUserInfoAuthenticationMapper;
 import com.github.dactiv.healthan.spring.security.authentication.oidc.OidcUserInfoAuthenticationResolver;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
@@ -21,7 +19,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -40,7 +38,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.stream.Collectors;
 
 @Configuration
-@AutoConfigureAfter(SpringSecurityAutoConfiguration.class)
+@AutoConfigureBefore(SpringSecurityAutoConfiguration.class)
 @EnableConfigurationProperties(AuthenticationProperties.class)
 @ConditionalOnClass(OAuth2AuthorizationServerConfigurer.class)
 @ConditionalOnProperty(prefix = "healthan.authentication.spring.security.oauth2", value = "enabled", matchIfMissing = true)
@@ -71,6 +69,31 @@ public class OAuth2WebSecurityAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(JsonAuthenticationSuccessHandler.class)
+    public JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler(ObjectProvider<JsonAuthenticationSuccessResponse> successResponse,
+                                                                             AuthenticationProperties properties) {
+
+        return new JsonAuthenticationSuccessHandler(
+                successResponse.orderedStream().collect(Collectors.toList()),
+                properties,
+                properties.getOauth2().getOauth2Urls()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JsonAuthenticationFailureHandler.class)
+    public JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler(ObjectProvider<JsonAuthenticationFailureResponse> failureHandlers,
+                                                                             AuthenticationProperties properties) {
+
+        return new JsonAuthenticationFailureHandler(
+                failureHandlers.orderedStream().collect(Collectors.toList()),
+                properties,
+                properties.getOauth2().getOauth2Urls()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(OAuth2JsonAuthenticationSuccessResponse.class)
     public OAuth2JsonAuthenticationSuccessResponse oAuth2JsonAuthenticationSuccessResponse(AuthenticationProperties authenticationProperties) {
         return new OAuth2JsonAuthenticationSuccessResponse(authenticationProperties);
     }

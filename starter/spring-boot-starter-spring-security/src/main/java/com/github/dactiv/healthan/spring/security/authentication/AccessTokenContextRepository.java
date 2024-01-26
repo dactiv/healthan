@@ -98,7 +98,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         }
 
         CipherService cipherService = cipherAlgorithmService.getCipherService(authenticationProperties.getAccessToken().getCipherAlgorithmName());
-        byte[] key = Base64.decode(authenticationProperties.getAccessToken().getKey());
+        byte[] key = Base64.decode(authenticationProperties.getAccessToken().getCryptoKey());
 
         try {
             ByteSource byteSource = cipherService.decrypt(Base64.decode(token), key);
@@ -154,7 +154,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
             return context;
         } catch (CryptoException e) {
-            LOGGER.warn("通过密钥:" + authenticationProperties.getAccessToken().getKey() + "解密token:" + token + "失败");
+            LOGGER.warn("通过密钥:" + authenticationProperties.getAccessToken().getCryptoKey() + "解密token:" + token + "失败");
         }
 
         return null;
@@ -170,7 +170,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     }
 
     public String generatePlaintextString(SecurityUserDetails userDetails) {
-        return generatePlaintextString(userDetails, authenticationProperties.getAccessToken().getKey());
+        return generatePlaintextString(userDetails, authenticationProperties.getAccessToken().getCryptoKey());
     }
 
     public String generatePlaintextString(SecurityUserDetails userDetails, String aesKey) {

@@ -2,8 +2,13 @@ package com.github.dactiv.healthan.spring.security.authentication.config;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.TimeProperties;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -14,9 +19,55 @@ import java.util.concurrent.TimeUnit;
 public class OAuth2Properties {
 
     /**
+     * 默认的授权页面 url
+     */
+    public static final String DEFAULT_AUTHORIZE_PAGE_URI = "/oauth2/authorize";
+
+    /**
+     * 默认的注销令牌 url
+     */
+    public static final String DEFAULT_TOKEN_REVOCATION_ENDPOINT_URI = "/oauth2/revoke";
+
+    /**
+     * 默认的令牌 url
+     */
+    public static final String DEFAULT_TOKEN_ENDPOINT_URI = "/oauth2/token";
+
+    /**
+     * 默认的用户信息 url
+     */
+    public static final String DEFAULT_OIDC_USER_INFO_ENDPOINT_URI = "/userinfo";
+
+    /**
+     * 默认确认授权敏感信息 url
+     */
+    public static final String DEFAULT_CONSENT_PAGE_URI = "/oauth2/consent";
+
+    /**
      * 确认授权页面 url
      */
-    private String consentPageUri = "/oauth2/consent";
+    private String consentPageUri = DEFAULT_CONSENT_PAGE_URI;
+
+    /**
+     * 用户信息 url
+     */
+    private String oidcUserInfoEndpointUri = DEFAULT_OIDC_USER_INFO_ENDPOINT_URI;
+
+    /**
+     * 令牌 url
+     */
+    private String tokenEndpointUri = DEFAULT_TOKEN_ENDPOINT_URI;
+
+    /**
+     * 注销令牌 url
+     */
+    private String tokenRevocationEndpointUri = DEFAULT_TOKEN_REVOCATION_ENDPOINT_URI;
+
+    /**
+     * 授权页面 url
+     */
+    private String authorizePageUri = DEFAULT_AUTHORIZE_PAGE_URI;
+
     /**
      * 授权缓存配置
      */
@@ -43,7 +94,7 @@ public class OAuth2Properties {
     /**
      * 忽略当前用户的属性内容
      */
-    private List<String> ignorePrincipalProperties;
+    private Map<String, List<String>> ignorePrincipalPropertiesMap = new LinkedHashMap<>();
 
     public OAuth2Properties() {
     }
@@ -88,11 +139,70 @@ public class OAuth2Properties {
         this.keyId = keyId;
     }
 
-    public List<String> getIgnorePrincipalProperties() {
-        return ignorePrincipalProperties;
+    public Map<String, List<String>> getIgnorePrincipalPropertiesMap() {
+        return ignorePrincipalPropertiesMap;
     }
 
-    public void setIgnorePrincipalProperties(List<String> ignorePrincipalProperties) {
-        this.ignorePrincipalProperties = ignorePrincipalProperties;
+    public void setIgnorePrincipalPropertiesMap(Map<String, List<String>> ignorePrincipalPropertiesMap) {
+        this.ignorePrincipalPropertiesMap = ignorePrincipalPropertiesMap;
+    }
+
+    public String getOidcUserInfoEndpointUri() {
+        return oidcUserInfoEndpointUri;
+    }
+
+    public void setOidcUserInfoEndpointUri(String oidcUserInfoEndpointUri) {
+        this.oidcUserInfoEndpointUri = oidcUserInfoEndpointUri;
+    }
+
+    public String getTokenEndpointUri() {
+        return tokenEndpointUri;
+    }
+
+    public void setTokenEndpointUri(String tokenEndpointUri) {
+        this.tokenEndpointUri = tokenEndpointUri;
+    }
+
+    public String getTokenRevocationEndpointUri() {
+        return tokenRevocationEndpointUri;
+    }
+
+    public void setTokenRevocationEndpointUri(String tokenRevocationEndpointUri) {
+        this.tokenRevocationEndpointUri = tokenRevocationEndpointUri;
+    }
+
+    public String getAuthorizePageUri() {
+        return authorizePageUri;
+    }
+
+    public void setAuthorizePageUri(String authorizePageUri) {
+        this.authorizePageUri = authorizePageUri;
+    }
+
+    public List<AntPathRequestMatcher> getOauth2Urls() {
+
+        List<AntPathRequestMatcher> antPathRequestMatchers = new ArrayList<>();
+
+        if (StringUtils.isNotEmpty(getAuthorizePageUri())) {
+            antPathRequestMatchers.add(new AntPathRequestMatcher(getAuthorizePageUri()));
+        }
+
+        if (StringUtils.isNotEmpty(getOidcUserInfoEndpointUri())) {
+            antPathRequestMatchers.add(new AntPathRequestMatcher(getOidcUserInfoEndpointUri()));
+        }
+
+        if (StringUtils.isNotEmpty(getTokenRevocationEndpointUri())) {
+            antPathRequestMatchers.add(new AntPathRequestMatcher(getTokenRevocationEndpointUri()));
+        }
+
+        if (StringUtils.isNotEmpty(getTokenEndpointUri())) {
+            antPathRequestMatchers.add(new AntPathRequestMatcher(getTokenEndpointUri()));
+        }
+
+        if (StringUtils.isNotEmpty(getAuthorizePageUri())) {
+            antPathRequestMatchers.add(new AntPathRequestMatcher(getAuthorizePageUri()));
+        }
+
+        return antPathRequestMatchers;
     }
 }

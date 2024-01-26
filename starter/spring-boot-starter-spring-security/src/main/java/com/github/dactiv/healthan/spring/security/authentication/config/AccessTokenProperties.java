@@ -34,7 +34,7 @@ public class AccessTokenProperties {
     /**
      * 加解密密钥
      */
-    private String key;
+    private String cryptoKey;
 
     /**
      * 是否开启令牌控制器
@@ -82,12 +82,12 @@ public class AccessTokenProperties {
         this.cipherAlgorithmName = cipherAlgorithmName;
     }
 
-    public String getKey() {
-        return key;
+    public String getCryptoKey() {
+        return cryptoKey;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setCryptoKey(String cryptoKey) {
+        this.cryptoKey = cryptoKey;
     }
 
     public CacheProperties getAccessTokenCache() {
