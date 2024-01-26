@@ -1,4 +1,4 @@
-package com.github.dactiv.healthan.spring.security;
+package com.github.dactiv.healthan.spring.security.authentication.adapter;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -15,7 +15,7 @@ public interface WebSecurityConfigurerAfterAdapter {
      *
      * @param httpSecurity http 访问安全
      */
-    default void configure(HttpSecurity httpSecurity) {
+    default void configure(HttpSecurity httpSecurity) throws Exception {
 
     }
 

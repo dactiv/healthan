@@ -1,0 +1,156 @@
+package com.github.dactiv.healthan.spring.security.authentication;
+
+import com.github.dactiv.healthan.commons.CacheProperties;
+import com.github.dactiv.healthan.commons.TimeProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
+import org.redisson.codec.SerializationCodec;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.util.DigestUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
+/**
+ * redisson 的 oauth 授权服务实现
+ *
+ * @author maurice.chen
+ */
+public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationService {
+
+    private final RedissonClient redissonClient;
+
+
+    private final AuthenticationProperties authenticationProperties;
+
+    public RedissonOAuth2AuthorizationService(RedissonClient redissonClient,
+                                              AuthenticationProperties authenticationProperties) {
+        this.redissonClient = redissonClient;
+        this.authenticationProperties = authenticationProperties;
+    }
+
+    @Override
+    public void save(OAuth2Authorization authorization) {
+
+        TimeProperties time = authenticationProperties.getOauth2().getAuthorizationCache().getExpiresTime();
+
+        if (Objects.nonNull(authorization.getAccessToken())) {
+            String accessTokenKey = authorization.getAccessToken().getToken().getTokenValue();
+            String md5AccessTokenKey = DigestUtils.md5DigestAsHex(accessTokenKey.getBytes(StandardCharsets.UTF_8));
+            String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.ACCESS_TOKEN + CacheProperties.DEFAULT_SEPARATOR + md5AccessTokenKey);
+
+            RBucket<OAuth2Authorization> accessTokenBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
+            accessTokenBucket.setAsync(authorization);
+            if (Objects.nonNull(authorization.getAccessToken().getToken().getExpiresAt())) {
+                accessTokenBucket.expireAsync(authorization.getAccessToken().getToken().getExpiresAt());
+            } else if (Objects.nonNull(time)) {
+                accessTokenBucket.expireAsync(time.toDuration());
+            }
+            remove(authorization, false);
+        } else if (authorization.getAttributes().containsKey(OAuth2ParameterNames.STATE)) {
+            String state = authorization.getAttributes().getOrDefault(OAuth2ParameterNames.STATE, StringUtils.EMPTY).toString();
+            String md5State = DigestUtils.md5DigestAsHex(state.getBytes(StandardCharsets.UTF_8));
+            String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.STATE + CacheProperties.DEFAULT_SEPARATOR + md5State);
+
+            RBucket<OAuth2Authorization> authorizationCodeBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
+            authorizationCodeBucket.setAsync(authorization);
+            if (Objects.nonNull(time)) {
+                authorizationCodeBucket.expireAsync(time.toDuration());
+            }
+        } else {
+
+            OAuth2Authorization.Token<OAuth2AuthorizationCode> authorizationCode = authorization.getToken(OAuth2AuthorizationCode.class);
+            if (Objects.nonNull(authorizationCode)) {
+                String codeKey = authorizationCode.getToken().getTokenValue();
+                String md5CodeKey = DigestUtils.md5DigestAsHex(codeKey.getBytes(StandardCharsets.UTF_8));
+                String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.CODE + CacheProperties.DEFAULT_SEPARATOR + md5CodeKey);
+
+                RBucket<OAuth2Authorization> authorizationCodeBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
+                authorizationCodeBucket.setAsync(authorization);
+                if (Objects.nonNull(authorizationCode.getToken().getExpiresAt())) {
+                    authorizationCodeBucket.expireAsync(authorizationCode.getToken().getExpiresAt());
+                } else if (Objects.nonNull(time)) {
+                    authorizationCodeBucket.expireAsync(time.toDuration());
+                }
+            }
+
+        }
+
+        if (Objects.nonNull(authorization.getRefreshToken())) {
+            String refreshKey = authorization.getRefreshToken().getToken().getTokenValue();
+            String md5RefreshKey = DigestUtils.md5DigestAsHex(refreshKey.getBytes(StandardCharsets.UTF_8));
+            String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.REFRESH_TOKEN + CacheProperties.DEFAULT_SEPARATOR + md5RefreshKey);
+
+            RBucket<OAuth2Authorization> refreshTokenBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
+            refreshTokenBucket.setAsync(authorization);
+            if (Objects.nonNull(authorization.getRefreshToken().getToken().getExpiresAt())) {
+                refreshTokenBucket.expireAsync(authorization.getRefreshToken().getToken().getExpiresAt());
+            } else if (Objects.nonNull(time)) {
+                refreshTokenBucket.expireAsync(time.toDuration());
+            }
+        }
+
+    }
+
+    @Override
+    public void remove(OAuth2Authorization authorization) {
+        remove(authorization, true);
+    }
+
+    public void remove(OAuth2Authorization authorization, boolean removeIdCache) {
+
+        OAuth2Authorization.Token<OAuth2AuthorizationCode> authorizationCode = authorization.getToken(OAuth2AuthorizationCode.class);
+
+        if (Objects.nonNull(authorizationCode)) {
+            String codeKey = authorizationCode.getToken().getTokenValue();
+            String md5CodeKey = DigestUtils.md5DigestAsHex(codeKey.getBytes(StandardCharsets.UTF_8));
+            String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.CODE + CacheProperties.DEFAULT_SEPARATOR + md5CodeKey);
+            redissonClient.getBucket(cacheKey).deleteAsync();
+        }
+
+        if (authorization.getAttributes().containsKey(OAuth2ParameterNames.STATE)) {
+            String state = authorization.getAttributes().getOrDefault(OAuth2ParameterNames.STATE, StringUtils.EMPTY).toString();
+            String md5State = DigestUtils.md5DigestAsHex(state.getBytes(StandardCharsets.UTF_8));
+            String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.STATE + CacheProperties.DEFAULT_SEPARATOR + md5State);
+
+            redissonClient.getBucket(cacheKey).deleteAsync();
+        }
+
+        if (removeIdCache) {
+            String key = authenticationProperties.getOauth2().getAuthorizationCache().getName(authorization.getId());
+            redissonClient.getBucket(key).deleteAsync();
+        }
+    }
+
+    @Override
+    public OAuth2Authorization findById(String id) {
+        throw new UnsupportedOperationException("redisson 的 oauth 授权服务实现, 不支持 public OAuth2Authorization findById(String id) 操作");
+    }
+
+    @Override
+    public OAuth2Authorization findByToken(String token, OAuth2TokenType tokenType) {
+
+        String key;
+
+        if (Objects.nonNull(tokenType)) {
+            key = tokenType.getValue() + CacheProperties.DEFAULT_SEPARATOR + DigestUtils.md5DigestAsHex(token.getBytes());
+        } else {
+            key = DigestUtils.md5DigestAsHex(token.getBytes());
+        }
+
+        String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(key);
+        RBucket<OAuth2Authorization> bucket =  redissonClient.getBucket(cacheKey, new SerializationCodec());
+
+        if (OAuth2ParameterNames.STATE.contains(tokenType.getValue())) {
+            return bucket.getAndDelete();
+        }
+
+        return bucket.get();
+    }
+}

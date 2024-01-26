@@ -238,7 +238,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      *
      * @return 公共密钥
      */
-    protected abstract PublicKey getPublicKey(byte[] key);
+    public abstract PublicKey getPublicKey(byte[] key);
 
     /**
      * 获取私有密钥
@@ -247,7 +247,7 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      *
      * @return 私有密钥
      */
-    protected abstract PrivateKey getPrivateKey(byte[] key);
+    public abstract PrivateKey getPrivateKey(byte[] key);
 
     /**
      * 获取签名算法名称

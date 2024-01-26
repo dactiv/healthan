@@ -3,6 +3,7 @@ package com.github.dactiv.healthan.spring.security;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.spring.security.authentication.*;
+import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
@@ -38,7 +39,7 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableConfigurationProperties(AuthenticationProperties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-public class WebSecurityDefaultConfigurerAdapter {
+public class DefaultWebSecurityAutoConfiguration {
 
     private final AccessTokenContextRepository accessTokenContextRepository;
 
@@ -62,7 +63,7 @@ public class WebSecurityDefaultConfigurerAdapter {
 
     private final List<ErrorResultResolver> resultResolvers;
 
-    public WebSecurityDefaultConfigurerAdapter(AccessTokenContextRepository accessTokenContextRepository,
+    public DefaultWebSecurityAutoConfiguration(AccessTokenContextRepository accessTokenContextRepository,
                                                AuthenticationProperties properties,
                                                JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler,
                                                JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler,
@@ -88,7 +89,6 @@ public class WebSecurityDefaultConfigurerAdapter {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-
         httpSecurity
                 .authorizeHttpRequests()
                 .antMatchers(properties.getPermitUriAntMatchers().toArray(new String[0]))

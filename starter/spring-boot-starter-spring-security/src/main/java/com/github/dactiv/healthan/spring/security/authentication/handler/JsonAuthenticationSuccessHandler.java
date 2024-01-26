@@ -35,8 +35,8 @@ public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
                                             AuthenticationProperties authenticationProperties) {
         this.successResponses = successResponses;
         this.loginRequestMatchers.add(new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl(), HttpMethod.POST.name()));
-        this.loginRequestMatchers.add(new AntPathRequestMatcher(authenticationProperties.getOauthEndpointUri()));
-        this.loginRequestMatchers.add(new AntPathRequestMatcher(authenticationProperties.getOauthOidcEndpointUri()));
+        //this.loginRequestMatchers.add(new AntPathRequestMatcher(authenticationProperties.getOauthEndpointUri()));
+        //this.loginRequestMatchers.add(new AntPathRequestMatcher(authenticationProperties.getOauthOidcEndpointUri()));
     }
 
     @Override

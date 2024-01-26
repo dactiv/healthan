@@ -17,7 +17,7 @@ import java.util.List;
 @Configuration
 @AutoConfigureBefore(MybatisPlusAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "healthan.mybatis.operation-data-trace", value = "enabled", matchIfMissing = true)
-public class OperationDataTraceAuditConfiguration {
+public class OperationDataTraceAuditAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "healthan.authentication.audit", name = "type", havingValue = "elasticsearch")

@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * 认证配置
+ * 验证码校验配置
  *
  * @author maurice.chen
  */

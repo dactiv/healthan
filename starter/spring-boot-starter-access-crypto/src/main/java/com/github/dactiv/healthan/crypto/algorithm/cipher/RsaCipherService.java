@@ -42,7 +42,7 @@ public class RsaCipherService extends AbstractAsymmetricCipherService {
     }
 
     @Override
-    protected PrivateKey getPrivateKey(byte[] key) {
+    public PrivateKey getPrivateKey(byte[] key) {
         try {
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(key);
             return getKeyFactory().generatePrivate(keySpec);
@@ -53,7 +53,7 @@ public class RsaCipherService extends AbstractAsymmetricCipherService {
     }
 
     @Override
-    protected PublicKey getPublicKey(byte[] key) {
+    public PublicKey getPublicKey(byte[] key) {
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(key);
             return getKeyFactory().generatePublic(keySpec);

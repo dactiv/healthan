@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.spring.security.authentication.config;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.TimeProperties;
+import com.github.dactiv.healthan.security.entity.BasicUserDetails;
 import com.github.dactiv.healthan.spring.security.authentication.provider.RequestAuthenticationProvider;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -17,10 +18,6 @@ import java.util.List;
  */
 @ConfigurationProperties("healthan.authentication")
 public class AuthenticationProperties {
-
-    public static final String DEFAULT_OAUTH_ENDPOINT_URI = "/oauth2/**";
-
-    public static final String DEFAULT_OAUTH_OIDC_ENDPOINT_URI = "/userinfo/**";
 
     /**
      * 默认的认证类型 header 名称
@@ -41,7 +38,7 @@ public class AuthenticationProperties {
     /**
      * 默认的登陆账户参数名
      */
-    public static final String SECURITY_FORM_USERNAME_PARAM_NAME = "username";
+    public static final String SECURITY_FORM_USERNAME_PARAM_NAME = BasicUserDetails.USERNAME_FIELD_NAME;
     /**
      * 默认的登陆密码参数名
      */
@@ -63,19 +60,14 @@ public class AuthenticationProperties {
     private String loginProcessingUrl = DefaultLoginPageGeneratingFilter.DEFAULT_LOGIN_PAGE_URL;
 
     /**
-     * oauth 授权终端 url
-     */
-    private String oauthEndpointUri = DEFAULT_OAUTH_ENDPOINT_URI;
-
-    /**
-     * oauth oidc 终端 url
-     */
-    private String oauthOidcEndpointUri = DEFAULT_OAUTH_OIDC_ENDPOINT_URI;
-
-    /**
      * 访问 token 配置
      */
     private AccessTokenProperties accessToken = new AccessTokenProperties();
+
+    /**
+     * oauth2 配置信息
+     */
+    private OAuth2Properties oauth2 = new OAuth2Properties();
 
     /**
      * 认证类型 header 名称
@@ -137,10 +129,20 @@ public class AuthenticationProperties {
      */
     private CaptchaVerificationProperties captchaVerification = new CaptchaVerificationProperties();
 
+    /**
+     * 获取验证码校验配置
+     *
+     * @return 验证码校验配置
+     */
     public CaptchaVerificationProperties getCaptchaVerification() {
         return captchaVerification;
     }
 
+    /**
+     * 设置验证码校验配置
+     *
+     * @param captchaVerification 验证码校验配置
+     */
     public void setCaptchaVerification(CaptchaVerificationProperties captchaVerification) {
         this.captchaVerification = captchaVerification;
     }
@@ -397,48 +399,39 @@ public class AuthenticationProperties {
         this.authorizationCache = authorizationCache;
     }
 
+    /**
+     * 获取是否允许访问投票器的拒绝和同意相等时允许访问
+     *
+     * @return true 是，否则 false
+     */
     public boolean isAllowIfEqualGrantedDeniedDecisions() {
         return allowIfEqualGrantedDeniedDecisions;
     }
 
-
+    /**
+     * 设置是否允许访问投票器的拒绝和同意相等时允许访问
+     *
+     * @param allowIfEqualGrantedDeniedDecisions true 是，否则 false
+     */
     public void setAllowIfEqualGrantedDeniedDecisions(boolean allowIfEqualGrantedDeniedDecisions) {
         this.allowIfEqualGrantedDeniedDecisions = allowIfEqualGrantedDeniedDecisions;
     }
 
     /**
-     * 获取 oauth 授权终端 url
+     * 获取 oauth2 配置信息
      *
-     * @return oauth 授权终端 url
+     * @return oauth2 配置信息
      */
-    public String getOauthEndpointUri() {
-        return oauthEndpointUri;
+    public OAuth2Properties getOauth2() {
+        return oauth2;
     }
 
     /**
-     * 设置 oauth 授权终端 url
+     * 设置 oauth2 配置信息
      *
-     * @param oauthEndpointUri oauth 授权终端 url
+     * @param oauth2 oauth2 配置信息
      */
-    public void setOauthEndpointUri(String oauthEndpointUri) {
-        this.oauthEndpointUri = oauthEndpointUri;
-    }
-
-    /**
-     * 获取 oauth oidc 终端 url
-     *
-     * @return oauth oidc 终端 url
-     */
-    public String getOauthOidcEndpointUri() {
-        return oauthOidcEndpointUri;
-    }
-
-    /**
-     * 设置 oauth oidc 终端 url
-     *
-     * @param oauthOidcEndpointUri oauth oidc 终端 url
-     */
-    public void setOauthOidcEndpointUri(String oauthOidcEndpointUri) {
-        this.oauthOidcEndpointUri = oauthOidcEndpointUri;
+    public void setOauth2(OAuth2Properties oauth2) {
+        this.oauth2 = oauth2;
     }
 }

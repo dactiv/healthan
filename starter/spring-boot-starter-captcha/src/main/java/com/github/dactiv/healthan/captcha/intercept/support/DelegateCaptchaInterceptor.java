@@ -7,7 +7,6 @@ import com.github.dactiv.healthan.captcha.InterceptToken;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.exception.SystemException;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -18,7 +17,6 @@ import java.util.Objects;
  *
  * @author maurice.chen
  */
-@Component
 public class DelegateCaptchaInterceptor implements Interceptor {
 
     private final DelegateCaptchaService delegateCaptchaService;

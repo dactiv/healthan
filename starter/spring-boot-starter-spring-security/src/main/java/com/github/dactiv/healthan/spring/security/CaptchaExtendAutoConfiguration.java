@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Lazy;
 @AutoConfigureAfter(CaptchaConfiguration.class)
 @EnableConfigurationProperties(CaptchaProperties.class)
 @ConditionalOnProperty(prefix = "healthan.captcha", value = "enabled", matchIfMissing = true)
-public class CaptchaExtendConfiguration {
+public class CaptchaExtendAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "healthan.captcha.controller", value = "enabled", matchIfMissing = true)
