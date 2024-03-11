@@ -80,7 +80,11 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
                                 Interceptor interceptor,
                                 RedissonClient redissonClient,
                                 TianaiCaptchaProperties tianaiCaptchaProperties) {
-        super(captchaProperties, interceptor, validator, redissonClient);
+
+        setCaptchaProperties(captchaProperties);
+        setInterceptor(interceptor);
+        setValidator(validator);
+        setRedissonClient(redissonClient);
 
         tianaiCaptchaProperties
                 .getTemplateMap()

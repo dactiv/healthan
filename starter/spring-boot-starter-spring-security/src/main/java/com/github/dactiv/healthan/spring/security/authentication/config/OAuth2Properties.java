@@ -183,10 +183,6 @@ public class OAuth2Properties {
 
         List<AntPathRequestMatcher> antPathRequestMatchers = new ArrayList<>();
 
-        if (StringUtils.isNotEmpty(getAuthorizePageUri())) {
-            antPathRequestMatchers.add(new AntPathRequestMatcher(getAuthorizePageUri()));
-        }
-
         if (StringUtils.isNotEmpty(getOidcUserInfoEndpointUri())) {
             antPathRequestMatchers.add(new AntPathRequestMatcher(getOidcUserInfoEndpointUri()));
         }

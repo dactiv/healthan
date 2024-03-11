@@ -18,9 +18,12 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class AbstractUserDetailsService implements UserDetailsService {
 
-    private final AuthenticationProperties authenticationProperties;
+    private AuthenticationProperties authenticationProperties;
 
-    public AbstractUserDetailsService(AuthenticationProperties authenticationProperties) {
+    public AbstractUserDetailsService() {
+    }
+
+    public void setAuthenticationProperties(AuthenticationProperties authenticationProperties) {
         this.authenticationProperties = authenticationProperties;
     }
 

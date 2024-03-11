@@ -35,24 +35,45 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
      */
     private static final String DEFAULT_CAPTCHA_PARAM_NAME = "captchaParamName";
 
-    protected final CaptchaProperties captchaProperties;
+    protected CaptchaProperties captchaProperties;
 
-    private final Interceptor interceptor;
+    private Interceptor interceptor;
 
     /**
      * 泛型实体class
      */
     private final Class<B> requestBodyClass;
 
-    private final Validator validator;
+    private Validator validator;
 
-    public AbstractCaptchaService(CaptchaProperties captchaProperties, Validator validator, Interceptor interceptor) {
-        this.captchaProperties = captchaProperties;
-        this.validator = validator;
-        this.interceptor = interceptor;
+    public AbstractCaptchaService() {
 
         ParameterizedType type = Casts.cast(this.getClass().getGenericSuperclass(), ParameterizedType.class);
         this.requestBodyClass = Casts.cast(type.getActualTypeArguments()[0]);
+    }
+
+    public CaptchaProperties getCaptchaProperties() {
+        return captchaProperties;
+    }
+
+    public void setCaptchaProperties(CaptchaProperties captchaProperties) {
+        this.captchaProperties = captchaProperties;
+    }
+
+    public Interceptor getInterceptor() {
+        return interceptor;
+    }
+
+    public void setInterceptor(Interceptor interceptor) {
+        this.interceptor = interceptor;
+    }
+
+    public Validator getValidator() {
+        return validator;
+    }
+
+    public void setValidator(Validator validator) {
+        this.validator = validator;
     }
 
     @Override

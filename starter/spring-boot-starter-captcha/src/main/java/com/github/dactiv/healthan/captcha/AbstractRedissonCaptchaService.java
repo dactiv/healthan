@@ -1,10 +1,8 @@
 package com.github.dactiv.healthan.captcha;
 
-import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.commons.CacheProperties;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
-import org.springframework.validation.Validator;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
@@ -16,13 +14,13 @@ import java.util.Objects;
  */
 public abstract class AbstractRedissonCaptchaService<B> extends AbstractCaptchaService<B> {
 
-    protected final RedissonClient redissonClient;
+    protected RedissonClient redissonClient;
 
-    public AbstractRedissonCaptchaService(CaptchaProperties captchaProperties,
-                                          Interceptor interceptor,
-                                          Validator validator,
-                                          RedissonClient redissonClient) {
-        super(captchaProperties, validator, interceptor);
+    public RedissonClient getRedissonClient() {
+        return redissonClient;
+    }
+
+    public void setRedissonClient(RedissonClient redissonClient) {
         this.redissonClient = redissonClient;
     }
 
