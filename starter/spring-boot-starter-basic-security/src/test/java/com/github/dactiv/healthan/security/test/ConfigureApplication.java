@@ -28,7 +28,6 @@ public class ConfigureApplication {
                                                                                SecurityProperties securityProperties) {
         List<String> ignorePrincipals = new ArrayList<>(PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS);
         ignorePrincipals.add(securityProperties.getUser().getName());
-
         return new ElasticsearchAuditEventRepository(
                 elasticsearchOperations,
                 "ix_test_audit_event",

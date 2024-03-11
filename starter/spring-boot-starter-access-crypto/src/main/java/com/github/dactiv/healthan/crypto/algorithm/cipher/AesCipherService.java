@@ -19,6 +19,8 @@ public class AesCipherService extends SymmetricCipherService {
 
     private static final int DEFAULT_KEY_SIZE = 256;
 
+    private static final int DEFAULT_INITIALIZATION_VECTOR_SIZE = 128;
+
     /**
      * AES 对称加密实现
      */
@@ -26,7 +28,7 @@ public class AesCipherService extends SymmetricCipherService {
         super(CipherAlgorithmService.AES_ALGORITHM);
 
         setKeySize(DEFAULT_KEY_SIZE);
-        setInitializationVectorSize(DEFAULT_KEY_SIZE);
+        setInitializationVectorSize(DEFAULT_INITIALIZATION_VECTOR_SIZE);
 
         setMode(OperationMode.CBC);
         setPaddingScheme(PaddingScheme.PKCS5);
