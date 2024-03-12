@@ -111,6 +111,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
             return createSuccessAuthentication(userDetails, token);
         } catch (Exception e) {
+            LOGGER.error("用户认证发生异常", e);
             throw new AuthenticationServiceException(e.getMessage());
         }
     }
@@ -212,7 +213,6 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
                         "用户名或密码错误"));
             }
         } catch (Exception e) {
-            LOGGER.error("用户认证发生异常", e);
             // 如果 hideUserNotFoundExceptions true 并且是 UsernameNotFoundException 异常，抛出 用户名密码错误异常
             if (UsernameNotFoundException.class.isAssignableFrom(e.getClass()) && hideUserNotFoundExceptions) {
                 throw new BadCredentialsException(messages.getMessage(
