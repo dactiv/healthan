@@ -21,6 +21,7 @@ import com.github.dactiv.healthan.commons.page.TotalPage;
 import com.github.dactiv.healthan.mybatis.plus.MybatisPlusQueryGenerator;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  * @param <M> 映射 BaseMapper 的 dao 实现
  * @param <T> 映射 BaseMapper dao 实体实现
  */
+@Transactional(readOnly = true)
 public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
 
     /**
@@ -87,6 +89,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int save(Collection<T> entities) {
         return save(entities, false);
     }
@@ -100,6 +103,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int save(Collection<T> entities, boolean errorThrow) {
         return executeIterable(entities, errorThrow, (e) -> save(e) > 0, "save");
     }
@@ -112,6 +116,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int save(T entity) {
 
         if (!BasicIdentification.class.isAssignableFrom(entity.getClass())) {
@@ -134,6 +139,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int insert(Collection<T> entities) {
         return insert(entities, false);
     }
@@ -146,6 +152,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int insert(Collection<T> entities, boolean errorThrow) {
         return executeIterable(entities, errorThrow, (e) -> insert(e) > 0, "insert");
     }
@@ -158,6 +165,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      * @return 影响行数
      *
      */
+    @Transactional(rollbackFor = Exception.class)
     public int insert(T entity) {
         return baseMapper.insert(entity);
     }
@@ -169,6 +177,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int updateById(Collection<T> entities) {
         return updateById(entities, false);
     }
@@ -181,6 +190,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int updateById(Collection<T> entities, boolean errorThrow) {
         return executeIterable(entities, errorThrow, (e) -> updateById(e) > 0, "updateById");
     }
@@ -215,6 +225,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int updateById(T entity) {
         return baseMapper.updateById(entity);
     }
@@ -227,6 +238,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int update(Collection<T> entities, Wrapper<T> wrapper) {
         return update(entities, wrapper, false);
     }
@@ -240,6 +252,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int update(Collection<T> entities, Wrapper<T> wrapper, boolean errorThrow) {
         return executeIterable(entities, errorThrow, (e) -> update(e, wrapper) > 0, "update");
     }
@@ -252,6 +265,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int update(T entity, Wrapper<T> wrapper) {
         return baseMapper.update(entity, wrapper);
     }
@@ -396,6 +410,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int deleteById(Collection<? extends Serializable> ids) {
         return deleteById(ids, false);
     }
@@ -408,6 +423,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int deleteById(Collection<? extends Serializable> ids, boolean errorThrow) {
         Collection<Serializable> collection = new LinkedList<>();
         CollectionUtils.addAll(collection, ids);
@@ -426,6 +442,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int deleteById(Serializable id) {
         return baseMapper.deleteById(id);
     }
@@ -437,6 +454,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int deleteByEntity(Collection<T> entities) {
         return deleteByEntity(entities, true);
     }
@@ -449,6 +467,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int deleteByEntity(Collection<T> entities, boolean errorThrow) {
         return executeIterable(entities, errorThrow, (e) -> deleteByEntity(e) > 0, "deleteByEntity");
     }
@@ -460,6 +479,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int deleteByEntity(T entity) {
         return baseMapper.deleteById(entity);
     }
@@ -471,6 +491,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 影响行数
      */
+    @Transactional(rollbackFor = Exception.class)
     public int delete(Wrapper<T> wrapper) {
         return baseMapper.delete(wrapper);
     }
