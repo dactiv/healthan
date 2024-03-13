@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
  * @param <M> 映射 BaseMapper 的 dao 实现
  * @param <T> 映射 BaseMapper dao 实体实现
  */
-@Transactional(readOnly = true)
 public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
 
     /**
@@ -275,7 +274,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 数据量
      */
-    @Transactional(readOnly = true)
     public long count() {
         return count(null);
     }
@@ -287,7 +285,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 数据量
      */
-    @Transactional(readOnly = true)
     public long count(Wrapper<T> wrapper) {
         return baseMapper.selectCount(wrapper);
     }
@@ -297,7 +294,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 数据集合
      */
-    @Transactional(readOnly = true)
     public List<T> find() {
         return find(null);
     }
@@ -309,7 +305,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 数据集合
      */
-    @Transactional(readOnly = true)
     public List<T> find(Wrapper<T> wrapper) {
         return baseMapper.selectList(wrapper);
     }
@@ -321,7 +316,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 数据集合
      */
-    @Transactional(readOnly = true)
     public <R> List<R> findObjects(Wrapper<T> wrapper, Class<R> returnType) {
         List<Object> result = baseMapper.selectObjs(wrapper);
 
@@ -342,7 +336,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 数据内容
      */
-    @Transactional(readOnly = true)
     public T findOne(Wrapper<T> wrapper) {
         return baseMapper.selectOne(wrapper);
     }
@@ -356,7 +349,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 数据内容
      */
-    @Transactional(readOnly = true)
     public <R> R findOneObject(Wrapper<T> wrapper, Class<R> returnType) {
         List<Object> result = baseMapper.selectObjs(wrapper);
 
@@ -377,7 +369,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 分页内容
      */
-    @Transactional(readOnly = true)
     public Page<T> findPage(PageRequest pageRequest) {
         return findPage(pageRequest, null);
     }
@@ -390,7 +381,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 分页内容
      */
-    @Transactional(readOnly = true)
     public Page<T> findPage(PageRequest pageRequest, Wrapper<T> wrapper) {
         IPage<T> result = baseMapper.selectPage(
                 MybatisPlusQueryGenerator.createQueryPage(pageRequest),
@@ -400,7 +390,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
         return MybatisPlusQueryGenerator.convertResultPage(result);
     }
 
-    @Transactional(readOnly = true)
     public TotalPage<T> findTotalPage(PageRequest pageRequest, Wrapper<T> wrapper) {
         IPage<T> result = baseMapper.selectPage(
                 MybatisPlusQueryGenerator.createQueryPage(pageRequest),
@@ -514,7 +503,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 实体
      */
-    @Transactional(readOnly = true)
     public T get(Serializable id) {
         return baseMapper.selectById(id);
     }
@@ -526,7 +514,6 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      *
      * @return 实体集合
      */
-    @Transactional(readOnly = true)
     public List<T> get(Collection<? extends Serializable> ids) {
         return baseMapper.selectBatchIds(ids);
     }
