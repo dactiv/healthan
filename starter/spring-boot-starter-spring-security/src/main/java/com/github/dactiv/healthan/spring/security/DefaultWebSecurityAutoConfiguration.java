@@ -127,6 +127,17 @@ public class DefaultWebSecurityAutoConfiguration {
             }
         }
 
+        RequestAuthenticationFilter filter = getRequestAuthenticationFilter();
+
+
+        httpSecurity.addFilter(filter);
+        httpSecurity.addFilterBefore(new IpAuthenticationFilter(this.properties), RequestAuthenticationFilter.class);
+
+        addConsensusBasedToMethodSecurityInterceptor(httpSecurity, properties);
+        return httpSecurity.build();
+    }
+
+    private RequestAuthenticationFilter getRequestAuthenticationFilter() {
         RequestAuthenticationFilter filter = new RequestAuthenticationFilter(
                 properties,
                 authenticationTypeTokenResolvers,
@@ -138,13 +149,7 @@ public class DefaultWebSecurityAutoConfiguration {
         filter.setRememberMeServices(cookieRememberService);
         filter.setAuthenticationSuccessHandler(jsonAuthenticationSuccessHandler);
         filter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
-
-
-        httpSecurity.addFilter(filter);
-        httpSecurity.addFilterBefore(new IpAuthenticationFilter(this.properties), RequestAuthenticationFilter.class);
-
-        addConsensusBasedToMethodSecurityInterceptor(httpSecurity, properties);
-        return httpSecurity.build();
+        return filter;
     }
 
 
