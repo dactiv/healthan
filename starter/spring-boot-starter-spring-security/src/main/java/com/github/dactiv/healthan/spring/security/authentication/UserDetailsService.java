@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -139,7 +140,7 @@ public interface UserDetailsService {
 
     }
 
-    default String adminRestPassword(Integer id) {
+    default String adminRestPassword(Serializable id) {
         throw new UnsupportedOperationException(getType() + "类型用户不支持管理员重置密码操作");
     }
 
