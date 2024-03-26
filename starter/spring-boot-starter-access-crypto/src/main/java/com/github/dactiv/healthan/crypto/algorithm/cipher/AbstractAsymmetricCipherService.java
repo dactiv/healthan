@@ -65,7 +65,6 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      *
      * @param plainText 明文内容
      * @param key       签名 key
-     *
      * @return 签名的字节原
      */
     public ByteSource sign(byte[] plainText, byte[] key) {
@@ -79,7 +78,6 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * @param signature 签名的算法实现
      * @param plainText 明文内容
      * @param key       签名 key
-     *
      * @return 签名的字节原
      */
     public ByteSource sign(Signature signature, byte[] plainText, byte[] key) {
@@ -97,35 +95,33 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
     /**
      * 验证签名
      *
-     * @param cipherText 密文内容
-     * @param key        验证 key
-     * @param sign       签名内容
-     *
+     * @param data 签名内容
+     * @param key  验证 key
+     * @param sign 签名内容
      * @return true 验证成功，否则 false
      */
-    public boolean verify(byte[] cipherText, byte[] key, byte[] sign) {
+    public boolean verify(byte[] data, byte[] key, byte[] sign) {
         Signature signature = newSignatureInstance(getSignatureAlgorithmName());
         initVerifySignature(signature, key);
-        return verify(signature, cipherText, key, sign);
+        return verify(signature, data, key, sign);
     }
 
     /**
      * 验证签名
      *
-     * @param signature  签名的算法实现
-     * @param cipherText 密文内容
-     * @param key        验证 key
-     * @param sign       签名内容
-     *
+     * @param signature 签名的算法实现
+     * @param data      签名内容
+     * @param key       验证 key
+     * @param sign      签名内容
      * @return true 验证成功，否则 false
      */
-    public boolean verify(Signature signature, byte[] cipherText, byte[] key, byte[] sign) {
+    public boolean verify(Signature signature, byte[] data, byte[] key, byte[] sign) {
         initVerifySignature(signature, key);
         try {
-            signature.update(cipherText);
+            signature.update(data);
             return signature.verify(sign);
         } catch (SignatureException e) {
-            String msg = "无法验证:" + Arrays.toString(cipherText);
+            String msg = "无法验证:" + Arrays.toString(data);
             throw new CryptoException(msg, e);
         }
     }
@@ -171,7 +167,6 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * 创建一个新的签名
      *
      * @param algorithmName 算法名称
-     *
      * @return 签名
      */
     public Signature newSignatureInstance(String algorithmName) {
@@ -202,7 +197,6 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * 生成密钥对
      *
      * @param keySize 密钥大小
-     *
      * @return 密钥对
      */
     public KeyPair generateKeyPair(int keySize) {
@@ -235,7 +229,6 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * 获取公共密钥
      *
      * @param key 密钥值
-     *
      * @return 公共密钥
      */
     public abstract PublicKey getPublicKey(byte[] key);
@@ -244,7 +237,6 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
      * 获取私有密钥
      *
      * @param key 密钥值
-     *
      * @return 私有密钥
      */
     public abstract PrivateKey getPrivateKey(byte[] key);
