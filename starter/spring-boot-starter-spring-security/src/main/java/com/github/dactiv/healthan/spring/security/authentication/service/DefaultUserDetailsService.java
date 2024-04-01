@@ -11,7 +11,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.DigestUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,10 +33,9 @@ public class DefaultUserDetailsService extends AbstractUserDetailsService {
     public DefaultUserDetailsService(AuthenticationProperties properties,
                                      PasswordEncoder passwordEncoder) {
         setAuthenticationProperties(properties);
-        for (int i = 0; i < properties.getUsers().size(); i++) {
-            SecurityProperties.User user = properties.getUsers().get(i);
+        for (SecurityProperties.User user : properties.getUsers()) {
             SecurityUserDetails userDetails = new SecurityUserDetails(
-                    i + 1,
+                    DigestUtils.md5DigestAsHex(user.getName().getBytes(StandardCharsets.UTF_8)),
                     user.getName(),
                     passwordEncoder.encode(user.getPassword())
             );

@@ -667,6 +667,10 @@ public abstract class Casts {
      */
     public static <T> T of(Object source, Class<T> targetClass, String... ignoreProperties) {
 
+        if (Objects.isNull(source)) {
+            return null;
+        }
+
         T result = ClassUtils.newInstance(targetClass);
 
         BeanUtils.copyProperties(source, result, ignoreProperties);
