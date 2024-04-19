@@ -381,4 +381,15 @@ public class SecurityUserDetails implements UserDetails, BasicIdentification<Obj
     public <T> BasicUserDetails<T> toBasicUserDetails() {
         return BasicUserDetails.of(Casts.cast(getId()), getUsername(), getType());
     }
+
+    /**
+     * 转换基础用户信息
+     *
+     * @param idClass 主键 id 类型
+     *
+     * @return 基础用户信息
+     */
+    public <T> BasicUserDetails<T> toBasicUserDetails(Class<T> idClass) {
+        return BasicUserDetails.of(Casts.cast(getId(), idClass), getUsername(), getType());
+    }
 }
