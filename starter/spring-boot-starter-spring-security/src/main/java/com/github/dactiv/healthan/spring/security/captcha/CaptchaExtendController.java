@@ -6,6 +6,7 @@ import com.github.dactiv.healthan.captcha.InterceptToken;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.commons.RestResult;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,6 +46,7 @@ public class CaptchaExtendController {
      * @param interceptType 拦截的 token 类型
      * @return 绑定 token
      */
+    @PreAuthorize("hasRole('FEIGN')")
     @PostMapping("createCaptchaIntercept")
     public InterceptToken createCaptchaIntercept(@RequestParam String token,
                                                  @RequestParam String type,
@@ -61,6 +63,7 @@ public class CaptchaExtendController {
      * @param request http servlet request
      * @return rest 结果集
      */
+    @PreAuthorize("hasRole('FEIGN')")
     @PostMapping("deleteCaptcha")
     public RestResult<Map<String, Object>> deleteCaptcha(HttpServletRequest request) {
         return delegateCaptchaService.delete(request);
