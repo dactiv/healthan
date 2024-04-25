@@ -29,6 +29,7 @@
         <module>spring-boot-starter-web-mvc</module>
         <module>spring-boot-starter-spring-security</module>
         <module>spring-boot-starter-captcha</module>
+        <module>spring-boot-starter-alibaba-canal</module>
     </modules>
 
 </project>

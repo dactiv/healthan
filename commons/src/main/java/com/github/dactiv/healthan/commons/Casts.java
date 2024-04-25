@@ -14,6 +14,7 @@ import org.apache.commons.beanutils.converters.DateConverter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.objenesis.instantiator.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -30,7 +31,6 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  **/
-@SuppressWarnings("unchecked")
 public abstract class Casts {
 
     /**
@@ -98,6 +98,7 @@ public abstract class Casts {
      */
     public static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<Map<String, Object>>() {};
 
+    public static final ParameterizedTypeReference<Map<String, Object>> MAP_PARAMETERIZED_TYPE_REFERENCE = new ParameterizedTypeReference<Map<String, Object>>() {};
     /**
      * list map 类型范型引用
      */

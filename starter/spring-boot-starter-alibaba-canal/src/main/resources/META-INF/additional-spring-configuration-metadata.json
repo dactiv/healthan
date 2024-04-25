@@ -1,0 +1,21 @@
+{
+  "groups": [
+    {
+      "name": "net.healthan"
+    }
+  ],
+  "properties": [
+    {
+      "name": "healthan.canal.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否开启 canal 支持.",
+      "defaultValue": true
+    },
+    {
+      "name": "healthan.canal.admin.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否开启 canal admin 支持.",
+      "defaultValue": false
+    }
+  ]
+}
