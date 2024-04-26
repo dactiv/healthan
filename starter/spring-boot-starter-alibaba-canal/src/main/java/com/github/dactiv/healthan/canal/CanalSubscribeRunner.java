@@ -10,8 +10,8 @@ import com.alibaba.otter.canal.protocol.FlatMessage;
 import com.alibaba.otter.canal.protocol.Message;
 import com.github.dactiv.healthan.canal.config.CanalInstanceProperties;
 import com.github.dactiv.healthan.canal.config.CanalProperties;
+import com.github.dactiv.healthan.canal.domain.CanalEntryRowDataMeta;
 import com.github.dactiv.healthan.canal.domain.CanalMessage;
-import com.github.dactiv.healthan.canal.domain.EntryRowDataMeta;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.ReflectionUtils;
 import com.google.protobuf.ByteString;
@@ -159,7 +159,7 @@ public class CanalSubscribeRunner implements Runnable {
                     .findFirst()
                     .ifPresent(t -> CanalMessage.setTransactionId(t.getTransactionId()));
 
-            EntryRowDataMeta[] entryRowData = buildMessageData(message, buildExecutor);
+            CanalEntryRowDataMeta[] entryRowData = buildMessageData(message, buildExecutor);
             List<FlatMessage> flatMessages = messageConverter(entryRowData, message.getId());
 
             CanalMessage.setFlatMessageList(flatMessages);
@@ -209,11 +209,11 @@ public class CanalSubscribeRunner implements Runnable {
         }
     }
 
-    public static EntryRowDataMeta[] buildMessageData(Message message, ThreadPoolExecutor executor) {
+    public static CanalEntryRowDataMeta[] buildMessageData(Message message, ThreadPoolExecutor executor) {
         ExecutorTemplate template = new ExecutorTemplate(executor);
         if (message.isRaw()) {
             List<ByteString> rawEntries = message.getRawEntries();
-            final EntryRowDataMeta[] data = new EntryRowDataMeta[rawEntries.size()];
+            final CanalEntryRowDataMeta[] data = new CanalEntryRowDataMeta[rawEntries.size()];
             int i = 0;
             for (ByteString byteString : rawEntries) {
                 final int index = i;
@@ -222,7 +222,7 @@ public class CanalSubscribeRunner implements Runnable {
                         CanalEntry.Entry entry = CanalEntry.Entry.parseFrom(byteString);
                         CanalEntry.RowChange rowChange = CanalEntry.RowChange.parseFrom(entry.getStoreValue());
 
-                        data[index] = new EntryRowDataMeta();
+                        data[index] = new CanalEntryRowDataMeta();
                         data[index].setEntry(entry);
                         data[index].setRowChange(rowChange);
 
@@ -237,14 +237,14 @@ public class CanalSubscribeRunner implements Runnable {
             template.waitForResult();
             return data;
         } else {
-            final EntryRowDataMeta[] datas = new EntryRowDataMeta[message.getEntries().size()];
+            final CanalEntryRowDataMeta[] datas = new CanalEntryRowDataMeta[message.getEntries().size()];
             int i = 0;
             for (CanalEntry.Entry entry : message.getEntries()) {
                 final int index = i;
                 template.submit(() -> {
                     try {
                         CanalEntry.RowChange rowChange = CanalEntry.RowChange.parseFrom(entry.getStoreValue());
-                        datas[index] = new EntryRowDataMeta();
+                        datas[index] = new CanalEntryRowDataMeta();
                         datas[index].setEntry(entry);
                         datas[index].setRowChange(rowChange);
                     } catch (InvalidProtocolBufferException e) {
@@ -260,9 +260,9 @@ public class CanalSubscribeRunner implements Runnable {
         }
     }
 
-    public static List<FlatMessage> messageConverter(EntryRowDataMeta[] datas, long id) {
+    public static List<FlatMessage> messageConverter(CanalEntryRowDataMeta[] datas, long id) {
         List<FlatMessage> flatMessages = new ArrayList<>();
-        for (EntryRowDataMeta entryRowData : datas) {
+        for (CanalEntryRowDataMeta entryRowData : datas) {
             CanalEntry.Entry entry = entryRowData.getEntry();
             CanalEntry.RowChange rowChange = entryRowData.getRowChange();
             // 如果有分区路由,则忽略begin/end事件

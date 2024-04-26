@@ -3,8 +3,11 @@ package com.github.dactiv.healthan.canal;
 import com.github.dactiv.healthan.canal.config.CanalAdminProperties;
 import com.github.dactiv.healthan.canal.config.CanalProperties;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeResolver;
+import com.github.dactiv.healthan.canal.service.CanalRowDataChangeNoticeService;
+import com.github.dactiv.healthan.canal.service.support.InMemoryCanalRowDataChangeNoticeService;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -46,5 +49,11 @@ public class CanalAutoConfiguration {
                 canalRowDataChangeResolvers.stream().collect(Collectors.toList()),
                 buildExecutor, canalProperties
         );
+    }
+
+    @Bean
+    @ConditionalOnBean(CanalRowDataChangeNoticeService.class)
+    public CanalRowDataChangeNoticeService canalRowDataChangeNoticeService(RestTemplate restTemplate) {
+        return new InMemoryCanalRowDataChangeNoticeService(restTemplate);
     }
 }

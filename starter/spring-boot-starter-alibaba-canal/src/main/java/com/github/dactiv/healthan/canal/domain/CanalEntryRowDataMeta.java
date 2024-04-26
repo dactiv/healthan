@@ -9,7 +9,7 @@ import java.io.Serializable;
  *
  * @author maurice.chen
  */
-public class EntryRowDataMeta implements Serializable {
+public class CanalEntryRowDataMeta implements Serializable {
 
     private static final long serialVersionUID = 7857439908947971423L;
 
@@ -17,10 +17,10 @@ public class EntryRowDataMeta implements Serializable {
 
     private CanalEntry.RowChange rowChange;
 
-    public EntryRowDataMeta() {
+    public CanalEntryRowDataMeta() {
     }
 
-    public EntryRowDataMeta(CanalEntry.Entry entry, CanalEntry.RowChange rowChange) {
+    public CanalEntryRowDataMeta(CanalEntry.Entry entry, CanalEntry.RowChange rowChange) {
         this.entry = entry;
         this.rowChange = rowChange;
     }
