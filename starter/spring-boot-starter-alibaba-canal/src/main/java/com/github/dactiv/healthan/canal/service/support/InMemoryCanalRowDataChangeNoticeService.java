@@ -2,22 +2,21 @@ package com.github.dactiv.healthan.canal.service.support;
 
 import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeEntity;
 import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeRecordEntity;
+import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeNoticeResolver;
 import com.github.dactiv.healthan.commons.Casts;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * 内存存储形式的 canal 行数据变更通知服务实现
  *
  * @author maurice.chen
  */
-public class InMemoryCanalRowDataChangeNoticeService extends AbstractHttpCanalRowDataChangeNoticeService{
+public class InMemoryCanalRowDataChangeNoticeService extends AbstractCanalRowDataChangeNoticeService {
 
     private static final List<CanalRowDataChangeNoticeEntity> CACHE_NOTICE_DATA = Collections.synchronizedList(new ArrayList<>());
 
@@ -26,12 +25,8 @@ public class InMemoryCanalRowDataChangeNoticeService extends AbstractHttpCanalRo
     public InMemoryCanalRowDataChangeNoticeService() {
     }
 
-    public InMemoryCanalRowDataChangeNoticeService(RestTemplate restTemplate) {
-        super(restTemplate);
-    }
-
-    public InMemoryCanalRowDataChangeNoticeService(RestTemplate restTemplate, ScheduledExecutorService executorService) {
-        super(restTemplate, executorService);
+    public InMemoryCanalRowDataChangeNoticeService(List<CanalRowDataChangeNoticeResolver> canalRowDataChangeNoticeResolvers) {
+        super(canalRowDataChangeNoticeResolvers);
     }
 
     @Override

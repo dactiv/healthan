@@ -1,13 +1,14 @@
-package com.github.dactiv.healthan.canal.service.support;
+package com.github.dactiv.healthan.canal.resolver.support;
 
 import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeRecordEntity;
 import com.github.dactiv.healthan.canal.domain.meta.HttpCanalRowDataChangeNoticeMeta;
-import com.github.dactiv.healthan.canal.service.CanalRowDataChangeNoticeService;
+import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeNoticeResolver;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.domain.body.AckResponseBody;
 import com.github.dactiv.healthan.commons.enumerate.support.AckStatus;
 import com.github.dactiv.healthan.commons.enumerate.support.ExecuteStatus;
+import com.github.dactiv.healthan.commons.enumerate.support.Protocol;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -23,15 +24,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
- * 抽象的 canal 行数据变更 http 通知实现
- *
- * @author maurice.chen
+ * http 形式 canal 行数据变更通知实现
  */
-public abstract class AbstractHttpCanalRowDataChangeNoticeService implements CanalRowDataChangeNoticeService {
+public class HttpCanalRowDataChangeNoticeResolver implements CanalRowDataChangeNoticeResolver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpCanalRowDataChangeNoticeService.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(HttpCanalRowDataChangeNoticeResolver.class);
 
     public static final String APPEND_BODY_KEY = "appendBody";
 
@@ -39,24 +39,28 @@ public abstract class AbstractHttpCanalRowDataChangeNoticeService implements Can
 
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(16);
 
-    public AbstractHttpCanalRowDataChangeNoticeService() {
+    public HttpCanalRowDataChangeNoticeResolver() {
     }
 
-    public AbstractHttpCanalRowDataChangeNoticeService(RestTemplate restTemplate) {
+    public HttpCanalRowDataChangeNoticeResolver(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    public AbstractHttpCanalRowDataChangeNoticeService(RestTemplate restTemplate,
-                                                       ScheduledExecutorService executorService) {
+    public HttpCanalRowDataChangeNoticeResolver(RestTemplate restTemplate, ScheduledExecutorService executorService) {
         this.restTemplate = restTemplate;
         this.executorService = executorService;
     }
 
     @Override
-    public void sendCanalRowDataChangeNoticeRecord(CanalRowDataChangeNoticeRecordEntity entity) {
+    public boolean isSupport(CanalRowDataChangeNoticeRecordEntity entity) {
+        return Protocol.HTTP_OR_HTTPS.equals(entity.getProtocol());
+    }
+
+    @Override
+    public void send(CanalRowDataChangeNoticeRecordEntity entity, Consumer<CanalRowDataChangeNoticeRecordEntity> consumer) {
         CompletableFuture
                 .supplyAsync(() -> exchangeNotification(entity))
-                .thenAccept(result -> completableExchange(result, entity));
+                .thenAccept(result -> completableExchange(result, entity, consumer));
     }
 
     /**
@@ -126,7 +130,9 @@ public abstract class AbstractHttpCanalRowDataChangeNoticeService implements Can
      * @param result restTemplate 响应实体
      * @param entity 通知记录实体
      */
-    public void completableExchange(ResponseEntity<Map<String, Object>> result, CanalRowDataChangeNoticeRecordEntity entity) {
+    public void completableExchange(ResponseEntity<Map<String, Object>> result,
+                                    CanalRowDataChangeNoticeRecordEntity entity,
+                                    Consumer<CanalRowDataChangeNoticeRecordEntity> consumer) {
 
         HttpCanalRowDataChangeNoticeMeta meta = Casts.convertValue(
                 entity.getProtocolMeta(),
@@ -162,21 +168,21 @@ public abstract class AbstractHttpCanalRowDataChangeNoticeService implements Can
             );
         }
 
-        saveCanalRowDataChangeNoticeRecordEntity(entity);
+        consumer.accept(entity);
         // 如果执行失败的情况下等待 notificationRecordService.updateById(entity); 提交事务后继续补发。
         if (ExecuteStatus.EXECUTING_STATUS.contains(entity.getExecuteStatus())) {
-            resendCanalRowDataChangeNoticeRecordEntity(entity);
+            resend(entity, consumer);
         }
     }
 
-    private void resendCanalRowDataChangeNoticeRecordEntity(CanalRowDataChangeNoticeRecordEntity entity) {
+    private void resend(CanalRowDataChangeNoticeRecordEntity entity, Consumer<CanalRowDataChangeNoticeRecordEntity> consumer) {
         if (entity.getRetryCount() > entity.getMaxRetryCount()) {
             return ;
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("记录 [{}] 状态发送结果为: {}, 将在{} 后重新发送", entity, entity.getExecuteStatus(), entity.getNextRetryTime());
         }
-        executorService.schedule(() -> sendCanalRowDataChangeNoticeRecord(entity), entity.getNextRetryTime().getTime(), TimeUnit.MICROSECONDS);
+        executorService.schedule(() -> send(entity, consumer), entity.getNextRetryTime().getTime(), TimeUnit.MICROSECONDS);
     }
 
     public RestTemplate getRestTemplate() {
