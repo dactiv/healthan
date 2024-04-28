@@ -7,6 +7,7 @@ import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeEn
 import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeRecordEntity;
 import com.github.dactiv.healthan.canal.domain.meta.HttpCanalRowDataChangeNoticeMeta;
 import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.commons.domain.AckMessage;
 import com.github.dactiv.healthan.commons.enumerate.support.Protocol;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +40,7 @@ public interface CanalRowDataChangeNoticeService {
      *
      * @return canal 行变更通知记录实体集合
      */
-    default List<CanalRowDataChangeNoticeRecordEntity> createCanalRowDataChangeNoticeRecordEntity(CanalRowDataChangeNoticeEntity notice, CanalMessage message) {
+    default List<CanalRowDataChangeNoticeRecordEntity> createAckMessage(CanalRowDataChangeNoticeEntity notice, CanalMessage message) {
         List<CanalRowDataChangeNoticeRecordEntity> result = new ArrayList<>();
         if (Protocol.HTTP_OR_HTTPS.equals(notice.getProtocol())) {
 
@@ -78,16 +79,16 @@ public interface CanalRowDataChangeNoticeService {
     /**
      * 保存 canal 行数据变更通知实体
      *
-     * @param record canal 行数据变更记录实体集合
+     * @param ackMessage 确认消息接口
      */
-    void saveCanalRowDataChangeNoticeRecordEntity(CanalRowDataChangeNoticeRecordEntity record);
+    void saveAckMessage(AckMessage ackMessage);
 
     /**
      * 发送 canal 行数据变更通知
      *
-     * @param canalRowDataChangeNoticeRecordEntity canal 行数据变更通知实体
+     * @param ackMessage 确认消息接口
      */
-    void sendCanalRowDataChangeNoticeRecord(CanalRowDataChangeNoticeRecordEntity canalRowDataChangeNoticeRecordEntity);
+    void sendAckMessage(AckMessage ackMessage);
 
     /**
      * 映射字段，用于将表字段映射成其他字段名

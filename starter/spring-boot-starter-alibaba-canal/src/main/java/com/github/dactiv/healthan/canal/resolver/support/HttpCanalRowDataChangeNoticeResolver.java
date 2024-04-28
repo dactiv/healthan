@@ -1,10 +1,10 @@
 package com.github.dactiv.healthan.canal.resolver.support;
 
-import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeRecordEntity;
 import com.github.dactiv.healthan.canal.domain.meta.HttpCanalRowDataChangeNoticeMeta;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeNoticeResolver;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
+import com.github.dactiv.healthan.commons.domain.AckMessage;
 import com.github.dactiv.healthan.commons.domain.body.AckResponseBody;
 import com.github.dactiv.healthan.commons.enumerate.support.AckStatus;
 import com.github.dactiv.healthan.commons.enumerate.support.ExecuteStatus;
@@ -52,12 +52,13 @@ public class HttpCanalRowDataChangeNoticeResolver implements CanalRowDataChangeN
     }
 
     @Override
-    public boolean isSupport(CanalRowDataChangeNoticeRecordEntity entity) {
+    public boolean isSupport(AckMessage entity) {
         return Protocol.HTTP_OR_HTTPS.equals(entity.getProtocol());
     }
 
     @Override
-    public void send(CanalRowDataChangeNoticeRecordEntity entity, Consumer<CanalRowDataChangeNoticeRecordEntity> consumer) {
+    public void send(AckMessage entity, Consumer<AckMessage> consumer) {
+        // FIXME 这里需要优化，写得不够好，Consumer<AckMessage> consumer 能不能一步返回给实现者去处理？
         CompletableFuture
                 .supplyAsync(() -> exchangeNotification(entity))
                 .thenAccept(result -> completableExchange(result, entity, consumer));
@@ -69,7 +70,7 @@ public class HttpCanalRowDataChangeNoticeResolver implements CanalRowDataChangeN
      * @param entity 通知记录实体
      * @return 执行结果
      */
-    private ResponseEntity<Map<String, Object>> exchangeNotification(CanalRowDataChangeNoticeRecordEntity entity) {
+    private ResponseEntity<Map<String, Object>> exchangeNotification(AckMessage entity) {
         HttpCanalRowDataChangeNoticeMeta meta = Casts.convertValue(
                 entity.getProtocolMeta(),
                 HttpCanalRowDataChangeNoticeMeta.class
@@ -131,8 +132,8 @@ public class HttpCanalRowDataChangeNoticeResolver implements CanalRowDataChangeN
      * @param entity 通知记录实体
      */
     public void completableExchange(ResponseEntity<Map<String, Object>> result,
-                                    CanalRowDataChangeNoticeRecordEntity entity,
-                                    Consumer<CanalRowDataChangeNoticeRecordEntity> consumer) {
+                                    AckMessage entity,
+                                    Consumer<AckMessage> consumer) {
 
         HttpCanalRowDataChangeNoticeMeta meta = Casts.convertValue(
                 entity.getProtocolMeta(),
@@ -169,13 +170,13 @@ public class HttpCanalRowDataChangeNoticeResolver implements CanalRowDataChangeN
         }
 
         consumer.accept(entity);
-        // 如果执行失败的情况下等待 notificationRecordService.updateById(entity); 提交事务后继续补发。
+        // 如果执行失败的情况下等待 consumer.accept(entity); 后继续补发。
         if (ExecuteStatus.EXECUTING_STATUS.contains(entity.getExecuteStatus())) {
             resend(entity, consumer);
         }
     }
 
-    private void resend(CanalRowDataChangeNoticeRecordEntity entity, Consumer<CanalRowDataChangeNoticeRecordEntity> consumer) {
+    private void resend(AckMessage entity, Consumer<AckMessage> consumer) {
         if (entity.getRetryCount() > entity.getMaxRetryCount()) {
             return ;
         }

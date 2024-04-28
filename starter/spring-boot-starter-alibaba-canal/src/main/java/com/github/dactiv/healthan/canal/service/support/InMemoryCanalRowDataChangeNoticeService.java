@@ -1,9 +1,9 @@
 package com.github.dactiv.healthan.canal.service.support;
 
 import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeEntity;
-import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeRecordEntity;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeNoticeResolver;
 import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.commons.domain.AckMessage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class InMemoryCanalRowDataChangeNoticeService extends AbstractCanalRowDat
 
     private static final List<CanalRowDataChangeNoticeEntity> CACHE_NOTICE_DATA = Collections.synchronizedList(new ArrayList<>());
 
-    private static final List<CanalRowDataChangeNoticeRecordEntity> CACHE_NOTICE_RECORD_DATA = Collections.synchronizedList(new ArrayList<>());
+    private static final List<AckMessage> CACHE_NOTICE_RECORD_DATA = Collections.synchronizedList(new ArrayList<>());
 
     public InMemoryCanalRowDataChangeNoticeService() {
     }
@@ -48,7 +48,7 @@ public class InMemoryCanalRowDataChangeNoticeService extends AbstractCanalRowDat
     }
 
     @Override
-    public void saveCanalRowDataChangeNoticeRecordEntity(CanalRowDataChangeNoticeRecordEntity record) {
+    public void saveAckMessage(AckMessage record) {
         CACHE_NOTICE_RECORD_DATA.add(record);
     }
 }

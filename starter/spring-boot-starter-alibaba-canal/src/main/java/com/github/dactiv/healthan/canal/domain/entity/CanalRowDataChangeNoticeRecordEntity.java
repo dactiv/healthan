@@ -1,15 +1,19 @@
 package com.github.dactiv.healthan.canal.domain.entity;
 
+import com.github.dactiv.healthan.commons.domain.AckMessage;
 import com.github.dactiv.healthan.commons.domain.body.AckResponseBody;
 import com.github.dactiv.healthan.commons.enumerate.support.ExecuteStatus;
 import com.github.dactiv.healthan.commons.enumerate.support.Protocol;
-import com.github.dactiv.healthan.commons.retry.Retryable;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
-public class CanalRowDataChangeNoticeRecordEntity implements Serializable, Retryable, ExecuteStatus.Body {
+/**
+ * canal 行数据变更通知记录实体
+ *
+ * @author maurice.chen
+ */
+public class CanalRowDataChangeNoticeRecordEntity implements AckMessage {
 
     private static final long serialVersionUID = 7867580272505563609L;
 

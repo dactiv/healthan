@@ -1,6 +1,6 @@
 package com.github.dactiv.healthan.canal.resolver;
 
-import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeRecordEntity;
+import com.github.dactiv.healthan.commons.domain.AckMessage;
 
 import java.util.function.Consumer;
 
@@ -18,7 +18,7 @@ public interface CanalRowDataChangeNoticeResolver {
      *
      * @return true 是，否则 false
      */
-    boolean isSupport(CanalRowDataChangeNoticeRecordEntity entity);
+    boolean isSupport(AckMessage entity);
 
     /**
      * 发送通知
@@ -26,6 +26,5 @@ public interface CanalRowDataChangeNoticeResolver {
      * @param entity canal 行数据变更通知记录实体
      * @param consumer 当数据发送比昂更后回调次接口
      */
-    void send(CanalRowDataChangeNoticeRecordEntity entity,
-              Consumer<CanalRowDataChangeNoticeRecordEntity> consumer);
+    void send(AckMessage entity, Consumer<AckMessage> consumer);
 }

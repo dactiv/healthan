@@ -5,6 +5,7 @@ import com.github.dactiv.healthan.canal.config.CanalProperties;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeNoticeResolver;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeResolver;
 import com.github.dactiv.healthan.canal.resolver.support.HttpCanalRowDataChangeNoticeResolver;
+import com.github.dactiv.healthan.canal.resolver.support.SimpleCanalRowDataChangeResolver;
 import com.github.dactiv.healthan.canal.service.CanalRowDataChangeNoticeService;
 import com.github.dactiv.healthan.canal.service.support.InMemoryCanalRowDataChangeNoticeService;
 import org.redisson.api.RedissonClient;
@@ -65,4 +66,11 @@ public class CanalAutoConfiguration {
     public HttpCanalRowDataChangeNoticeResolver httpCanalRowDataChangeNoticeResolver(RestTemplate restTemplate) {
         return new HttpCanalRowDataChangeNoticeResolver(restTemplate);
     }
+
+    @Bean
+    @ConditionalOnBean(CanalRowDataChangeResolver.class)
+    public CanalRowDataChangeResolver simpleCanalRowDataChangeResolver(CanalRowDataChangeNoticeService canalRowDataChangeNoticeService) {
+        return new SimpleCanalRowDataChangeResolver(canalRowDataChangeNoticeService);
+    }
+
 }

@@ -3,10 +3,10 @@ package com.github.dactiv.healthan.canal.resolver.support;
 import com.alibaba.otter.canal.protocol.FlatMessage;
 import com.github.dactiv.healthan.canal.domain.CanalMessage;
 import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeEntity;
-import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeRecordEntity;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeResolver;
 import com.github.dactiv.healthan.canal.service.CanalRowDataChangeNoticeService;
 import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.commons.domain.AckMessage;
 import com.github.dactiv.healthan.commons.enumerate.support.YesOrNo;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -23,20 +23,20 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class CanalRowDataChangeNoticeResolver implements CanalRowDataChangeResolver {
+public class SimpleCanalRowDataChangeResolver implements CanalRowDataChangeResolver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CanalRowDataChangeNoticeResolver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleCanalRowDataChangeResolver.class);
 
     /**
      * canal 行谁变更通知服务
      */
     private CanalRowDataChangeNoticeService canalRowDataChangeNoticeService;
 
-    public CanalRowDataChangeNoticeResolver(CanalRowDataChangeNoticeService canalRowDataChangeNoticeService) {
+    public SimpleCanalRowDataChangeResolver(CanalRowDataChangeNoticeService canalRowDataChangeNoticeService) {
         this.canalRowDataChangeNoticeService = canalRowDataChangeNoticeService;
     }
 
-    public CanalRowDataChangeNoticeResolver() {
+    public SimpleCanalRowDataChangeResolver() {
     }
 
     @Override
@@ -54,7 +54,7 @@ public class CanalRowDataChangeNoticeResolver implements CanalRowDataChangeResol
         // 通过数据库名称.表名称查询启用的通知实体
         List<CanalRowDataChangeNoticeEntity> result = canalRowDataChangeNoticeService.findEnableByDestinations(destinations);
 
-        List<CanalRowDataChangeNoticeRecordEntity> recordList = new LinkedList<>();
+        List<AckMessage> recordList = new LinkedList<>();
 
         // 循环构造所有要发送的消息记录
         for (CanalRowDataChangeNoticeEntity notification : result) {
@@ -89,13 +89,13 @@ public class CanalRowDataChangeNoticeResolver implements CanalRowDataChangeResol
                 canalRowDataChangeNoticeService.mappingField(flatMessages, notification.getFieldMappings());
             }
 
-            recordList.addAll(canalRowDataChangeNoticeService.createCanalRowDataChangeNoticeRecordEntity(notification, temp));
+            recordList.addAll(canalRowDataChangeNoticeService.createAckMessage(notification, temp));
 
         }
 
-        recordList.forEach(canalRowDataChangeNoticeService::saveCanalRowDataChangeNoticeRecordEntity);
+        recordList.forEach(canalRowDataChangeNoticeService::saveAckMessage);
 
-        recordList.forEach(canalRowDataChangeNoticeService::sendCanalRowDataChangeNoticeRecord);
+        recordList.forEach(canalRowDataChangeNoticeService::sendAckMessage);
     }
 
     public CanalRowDataChangeNoticeService getCanalRowDataChangeNoticeService() {

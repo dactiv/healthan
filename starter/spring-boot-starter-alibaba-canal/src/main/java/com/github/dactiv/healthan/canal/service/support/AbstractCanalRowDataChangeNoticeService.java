@@ -1,8 +1,9 @@
 package com.github.dactiv.healthan.canal.service.support;
 
-import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeRecordEntity;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeNoticeResolver;
 import com.github.dactiv.healthan.canal.service.CanalRowDataChangeNoticeService;
+import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.commons.domain.AckMessage;
 import com.github.dactiv.healthan.commons.exception.SystemException;
 
 import java.util.List;
@@ -24,13 +25,13 @@ public abstract class AbstractCanalRowDataChangeNoticeService implements CanalRo
     }
 
     @Override
-    public void sendCanalRowDataChangeNoticeRecord(CanalRowDataChangeNoticeRecordEntity entity) {
+    public void sendAckMessage(AckMessage ackMessage) {
         canalRowDataChangeNoticeResolvers
                 .stream()
-                .filter(c -> c.isSupport(entity))
+                .filter(c -> c.isSupport(ackMessage))
                 .findFirst()
-                .orElseThrow(() -> new SystemException("找不到 [" + entity + "] 的通知解析器支持"))
-                .send(entity, this::saveCanalRowDataChangeNoticeRecordEntity);
+                .orElseThrow(() -> new SystemException("找不到 [" + ackMessage + "] 的通知解析器支持"))
+                .send(ackMessage, e -> this.saveAckMessage(Casts.cast(ackMessage)));
 
     }
 }
