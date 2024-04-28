@@ -56,15 +56,15 @@ public class CanalAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(CanalRowDataChangeNoticeService.class)
-    public CanalRowDataChangeNoticeService canalRowDataChangeNoticeService(ObjectProvider<CanalRowDataChangeNoticeResolver> canalRowDataChangeNoticeResolvers) {
-        return new InMemoryCanalRowDataChangeNoticeService(canalRowDataChangeNoticeResolvers.stream().collect(Collectors.toList()));
-    }
-
-    @Bean
     @ConditionalOnBean(HttpCanalRowDataChangeNoticeResolver.class)
     public HttpCanalRowDataChangeNoticeResolver httpCanalRowDataChangeNoticeResolver(RestTemplate restTemplate) {
         return new HttpCanalRowDataChangeNoticeResolver(restTemplate);
+    }
+
+    @Bean
+    @ConditionalOnBean(CanalRowDataChangeNoticeService.class)
+    public CanalRowDataChangeNoticeService canalRowDataChangeNoticeService(ObjectProvider<CanalRowDataChangeNoticeResolver> canalRowDataChangeNoticeResolvers) {
+        return new InMemoryCanalRowDataChangeNoticeService(canalRowDataChangeNoticeResolvers.stream().collect(Collectors.toList()));
     }
 
     @Bean

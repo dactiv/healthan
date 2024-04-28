@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public abstract class AbstractCanalRowDataChangeNoticeService<N extends CanalRowDataChangeNotice> implements CanalRowDataChangeNoticeService<N> {
+public abstract class AbstractCanalRowDataChangeNoticeService<N extends CanalRowDataChangeNotice> implements CanalRowDataChangeNoticeService {
 
     private List<CanalRowDataChangeNoticeResolver> canalRowDataChangeNoticeResolvers;
 
