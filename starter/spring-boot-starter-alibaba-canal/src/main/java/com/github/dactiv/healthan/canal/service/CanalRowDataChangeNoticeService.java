@@ -16,7 +16,7 @@ import java.util.*;
  *
  * @author maurice.chen
  */
-public interface CanalRowDataChangeNoticeService<N extends CanalRowDataChangeNotice> {
+public interface CanalRowDataChangeNoticeService {
 
     String HTTP_ENTITY_FIELD = "httpEntity";
 
@@ -27,7 +27,7 @@ public interface CanalRowDataChangeNoticeService<N extends CanalRowDataChangeNot
      *
      * @return canal 行数据变更通知实体集合
      */
-    List<N> findEnableByDestinations(List<String> destinations);
+    List<CanalRowDataChangeNotice> findEnableByDestinations(List<String> destinations);
 
     /**
      * 创建 canal 行数据变更通知记录实体
@@ -37,7 +37,7 @@ public interface CanalRowDataChangeNoticeService<N extends CanalRowDataChangeNot
      *
      * @return canal 行变更通知记录实体集合
      */
-    default List<AckMessage> createAckMessage(N notice, CanalMessage message) {
+    default List<AckMessage> createAckMessage(CanalRowDataChangeNotice notice, CanalMessage message) {
         return new ArrayList<>(CanalRowDataChangeNoticeRecordEntity.of(notice, message));
     }
 

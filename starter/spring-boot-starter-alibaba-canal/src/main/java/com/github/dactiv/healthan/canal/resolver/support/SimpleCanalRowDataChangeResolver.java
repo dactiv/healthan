@@ -2,7 +2,7 @@ package com.github.dactiv.healthan.canal.resolver.support;
 
 import com.alibaba.otter.canal.protocol.FlatMessage;
 import com.github.dactiv.healthan.canal.domain.CanalMessage;
-import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeEntity;
+import com.github.dactiv.healthan.canal.domain.CanalRowDataChangeNotice;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeResolver;
 import com.github.dactiv.healthan.canal.service.CanalRowDataChangeNoticeService;
 import com.github.dactiv.healthan.commons.Casts;
@@ -52,12 +52,12 @@ public class SimpleCanalRowDataChangeResolver implements CanalRowDataChangeResol
         }
 
         // 通过数据库名称.表名称查询启用的通知实体
-        List<CanalRowDataChangeNoticeEntity> result = canalRowDataChangeNoticeService.findEnableByDestinations(destinations);
+        List<CanalRowDataChangeNotice> result = canalRowDataChangeNoticeService.findEnableByDestinations(destinations);
 
         List<AckMessage> recordList = new LinkedList<>();
 
         // 循环构造所有要发送的消息记录
-        for (CanalRowDataChangeNoticeEntity notification : result) {
+        for (CanalRowDataChangeNotice notification : result) {
             // 克隆一次新的对象内容，防止某些通知将 message 原始数据修改。
             CanalMessage temp = Casts.of(message, CanalMessage.class);
             if (Objects.isNull(temp)) {

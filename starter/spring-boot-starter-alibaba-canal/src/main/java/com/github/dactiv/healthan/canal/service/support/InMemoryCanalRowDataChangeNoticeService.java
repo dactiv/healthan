@@ -1,5 +1,6 @@
 package com.github.dactiv.healthan.canal.service.support;
 
+import com.github.dactiv.healthan.canal.domain.CanalRowDataChangeNotice;
 import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeEntity;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeNoticeResolver;
 import com.github.dactiv.healthan.commons.Casts;
@@ -30,7 +31,7 @@ public class InMemoryCanalRowDataChangeNoticeService extends AbstractCanalRowDat
     }
 
     @Override
-    public List<CanalRowDataChangeNoticeEntity> findEnableByDestinations(List<String> destinations) {
+    public List<CanalRowDataChangeNotice> findEnableByDestinations(List<String> destinations) {
         List<CanalRowDataChangeNoticeEntity> result = new LinkedList<>();
         for (String destination : destinations) {
             String databaseName = StringUtils.substringBefore(destination, Casts.COMMA);
@@ -44,7 +45,7 @@ public class InMemoryCanalRowDataChangeNoticeService extends AbstractCanalRowDat
                     .filter(c -> c.getTableName().equals(tableName))
                     .forEach(result::add);
         }
-        return Collections.emptyList();
+        return new LinkedList<>(result);
     }
 
     @Override
