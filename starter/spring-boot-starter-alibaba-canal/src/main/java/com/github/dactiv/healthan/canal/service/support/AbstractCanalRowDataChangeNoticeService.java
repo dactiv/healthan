@@ -1,5 +1,6 @@
 package com.github.dactiv.healthan.canal.service.support;
 
+import com.github.dactiv.healthan.canal.domain.CanalRowDataChangeNotice;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeNoticeResolver;
 import com.github.dactiv.healthan.canal.service.CanalRowDataChangeNoticeService;
 import com.github.dactiv.healthan.commons.Casts;
@@ -13,7 +14,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public abstract class AbstractCanalRowDataChangeNoticeService implements CanalRowDataChangeNoticeService {
+public abstract class AbstractCanalRowDataChangeNoticeService<N extends CanalRowDataChangeNotice> implements CanalRowDataChangeNoticeService<N> {
 
     private List<CanalRowDataChangeNoticeResolver> canalRowDataChangeNoticeResolvers;
 

@@ -1,9 +1,9 @@
 package com.github.dactiv.healthan.canal.domain.entity;
 
+import com.github.dactiv.healthan.canal.domain.CanalRowDataChangeNotice;
 import com.github.dactiv.healthan.commons.enumerate.support.Protocol;
 import com.github.dactiv.healthan.commons.enumerate.support.YesOrNo;
 
-import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author maurice.chen
  */
-public class CanalRowDataChangeNoticeEntity implements Serializable {
+public class CanalRowDataChangeNoticeEntity implements CanalRowDataChangeNotice {
 
     private static final long serialVersionUID = -5105461307882560087L;
 

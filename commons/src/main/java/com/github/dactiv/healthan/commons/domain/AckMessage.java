@@ -1,8 +1,8 @@
 package com.github.dactiv.healthan.commons.domain;
 
 import com.github.dactiv.healthan.commons.domain.body.AckResponseBody;
+import com.github.dactiv.healthan.commons.domain.meta.ProtocolMeta;
 import com.github.dactiv.healthan.commons.enumerate.support.ExecuteStatus;
-import com.github.dactiv.healthan.commons.enumerate.support.Protocol;
 import com.github.dactiv.healthan.commons.retry.Retryable;
 
 import java.io.Serializable;
@@ -13,21 +13,7 @@ import java.util.Map;
  *
  * @author maurice.chen
  */
-public interface AckMessage extends Serializable, Retryable, ExecuteStatus.Body {
-
-    /**
-     * 获取消息协议信息
-     *
-     * @return 协议类型枚举
-     */
-    Protocol getProtocol();
-
-    /**
-     * 获取协议内容元数据信息
-     *
-     * @return 协议内容元数据信息
-     */
-    Map<String, Object> getProtocolMeta();
+public interface AckMessage extends Serializable, Retryable, ExecuteStatus.Body, ProtocolMeta {
 
     /**
      * 获取消息请求体

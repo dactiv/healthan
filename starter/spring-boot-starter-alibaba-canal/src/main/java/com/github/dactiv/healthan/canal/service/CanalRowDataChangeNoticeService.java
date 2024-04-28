@@ -1,14 +1,11 @@
 package com.github.dactiv.healthan.canal.service;
 
 import com.alibaba.otter.canal.protocol.FlatMessage;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.dactiv.healthan.canal.domain.CanalMessage;
-import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeEntity;
+import com.github.dactiv.healthan.canal.domain.CanalRowDataChangeNotice;
 import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeRecordEntity;
-import com.github.dactiv.healthan.canal.domain.meta.HttpCanalRowDataChangeNoticeMeta;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.domain.AckMessage;
-import com.github.dactiv.healthan.commons.enumerate.support.Protocol;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,7 +16,7 @@ import java.util.*;
  *
  * @author maurice.chen
  */
-public interface CanalRowDataChangeNoticeService {
+public interface CanalRowDataChangeNoticeService<N extends CanalRowDataChangeNotice> {
 
     String HTTP_ENTITY_FIELD = "httpEntity";
 
@@ -30,7 +27,7 @@ public interface CanalRowDataChangeNoticeService {
      *
      * @return canal 行数据变更通知实体集合
      */
-    List<CanalRowDataChangeNoticeEntity> findEnableByDestinations(List<String> destinations);
+    List<N> findEnableByDestinations(List<String> destinations);
 
     /**
      * 创建 canal 行数据变更通知记录实体
@@ -40,40 +37,8 @@ public interface CanalRowDataChangeNoticeService {
      *
      * @return canal 行变更通知记录实体集合
      */
-    default List<CanalRowDataChangeNoticeRecordEntity> createAckMessage(CanalRowDataChangeNoticeEntity notice, CanalMessage message) {
-        List<CanalRowDataChangeNoticeRecordEntity> result = new ArrayList<>();
-        if (Protocol.HTTP_OR_HTTPS.equals(notice.getProtocol())) {
-
-            List<HttpCanalRowDataChangeNoticeMeta> metas = Casts.convertValue(
-                    notice.getProtocolMeta().get(HTTP_ENTITY_FIELD),
-                    new TypeReference<List<HttpCanalRowDataChangeNoticeMeta>>() {}
-            );
-            for (HttpCanalRowDataChangeNoticeMeta map : metas) {
-                CanalRowDataChangeNoticeRecordEntity entity = Casts.of(
-                        notice,
-                        CanalRowDataChangeNoticeRecordEntity.class,
-                        CanalRowDataChangeNoticeEntity.PROTOCOL_META_FIELD_NAME
-                );
-                if (Objects.isNull(entity)) {
-                    continue;
-                }
-                entity.setProtocolMeta(Casts.convertValue(map, Casts.MAP_TYPE_REFERENCE));
-                entity.setRequestBody(Casts.convertValue(message, Casts.MAP_TYPE_REFERENCE));
-                result.add(entity);
-            }
-        } else {
-            CanalRowDataChangeNoticeRecordEntity entity = Casts.of(
-                    notice,
-                    CanalRowDataChangeNoticeRecordEntity.class,
-                    CanalRowDataChangeNoticeEntity.PROTOCOL_META_FIELD_NAME
-            );
-
-            if (Objects.nonNull(entity)) {
-                entity.setRequestBody(Casts.convertValue(message, Casts.MAP_TYPE_REFERENCE));
-                result.add(entity);
-            }
-        }
-        return result;
+    default List<AckMessage> createAckMessage(N notice, CanalMessage message) {
+        return new ArrayList<>(CanalRowDataChangeNoticeRecordEntity.of(notice, message));
     }
 
     /**
