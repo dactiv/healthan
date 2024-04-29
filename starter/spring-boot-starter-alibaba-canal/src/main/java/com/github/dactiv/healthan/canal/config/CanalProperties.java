@@ -15,11 +15,6 @@ import java.util.List;
 public class CanalProperties {
 
     /**
-     * 解析日志的线程数量，订阅消息也通过该值去开启线程
-     */
-    private int parallelBuildThreadSize = 8;
-
-    /**
      * 定于获取链接出现异常时重试时间
      */
     private TimeProperties exceptionRetryTime = TimeProperties.ofMinutes(1);
@@ -41,24 +36,6 @@ public class CanalProperties {
 
     public CanalProperties() {
 
-    }
-
-    /**
-     * 获取解析日志的线程数量，订阅消息也通过该值去开启线程
-     *
-     * @return 解析日志的线程数量，订阅消息也通过该值去开启线程
-     */
-    public int getParallelBuildThreadSize() {
-        return parallelBuildThreadSize;
-    }
-
-    /**
-     * 设置解析日志的线程数量，订阅消息也通过该值去开启线程
-     *
-     * @param parallelBuildThreadSize 解析日志的线程数量，订阅消息也通过该值去开启线程
-     */
-    public void setParallelBuildThreadSize(int parallelBuildThreadSize) {
-        this.parallelBuildThreadSize = parallelBuildThreadSize;
     }
 
     /**

@@ -10,14 +10,13 @@ import com.github.dactiv.healthan.canal.service.CanalRowDataChangeNoticeService;
 import com.github.dactiv.healthan.canal.service.support.InMemoryCanalRowDataChangeNoticeService;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 public class CanalAutoConfiguration {
 
     @Bean
+    @ConditionalOnMissingBean(CanalInstanceManager.class)
     @ConditionalOnProperty(prefix = "healthan.canal.admin", value = "enabled", matchIfMissing = true)
     public CanalAdminService canalAdminService(CanalAdminProperties canalAdminProperties,
                                                RestTemplate restTemplate,
@@ -45,30 +45,28 @@ public class CanalAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(CanalInstanceManager.class)
+    @ConditionalOnMissingBean(CanalInstanceManager.class)
     public CanalInstanceManager canalInstanceManager(ObjectProvider<CanalRowDataChangeResolver> canalRowDataChangeResolvers,
-                                                     ThreadPoolExecutor buildExecutor,
                                                      CanalProperties canalProperties) {
         return new CanalInstanceManager(
                 canalRowDataChangeResolvers.stream().collect(Collectors.toList()),
-                buildExecutor, canalProperties
+                canalProperties
         );
     }
 
     @Bean
-    @ConditionalOnBean(HttpCanalRowDataChangeNoticeResolver.class)
+    @ConditionalOnMissingBean(HttpCanalRowDataChangeNoticeResolver.class)
     public HttpCanalRowDataChangeNoticeResolver httpCanalRowDataChangeNoticeResolver(RestTemplate restTemplate) {
         return new HttpCanalRowDataChangeNoticeResolver(restTemplate);
     }
 
     @Bean
-    @ConditionalOnBean(CanalRowDataChangeNoticeService.class)
-    public CanalRowDataChangeNoticeService canalRowDataChangeNoticeService(ObjectProvider<CanalRowDataChangeNoticeResolver> canalRowDataChangeNoticeResolvers) {
+    @ConditionalOnMissingBean(CanalRowDataChangeNoticeService.class)
+    public CanalRowDataChangeNoticeService InMemoryCanalRowDataChangeNoticeService(ObjectProvider<CanalRowDataChangeNoticeResolver> canalRowDataChangeNoticeResolvers) {
         return new InMemoryCanalRowDataChangeNoticeService(canalRowDataChangeNoticeResolvers.stream().collect(Collectors.toList()));
     }
 
     @Bean
-    @ConditionalOnBean(CanalRowDataChangeResolver.class)
     public CanalRowDataChangeResolver simpleCanalRowDataChangeResolver(CanalRowDataChangeNoticeService canalRowDataChangeNoticeService) {
         return new SimpleCanalRowDataChangeResolver(canalRowDataChangeNoticeService);
     }

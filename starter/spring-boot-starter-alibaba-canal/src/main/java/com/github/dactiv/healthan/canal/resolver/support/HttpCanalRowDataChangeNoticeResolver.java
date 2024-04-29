@@ -28,6 +28,8 @@ import java.util.function.Consumer;
 
 /**
  * http 形式 canal 行数据变更通知实现
+ *
+ * @author maurice.chen
  */
 public class HttpCanalRowDataChangeNoticeResolver implements CanalRowDataChangeNoticeResolver {
 
@@ -100,7 +102,7 @@ public class HttpCanalRowDataChangeNoticeResolver implements CanalRowDataChangeN
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(
-                    "发送 [{}] canal 行数据通知，地址为: {}, 数据为:{}",
+                    "发送 [{}] canal 行数据通知，地址为: {}, 请求数据为:{}",
                     entity.getProtocol().getName(),
                     meta.getUrl(),
                     entity.getRequestBody()
@@ -162,10 +164,11 @@ public class HttpCanalRowDataChangeNoticeResolver implements CanalRowDataChangeN
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(
-                    "发送 [{}] canal 行数据通知，地址为: {}, 响应数据。结果为:{}",
+                    "发送 [{}] canal 行数据通知，地址为: {}, 响应数据为:{}, 异常信息为:{}",
                     entity.getProtocol().getName(),
                     meta.getUrl(),
-                    entity.getResponseBody()
+                    entity.getResponseBody(),
+                    entity.getException()
             );
         }
 

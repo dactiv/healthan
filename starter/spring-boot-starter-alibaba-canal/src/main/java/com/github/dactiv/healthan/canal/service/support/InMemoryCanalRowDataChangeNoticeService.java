@@ -17,7 +17,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public class InMemoryCanalRowDataChangeNoticeService extends AbstractCanalRowDataChangeNoticeService<CanalRowDataChangeNoticeEntity> {
+public class InMemoryCanalRowDataChangeNoticeService extends AbstractCanalRowDataChangeNoticeService {
 
     private static final List<CanalRowDataChangeNoticeEntity> CACHE_NOTICE_DATA = Collections.synchronizedList(new ArrayList<>());
 

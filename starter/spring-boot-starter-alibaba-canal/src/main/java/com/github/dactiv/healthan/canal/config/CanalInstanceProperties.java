@@ -29,7 +29,7 @@ public class CanalInstanceProperties extends IdEntity<Long>  {
     /**
      * 连接端口
      */
-    private int tcpPort;
+    private int tcpPort = 11111;
 
     /**
      * 连接地址

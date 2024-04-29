@@ -14,7 +14,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * canal 实例管理
@@ -35,6 +37,24 @@ public class CanalInstanceManager implements InitializingBean {
 
     public CanalInstanceManager() {
 
+    }
+
+    public CanalInstanceManager(List<CanalRowDataChangeResolver> canalRowDataChangeResolvers,
+                                CanalProperties canalProperties) {
+        this.canalRowDataChangeResolvers = canalRowDataChangeResolvers;
+
+        int corePoolSize = Runtime.getRuntime().availableProcessors() + 1;
+
+        this.buildExecutor = new ThreadPoolExecutor(
+                corePoolSize,
+                corePoolSize * 2,
+                60L,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(),
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
+
+        this.canalProperties = canalProperties;
     }
 
     public CanalInstanceManager(List<CanalRowDataChangeResolver> canalRowDataChangeResolvers,

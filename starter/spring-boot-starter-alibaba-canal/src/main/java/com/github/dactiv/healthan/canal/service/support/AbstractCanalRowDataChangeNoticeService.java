@@ -1,6 +1,5 @@
 package com.github.dactiv.healthan.canal.service.support;
 
-import com.github.dactiv.healthan.canal.domain.CanalRowDataChangeNotice;
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeNoticeResolver;
 import com.github.dactiv.healthan.canal.service.CanalRowDataChangeNoticeService;
 import com.github.dactiv.healthan.commons.Casts;
@@ -14,7 +13,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public abstract class AbstractCanalRowDataChangeNoticeService<N extends CanalRowDataChangeNotice> implements CanalRowDataChangeNoticeService {
+public abstract class AbstractCanalRowDataChangeNoticeService implements CanalRowDataChangeNoticeService {
 
     private List<CanalRowDataChangeNoticeResolver> canalRowDataChangeNoticeResolvers;
 
@@ -34,5 +33,13 @@ public abstract class AbstractCanalRowDataChangeNoticeService<N extends CanalRow
                 .orElseThrow(() -> new SystemException("找不到 [" + ackMessage + "] 的通知解析器支持"))
                 .send(ackMessage, e -> this.saveAckMessage(Casts.cast(ackMessage)));
 
+    }
+
+    public List<CanalRowDataChangeNoticeResolver> getCanalRowDataChangeNoticeResolvers() {
+        return canalRowDataChangeNoticeResolvers;
+    }
+
+    public void setCanalRowDataChangeNoticeResolvers(List<CanalRowDataChangeNoticeResolver> canalRowDataChangeNoticeResolvers) {
+        this.canalRowDataChangeNoticeResolvers = canalRowDataChangeNoticeResolvers;
     }
 }

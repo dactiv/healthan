@@ -52,4 +52,12 @@ public class AckResponseBody implements Serializable {
     public void setMessage(Map<String, Object> message) {
         this.message = message;
     }
+
+    @Override
+    public String toString() {
+        return "AckResponseBody{" +
+                "ack=" + ack +
+                ", message=" + message +
+                '}';
+    }
 }

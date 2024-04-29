@@ -113,7 +113,7 @@ public class CanalRowDataChangeNoticeRecordEntity implements AckMessage {
     }
 
     public static List<CanalRowDataChangeNoticeRecordEntity> of(ProtocolMeta meta, CanalMessage message) {
-        return of(meta, Casts.convertValue(meta, Casts.MAP_TYPE_REFERENCE));
+        return of(meta, Casts.convertValue(message, Casts.MAP_TYPE_REFERENCE));
     }
 
     public Protocol getProtocol() {

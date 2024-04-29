@@ -147,8 +147,8 @@ public class CanalSubscribeRunner implements Runnable {
 
         try {
 
-            CanalMessage CanalMessage = new CanalMessage();
-            CanalMessage.setId(UUID.randomUUID().toString());
+            CanalMessage canalMessage = new CanalMessage();
+            canalMessage.setId(UUID.randomUUID().toString());
 
             message
                     .getEntries()
@@ -157,16 +157,16 @@ public class CanalSubscribeRunner implements Runnable {
                     .map(CanalSubscribeRunner::buildTransactionEndMessage)
                     .filter(Objects::nonNull)
                     .findFirst()
-                    .ifPresent(t -> CanalMessage.setTransactionId(t.getTransactionId()));
+                    .ifPresent(t -> canalMessage.setTransactionId(t.getTransactionId()));
 
             CanalEntryRowDataMeta[] entryRowData = buildMessageData(message, buildExecutor);
             List<FlatMessage> flatMessages = messageConverter(entryRowData, message.getId());
 
-            CanalMessage.setFlatMessageList(flatMessages);
+            canalMessage.setFlatMessageList(flatMessages);
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("canal 收到 binlog 变更消息，事务 id 为 {}, 变更数据条目为 {} 条", CanalMessage.getTransactionId(), CanalMessage.getFlatMessageList().size());
+                LOGGER.debug("canal 收到 binlog 变更消息，事务 id 为 {}, 变更数据条目为 {} 条", canalMessage.getTransactionId(), canalMessage.getFlatMessageList().size());
             }
-            consumer.accept(CanalMessage);
+            consumer.accept(canalMessage);
         } catch (Exception e) {
             LOGGER.error("canal 解析数据变更内容出现错误", e);
         }
