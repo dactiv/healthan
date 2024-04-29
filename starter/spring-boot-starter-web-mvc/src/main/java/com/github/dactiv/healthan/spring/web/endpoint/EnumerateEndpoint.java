@@ -34,6 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author maurice
  */
+//FIXME 添加 enumerate 配置，不要通过 ConfigurationProperties 配置信息
 @Endpoint(id = "enumerate")
 public class EnumerateEndpoint {
 

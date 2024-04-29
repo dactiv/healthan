@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice
  */
+//FIXME 添加 plugin 配置，不要通过 ConfigurationProperties 配置信息
 @Endpoint(id = PluginEndpoint.DEFAULT_PLUGIN_KEY_NAME)
 public class PluginEndpoint {
 
@@ -99,7 +100,7 @@ public class PluginEndpoint {
     /**
      * 缓存值
      */
-    private final Map<String, Object> cache = new LinkedHashMap<>();
+    private static final Map<String, Object> CACHE = new LinkedHashMap<>();
 
     /**
      * 找不到父类的插件信息
@@ -127,7 +128,7 @@ public class PluginEndpoint {
 
         try {
 
-            if (cache.isEmpty()) {
+            if (CACHE.isEmpty()) {
 
                 Info.Builder builder = new Info.Builder();
 
@@ -149,10 +150,10 @@ public class PluginEndpoint {
 
                 info.put(DEFAULT_PLUGIN_KEY_NAME, pluginList);
 
-                cache.putAll(info);
+                CACHE.putAll(info);
             }
 
-            return cache;
+            return CACHE;
         } finally {
             lock.unlock();
         }
@@ -255,7 +256,7 @@ public class PluginEndpoint {
 
         pluginInfoList.addAll(parent.values());
 
-        LOGGER.info("找到" + cache.size() + "条记录信息");
+        LOGGER.info("找到" + CACHE.size() + "条记录信息");
 
         result = TreeUtils.buildTree(pluginInfoList);
 
