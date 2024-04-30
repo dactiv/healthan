@@ -12,19 +12,42 @@ public class TableMeta implements Serializable {
 
     private static final long serialVersionUID = -3280652379059502703L;
 
+    /**
+     * 所属数据库
+     */
+    private String database;
+
+    /**
+     * 表名称
+     */
     private String name;
 
+    /**
+     * 备注信息
+     */
     private String comment;
 
+    /**
+     * 表列信息
+     */
     private List<TableColumnInfoMeta> columnInfoMetas;
 
     public TableMeta() {
     }
 
-    public TableMeta(String name, String comment, List<TableColumnInfoMeta> columnInfoMetas) {
+    public TableMeta(String database, String name, String comment, List<TableColumnInfoMeta> columnInfoMetas) {
+        this.database = database;
         this.name = name;
         this.comment = comment;
         this.columnInfoMetas = columnInfoMetas;
+    }
+
+    public String getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(String database) {
+        this.database = database;
     }
 
     public String getName() {

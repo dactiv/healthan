@@ -138,6 +138,7 @@ public class NotifiableTableEndpoint {
                 if (filter.match(metadataReader, metadataReaderFactory)) {
                     NotifiableTable notifiableTable = AnnotationUtils.findAnnotation(targetClass, NotifiableTable.class);
                     TableMeta tableMeta = new TableMeta();
+                    tableMeta.setDatabase(noticeProperties.getDatabaseName());
                     tableMeta.setName(notifiableTable.value());
                     tableMeta.setComment(notifiableTable.comment());
                     tableMeta.setColumnInfoMetas(MysqlUtils.getTableColumns(tableMeta.getName(), noticeProperties.getDatabaseName(), dataSource.getConnection()));

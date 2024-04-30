@@ -15,10 +15,19 @@ public class TableColumnInfoMeta implements Serializable {
 
     private static final long serialVersionUID = 485451195258828391L;
 
+    /**
+     * 列名称
+     */
     private String name;
 
+    /**
+     * 列备注
+     */
     private String comment;
 
+    /**
+     * 列 id
+     */
     private String id;
 
     public TableColumnInfoMeta() {
