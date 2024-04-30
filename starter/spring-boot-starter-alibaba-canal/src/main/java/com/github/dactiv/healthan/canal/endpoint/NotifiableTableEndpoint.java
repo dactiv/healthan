@@ -4,6 +4,7 @@ import com.github.dactiv.healthan.canal.MysqlUtils;
 import com.github.dactiv.healthan.canal.annotation.NotifiableTable;
 import com.github.dactiv.healthan.canal.config.CanalNoticeProperties;
 import com.github.dactiv.healthan.canal.domain.meta.TableMeta;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
@@ -121,6 +122,10 @@ public class NotifiableTableEndpoint {
 
     public List<TableMeta> resolveTableMeta() throws Exception {
         List<TableMeta> tableMetas = new LinkedList<>();
+        if (CollectionUtils.isEmpty(noticeProperties.getBasePackages())) {
+            return tableMetas;
+        }
+
         TypeFilter filter = new AnnotationTypeFilter(NotifiableTable.class);
 
         for (String basePackage : noticeProperties.getBasePackages()) {

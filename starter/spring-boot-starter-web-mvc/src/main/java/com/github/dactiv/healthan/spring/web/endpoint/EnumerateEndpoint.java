@@ -158,6 +158,10 @@ public class EnumerateEndpoint {
     private Set<Class<? extends Enum<? extends NameEnum>>> resolvePlaceholders() {
         Set<Class<? extends Enum<? extends NameEnum>>> classes = new HashSet<>();
 
+        if (CollectionUtils.isEmpty(basePackages)) {
+            return classes;
+        }
+
         for (String basePackage : basePackages) {
             String classPath = ClassUtils.convertClassNameToResourcePath(SystemPropertyUtils.resolvePlaceholders(basePackage)) + "/**/*.class";
             TypeFilter filter = new AssignableTypeFilter(NameEnum.class);

@@ -541,6 +541,10 @@ public class PluginEndpoint {
     private Set<Object> resolvePlaceholders() {
         Set<Object> target = new HashSet<>();
 
+        if (CollectionUtils.isEmpty(basePackages)) {
+            return target;
+        }
+
         for (String basePackage : basePackages) {
             String classPath = ClassUtils.convertClassNameToResourcePath(SystemPropertyUtils.resolvePlaceholders(basePackage)) + "/**/*.class";
             TypeFilter filter = new AnnotationTypeFilter(Plugin.class);
