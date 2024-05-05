@@ -46,7 +46,7 @@ public interface CanalRowDataChangeNoticeService {
      *
      * @param ackMessage 确认消息接口
      */
-    void saveAckMessage(AckMessage ackMessage);
+    AckMessage saveAckMessage(AckMessage ackMessage);
 
     /**
      * 发送 canal 行数据变更通知

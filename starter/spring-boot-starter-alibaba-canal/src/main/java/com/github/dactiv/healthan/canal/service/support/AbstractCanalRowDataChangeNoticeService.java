@@ -2,7 +2,6 @@ package com.github.dactiv.healthan.canal.service.support;
 
 import com.github.dactiv.healthan.canal.resolver.CanalRowDataChangeNoticeResolver;
 import com.github.dactiv.healthan.canal.service.CanalRowDataChangeNoticeService;
-import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.domain.AckMessage;
 import com.github.dactiv.healthan.commons.exception.SystemException;
 
@@ -31,7 +30,7 @@ public abstract class AbstractCanalRowDataChangeNoticeService implements CanalRo
                 .filter(c -> c.isSupport(ackMessage))
                 .findFirst()
                 .orElseThrow(() -> new SystemException("找不到 [" + ackMessage + "] 的通知解析器支持"))
-                .send(ackMessage, e -> this.saveAckMessage(Casts.cast(ackMessage)));
+                .send(ackMessage, e -> this.saveAckMessage(ackMessage));
 
     }
 

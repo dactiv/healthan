@@ -49,7 +49,8 @@ public class InMemoryCanalRowDataChangeNoticeService extends AbstractCanalRowDat
     }
 
     @Override
-    public void saveAckMessage(AckMessage record) {
+    public AckMessage saveAckMessage(AckMessage record) {
         CACHE_NOTICE_RECORD_DATA.add(record);
+        return record;
     }
 }

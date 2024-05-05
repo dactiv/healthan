@@ -93,9 +93,10 @@ public class SimpleCanalRowDataChangeResolver implements CanalRowDataChangeResol
 
         }
 
-        recordList.forEach(canalRowDataChangeNoticeService::saveAckMessage);
-
-        recordList.forEach(canalRowDataChangeNoticeService::sendAckMessage);
+        recordList
+                .stream()
+                .map(canalRowDataChangeNoticeService::saveAckMessage)
+                .forEach(canalRowDataChangeNoticeService::sendAckMessage);
     }
 
     public CanalRowDataChangeNoticeService getCanalRowDataChangeNoticeService() {
