@@ -21,7 +21,7 @@
       "name": "healthan.canal.notice.enabled",
       "type": "java.lang.Boolean",
       "description": "是否开启可通知表注解支持.",
-      "defaultValue": false
+      "defaultValue": true
     }
   ]
 }
