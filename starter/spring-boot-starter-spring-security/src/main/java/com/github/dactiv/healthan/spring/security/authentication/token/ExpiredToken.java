@@ -49,6 +49,6 @@ public interface ExpiredToken extends Serializable {
     }
 
     default Date getExpiresInDateTime() {
-        return new Date(System.currentTimeMillis() + getExpiresTime().toMillis());
+        return new Date(getCreationTime().getTime() + getExpiresTime().toMillis());
     }
 }

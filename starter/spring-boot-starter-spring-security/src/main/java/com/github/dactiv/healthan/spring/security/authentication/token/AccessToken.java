@@ -11,6 +11,8 @@ import java.util.Date;
  */
 public class AccessToken implements ExpiredToken {
 
+    private static final long serialVersionUID = -8600594693881884136L;
+
     /**
      * 创建时间
      */
