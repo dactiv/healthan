@@ -30,8 +30,8 @@
 
     <scm>
         <url>https://github.com/dactiv/healthan.git</url>
-        <connection>scm:git:ssh://git@github.com:dactiv/healthan.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:dactiv/healthan.git</developerConnection>
+        <connection>scm:git:ssh://github.com/dactiv/healthan.git</connection>
+        <developerConnection>scm:git:ssh://github.com/dactiv/healthan.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
