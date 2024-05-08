@@ -16,7 +16,8 @@ spring:
       field-naming-strategy: org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy
   elasticsearch:
     uris: http://localhost:9200
-
+    username: elastic
+    password: 20160826
 ---
 spring:
   config:
