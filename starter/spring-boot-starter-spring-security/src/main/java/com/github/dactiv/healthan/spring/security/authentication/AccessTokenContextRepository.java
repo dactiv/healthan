@@ -154,7 +154,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
             return context;
         } catch (CryptoException e) {
-            LOGGER.warn("通过密钥:" + authenticationProperties.getAccessToken().getCryptoKey() + "解密token:" + token + "失败");
+            LOGGER.warn("通过密钥:{} 解密 token:{} 失败", authenticationProperties.getAccessToken().getCryptoKey(), token);
         }
 
         return null;
