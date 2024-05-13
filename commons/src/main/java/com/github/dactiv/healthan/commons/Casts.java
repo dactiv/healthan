@@ -722,15 +722,15 @@ public abstract class Casts {
     }
 
     /**
-     * 将数据库列名称转驼峰
+     * 将蛇转驼峰
      *
-     * @param columnName 列名称
+     * @param snakeCase 蛇命名
      *
-     * @return 驼峰名称
+     * @return 驼峰命名名称
      */
-    public static String castDataBaseColumnNameToCamelCase(String columnName) {
+    public static String castSnakeCaseToCamelCase(String snakeCase) {
         // 首先将字段名按下划线分割成单词
-        String[] words = columnName.split(UNDERSCORE);
+        String[] words = snakeCase.split(UNDERSCORE);
 
         // 如果只有一个单词，无需转换，直接返回
         if (words.length == 1) {
@@ -745,6 +745,32 @@ public abstract class Casts {
         }
 
         return result.toString();
+    }
+
+    /**
+     * 将驼峰转蛇
+     *
+     * @param camelCase 驼峰命名
+     *
+     * @return 驼峰命名名称
+     */
+    public static String castCamelCaseToSnakeCase(String camelCase) {
+        StringBuilder snakeCase = new StringBuilder();
+        boolean isFirst = true;
+
+        for (char c : camelCase.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                if (!isFirst) {
+                    snakeCase.append(UNDERSCORE);
+                }
+                snakeCase.append(Character.toLowerCase(c));
+            } else {
+                snakeCase.append(c);
+            }
+            isFirst = false;
+        }
+
+        return snakeCase.toString();
     }
 
 }

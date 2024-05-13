@@ -35,7 +35,7 @@ public class MysqlUtils {
             while (resultSet.next()) {
                 String columnName = resultSet.getString(TableColumnInfoMeta.MYSQL_COLUMN_NAME);
                 String columnComment = resultSet.getString(TableColumnInfoMeta.MYSQL_COLUMN_COMMENT);
-                String camelName = Casts.castDataBaseColumnNameToCamelCase(columnName);
+                String camelName = Casts.castSnakeCaseToCamelCase(columnName);
 
                 TableColumnInfoMeta tableColumnInfoMeta = new TableColumnInfoMeta();
 

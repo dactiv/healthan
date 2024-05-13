@@ -91,7 +91,7 @@ public class LastModifiedDateInnerInterceptor implements InnerInterceptor {
             }
 
             if (snakeCase) {
-                fields.forEach(f -> updateWrapper.set(Casts.toSnakeCase(f.getName()), getDateValue(f)));
+                fields.forEach(f -> updateWrapper.set(Casts.castCamelCaseToSnakeCase(f.getName()), getDateValue(f)));
             } else {
                 fields.forEach(f -> updateWrapper.set(f.getName(), getDateValue(f)));
             }
