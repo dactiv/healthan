@@ -21,6 +21,8 @@ import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -42,6 +44,8 @@ import java.util.*;
         )
 )
 public class DecryptInterceptor implements Interceptor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DecryptInterceptor.class);
 
     private final ApplicationContext applicationContext;
 
@@ -77,8 +81,12 @@ public class DecryptInterceptor implements Interceptor {
                 if (Objects.isNull(value) || !Base64.isBase64(CodecUtils.toBytes(value.toString()))) {
                     continue;
                 }
-                String text = decryptService.decrypt(value.toString());
-                ReflectionUtils.setFieldValue(entity, field.getName(), text);
+                try {
+                    String text = decryptService.decrypt(value.toString());
+                    ReflectionUtils.setFieldValue(entity, field.getName(), text);
+                } catch (Exception e) {
+                    LOGGER.warn("解密 [{}] 的 {} 字段出现异常:{},数据将不做任何处理", entity.getClass(), field.getName(), e.getMessage());
+                }
             }
 
         }

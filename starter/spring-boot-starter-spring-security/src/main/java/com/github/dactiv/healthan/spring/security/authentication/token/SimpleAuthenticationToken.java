@@ -113,7 +113,21 @@ public class SimpleAuthenticationToken extends AbstractAuthenticationToken {
         return type;
     }
 
+    /**
+     * 获取是否记住我认证
+     *
+     * @return 是否记住我认证
+     */
     public boolean isRememberMe() {
         return rememberMe;
+    }
+
+    /**
+     * 获取 token 信息
+     *
+     * @return token 信息
+     */
+    public UsernamePasswordAuthenticationToken getToken() {
+        return token;
     }
 }

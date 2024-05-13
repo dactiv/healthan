@@ -24,6 +24,8 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
@@ -40,6 +42,8 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  */
 public class EncryptInnerInterceptor implements InnerInterceptor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DecryptInterceptor.class);
 
     public static final List<SqlCommandType> SUPPORT_COMMANDS = Arrays.asList(SqlCommandType.UPDATE, SqlCommandType.INSERT);
 
@@ -128,8 +132,12 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
                 if (Objects.isNull(value) || Base64.isBase64(CodecUtils.toBytes(value.toString()))) {
                     continue;
                 }
-                String text = encryptService.encrypt(value.toString());
-                ReflectionUtils.setFieldValue(entity, field.getName(), text);
+                try {
+                    String text = encryptService.encrypt(value.toString());
+                    ReflectionUtils.setFieldValue(entity, field.getName(), text);
+                } catch (Exception e) {
+                    LOGGER.warn("加密 [{}] 的 {} 字段出现异常:{},数据将不做任何处理", entity.getClass(), field.getName(), e.getMessage());
+                }
             }
 
         }
