@@ -152,7 +152,7 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
 
         ImageCaptchaTrack track = Casts.readValue(captcha.getValue(), ImageCaptchaTrack.class);
         Duration duration = Duration.between(
-                LocalDateTime.now(),
+                LocalDateTime.ofInstant(track.getStartSlidingTime().toInstant(), ZoneId.systemDefault()),
                 LocalDateTime.ofInstant(track.getEndSlidingTime().toInstant(), ZoneId.systemDefault())
         );
         if (LOGGER.isDebugEnabled()) {
