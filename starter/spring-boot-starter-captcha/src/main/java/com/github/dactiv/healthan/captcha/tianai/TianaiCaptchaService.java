@@ -143,6 +143,9 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
     protected boolean matchesCaptcha(HttpServletRequest request, SimpleCaptcha captcha) {
         String captchaValue = request.getParameter(getCaptchaParamName());
         String md5 = DigestUtils.md5DigestAsHex(captcha.getValue().getBytes());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("[tianal 验证码] 匹配验证码信息:请求值为:{},对比值为:{}", captchaValue, md5);
+        }
         if (!StringUtils.equals(md5, captchaValue)) {
             return false;
         }
@@ -152,7 +155,9 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
                 LocalDateTime.now(),
                 LocalDateTime.ofInstant(track.getEndSlidingTime().toInstant(), ZoneId.systemDefault())
         );
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("[tianal 验证码] 调用滑动时间比对，当前滑动时间值为:{}, 服务验证码超时值为:{}", duration.getSeconds(), tianaiCaptchaProperties.getServerVerifyTimeout().toSeconds());
+        }
         return duration.getSeconds() < tianaiCaptchaProperties.getServerVerifyTimeout().toSeconds();
     }
 
