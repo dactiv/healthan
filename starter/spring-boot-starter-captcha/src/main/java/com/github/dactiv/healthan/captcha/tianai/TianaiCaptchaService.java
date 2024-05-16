@@ -156,7 +156,11 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
                 LocalDateTime.ofInstant(track.getEndSlidingTime().toInstant(), ZoneId.systemDefault())
         );
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("[tianal 验证码] 调用滑动时间比对，当前滑动时间值为:{}, 服务验证码超时值为:{}", duration.getSeconds(), tianaiCaptchaProperties.getServerVerifyTimeout().toSeconds());
+            LOGGER.debug(
+                    "[tianal 验证码] 调用滑动时间比对，当前滑动时间值为:{} 秒, 服务验证码超时值为:{} 秒",
+                    duration.getSeconds(),
+                    tianaiCaptchaProperties.getServerVerifyTimeout().toSeconds()
+            );
         }
         return duration.getSeconds() < tianaiCaptchaProperties.getServerVerifyTimeout().toSeconds();
     }
