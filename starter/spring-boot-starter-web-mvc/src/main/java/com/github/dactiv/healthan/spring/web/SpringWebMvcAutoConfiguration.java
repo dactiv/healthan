@@ -19,7 +19,6 @@ import com.github.dactiv.healthan.spring.web.argument.GenericsListHandlerMethodA
 import com.github.dactiv.healthan.spring.web.device.DeviceResolverRequestFilter;
 import com.github.dactiv.healthan.spring.web.endpoint.EnumerateEndpoint;
 import com.github.dactiv.healthan.spring.web.interceptor.CustomClientHttpRequestInterceptor;
-import com.github.dactiv.healthan.spring.web.interceptor.LoggingClientHttpRequestInterceptor;
 import com.github.dactiv.healthan.spring.web.jackson.LocalDateTimeTimestampSerializer;
 import com.github.dactiv.healthan.spring.web.jackson.LocalDateTimestampSerializer;
 import com.github.dactiv.healthan.spring.web.jackson.LocalTimeSecondOfDaySerializer;
@@ -45,7 +44,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -54,7 +52,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -125,13 +122,10 @@ public class SpringWebMvcAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(RestTemplate.class)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public RestTemplate restTemplate(List<CustomClientHttpRequestInterceptor> clientHttpRequestInterceptors) {
+    public RestTemplate restTemplate(ObjectProvider<CustomClientHttpRequestInterceptor> clientHttpRequestInterceptors) {
         RestTemplate restTemplate = new RestTemplate();
 
-        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(clientHttpRequestInterceptors);
-
-        interceptors.add(new LoggingClientHttpRequestInterceptor());
-        restTemplate.setInterceptors(interceptors);
+        restTemplate.setInterceptors(clientHttpRequestInterceptors.stream().collect(Collectors.toList()));
 
         return restTemplate;
     }
