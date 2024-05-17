@@ -6,6 +6,7 @@ import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -62,6 +63,11 @@ public class RestResult<T> implements Serializable {
      * 创建时间
      */
     private Date timestamp = new Date();
+
+    /**
+     * 元数据信息
+     */
+    private Map<String, Object> meta;
 
     /**
      * 创建一个抽象的 rest 结果集实体类
@@ -319,6 +325,24 @@ public class RestResult<T> implements Serializable {
      */
     public Date getTimestamp() {
         return timestamp;
+    }
+
+    /**
+     * 获取元数据信息
+     *
+     * @return 元数据信息
+     */
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    /**
+     * 设置元数据信息
+     *
+     * @param meta 元数据信息
+     */
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     @Override
