@@ -6,6 +6,7 @@ import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -67,7 +68,7 @@ public class RestResult<T> implements Serializable {
     /**
      * 元数据信息
      */
-    private Map<String, Object> meta;
+    private Map<String, Object> meta = new LinkedHashMap<>();
 
     /**
      * 创建一个抽象的 rest 结果集实体类
