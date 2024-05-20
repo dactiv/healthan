@@ -40,6 +40,8 @@ public class RestResult<T> implements Serializable {
 
     public static final String DEFAULT_TIMESTAMP_NAME = "timestamp";
 
+    public static final String DEFAULT_META_NAME = "meta";
+
     /**
      * 信息
      */
