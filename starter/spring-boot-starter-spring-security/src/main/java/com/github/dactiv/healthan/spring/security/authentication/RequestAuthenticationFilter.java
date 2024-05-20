@@ -1,7 +1,6 @@
 package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.commons.exception.SystemException;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -144,7 +143,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
                     .stream()
                     .filter(a -> a.isSupport(resolverType))
                     .findFirst()
-                    .orElseThrow(() -> new SystemException("找不到类型 [" + resolverType + "] token 解析器实现"));
+                    .orElseThrow(() -> new AuthenticationServiceException("找不到类型 [" + resolverType + "] token 解析器实现"));
 
             return resolver.createToken(request, response, token);
 
@@ -153,7 +152,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
                     .stream()
                     .filter(u -> u.getType().contains(type))
                     .findFirst()
-                    .orElseThrow(() -> new SystemException("找不到类型为 [" + type + "] 的用户明细服务实现"));
+                    .orElseThrow(() -> new AuthenticationServiceException("找不到类型为 [" + type + "] 的用户明细服务实现"));
 
             return userDetailsService.createToken(request, response, type);
         }
