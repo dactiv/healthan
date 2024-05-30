@@ -185,7 +185,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
                     continue;
                 }
                 String plainText = paramValue.toString();
-                if (Base64.isBase64(plainText)) {
+                if (StringUtils.isEmpty(plainText) || Base64.isBase64(plainText)) {
                     continue;
                 }
                 paramNameValuePairs.put(varName, encryptService.encrypt(plainText));
