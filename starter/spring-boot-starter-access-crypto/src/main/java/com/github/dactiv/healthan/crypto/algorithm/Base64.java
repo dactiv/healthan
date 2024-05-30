@@ -142,33 +142,23 @@ public class Base64 {
     /**
      * Tests a given byte array to see if it contains only valid characters within the Base64 alphabet.
      *
-     * @param arrayOctect byte array to test
+     * @param arrayBytes byte array to test
      *
      * @return <code>true</code> if all bytes are valid characters in the Base64 alphabet or if the byte array is
      * empty; false, otherwise
      */
-    public static boolean isBase64(byte[] arrayOctect) {
+    public static boolean isBase64(byte[] arrayBytes) {
         try {
-            byte[] decodedBytes = decode(arrayOctect);
+            byte[] decodedBytes = decode(arrayBytes);
             String encodedString = encodeToString(decodedBytes);
-            return new String(arrayOctect).equals(encodedString);
+            return new String(arrayBytes).equals(encodedString);
         } catch (Exception e) {
             return false;
         }
-        /*arrayOctect = discardWhitespace(arrayOctect);
+    }
 
-        int length = arrayOctect.length;
-        if (length == 0) {
-            // shouldn't a 0 length array be valid base64 data?
-            // return false;
-            return true;
-        }
-        for (byte b : arrayOctect) {
-            if (!isBase64(b)) {
-                return false;
-            }
-        }
-        return true;*/
+    public static boolean isBase64(String encodedString) {
+        return isBase64(encodedString.getBytes());
     }
 
     /**
