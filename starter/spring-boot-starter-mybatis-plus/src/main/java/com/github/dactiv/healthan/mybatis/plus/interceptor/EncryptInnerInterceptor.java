@@ -32,7 +32,6 @@ import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -182,6 +181,9 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
 
                 EncryptService encryptService = Casts.cast(entry.getKey());
                 Object paramValue = paramNameValuePairs.get(varName);
+                if (Objects.isNull(paramValue)) {
+                    continue;
+                }
                 String plainText = paramValue.toString();
                 if (Base64.isBase64(plainText)) {
                     continue;
