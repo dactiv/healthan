@@ -474,6 +474,23 @@ public class MinioTemplate {
     }
 
     /**
+     * 移动文件
+     *
+     * @param fromObject 来源文件
+     * @param toObject 目标文件
+     *
+     * @return minio API 调用响应的 ObjectWriteResponse 对象
+     *
+     * @throws Exception Exception 拷贝出错时候抛出
+     */
+    public ObjectWriteResponse moveObject(FileObject fromObject, FileObject toObject) throws Exception {
+        ObjectWriteResponse response = copyObject(fromObject, toObject);
+        deleteObject(fromObject,false);
+
+        return response;
+    }
+
+    /**
      * 读取桶的文件内容值并将 json 转换为目标类型
      *
      * @param fileObject 文件对象描述
