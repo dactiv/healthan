@@ -25,6 +25,11 @@ public class FileObject extends Bucket {
      */
     public static String MINIO_OBJECT_NAME = "object";
 
+    /**
+     * minio 内容类型
+     */
+    public static final String MINIO_CONTENT_TYPE = "contentType";
+
     private static final long serialVersionUID = 3325877878659487154L;
 
     /**

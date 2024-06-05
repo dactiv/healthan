@@ -4,6 +4,7 @@ import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.commons.minio.Bucket;
 import com.github.dactiv.healthan.commons.minio.FileObject;
+import com.github.dactiv.healthan.commons.minio.MoveFileObject;
 import com.github.dactiv.healthan.minio.MinioTemplate;
 import io.minio.ListObjectsArgs;
 import io.minio.ObjectWriteResponse;
@@ -201,8 +202,8 @@ public class MinioTemplateTest {
 
         Iterable<Result<Item>> iterable = minioTemplate.getMinioClient().listObjects(copy);
         Assertions.assertEquals(iterable.iterator().next().get().objectName(), "copy");
-
-        ObjectWriteResponse response = minioTemplate.copyObject(copyFile, FileObject.of(bucket, "newCopy"));
+        MoveFileObject moveFileObject = new MoveFileObject(copyFile, FileObject.of(bucket, "newCopy"));
+        ObjectWriteResponse response = minioTemplate.moveObject(moveFileObject);
 
         ListObjectsArgs newCopy = ListObjectsArgs
                 .builder()

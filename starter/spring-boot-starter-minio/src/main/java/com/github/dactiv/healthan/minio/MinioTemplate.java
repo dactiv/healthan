@@ -7,10 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.commons.exception.SystemException;
-import com.github.dactiv.healthan.commons.minio.Bucket;
-import com.github.dactiv.healthan.commons.minio.FileObject;
-import com.github.dactiv.healthan.commons.minio.FilenameObject;
-import com.github.dactiv.healthan.commons.minio.VersionFileObject;
+import com.github.dactiv.healthan.commons.minio.*;
 import com.google.common.collect.Multimap;
 import io.minio.*;
 import io.minio.http.Method;
@@ -442,50 +439,39 @@ public class MinioTemplate {
     }
 
     /**
-     * 拷贝文件
-     *
-     * @param fromObject 来源文件
-     * @param toObject   目标文件
-     *
-     * @return minio API 调用响应的 ObjectWriteResponse 对象
-     *
-     * @throws Exception 拷贝出错时候抛出
-     */
-    public ObjectWriteResponse copyObject(FileObject fromObject, FileObject toObject) throws Exception {
-        CopySource.Builder copySource = CopySource
-                .builder()
-                .bucket(fromObject.getBucketName().toLowerCase())
-                .region(fromObject.getRegion())
-                .object(fromObject.getObjectName());
-
-        if (VersionFileObject.class.isAssignableFrom(fromObject.getClass())) {
-            VersionFileObject version = Casts.cast(fromObject);
-            copySource.versionId(version.getVersionId());
-        }
-
-        CopyObjectArgs.Builder args = CopyObjectArgs
-                .builder()
-                .bucket(toObject.getBucketName().toLowerCase())
-                .region(toObject.getRegion())
-                .object(StringUtils.defaultString(toObject.getObjectName(), fromObject.getObjectName()))
-                .source(copySource.build());
-
-        return minioClient.copyObject(args.build()).get();
-    }
-
-    /**
      * 移动文件
      *
-     * @param fromObject 来源文件
-     * @param toObject 目标文件
+     * @param object 对懂文件对象
      *
      * @return minio API 调用响应的 ObjectWriteResponse 对象
      *
      * @throws Exception Exception 拷贝出错时候抛出
      */
-    public ObjectWriteResponse moveObject(FileObject fromObject, FileObject toObject) throws Exception {
-        ObjectWriteResponse response = copyObject(fromObject, toObject);
-        deleteObject(fromObject,false);
+    public ObjectWriteResponse moveObject(MoveFileObject object) throws Exception {
+
+        CopySource.Builder copySource = CopySource
+                .builder()
+                .bucket(object.getSource().getBucketName().toLowerCase())
+                .region(object.getSource().getRegion())
+                .object(object.getSource().getObjectName());
+
+        if (VersionFileObject.class.isAssignableFrom(object.getSource().getClass())) {
+            VersionFileObject version = Casts.cast(object.getSource());
+            copySource.versionId(version.getVersionId());
+        }
+
+        CopyObjectArgs.Builder args = CopyObjectArgs
+                .builder()
+                .bucket(object.getTarget().getBucketName().toLowerCase())
+                .region(object.getTarget().getRegion())
+                .object(StringUtils.defaultString(object.getTarget().getObjectName(), object.getTarget().getObjectName()))
+                .source(copySource.build());
+
+        ObjectWriteResponse response = minioClient.copyObject(args.build()).get();
+
+        if (object.isDeleteSourceIfSuccess()) {
+            deleteObject(object.getSource(), object.isDeleteBucketIfEmpty());
+        }
 
         return response;
     }
