@@ -77,9 +77,9 @@ public class TestQueryGenerator {
 
         Assertions.assertTrue(targetSql.contains("creation_time BETWEEN ? AND ?"));
 
-        Assertions.assertTrue(targetSql.contains("JSON_CONTAINS(city->'$[*].id', JSON_QUOTE(?), '$')"));
+        Assertions.assertTrue(targetSql.contains("JSON_CONTAINS(city->'$[*].id', JSON_ARRAY(?), '$')"));
         Assertions.assertTrue(targetSql.contains("city->'$.name' = ?"));
-        Assertions.assertTrue(targetSql.contains("(JSON_CONTAINS(area, JSON_QUOTE(?)) OR JSON_CONTAINS(area, JSON_QUOTE(?)))"));
+        Assertions.assertTrue(targetSql.contains("(JSON_CONTAINS(area, JSON_ARRAY(?)) OR JSON_CONTAINS(area, JSON_ARRAY(?)))"));
         Assertions.assertTrue(targetSql.contains("(JSON_SEARCH(area, 'all', ?) IS NOT NULL OR JSON_SEARCH(area, 'all', ?) IS NOT NULL)"));
         Assertions.assertTrue(targetSql.contains("(JSON_SEARCH(area, 'one', ?) IS NOT NULL OR JSON_SEARCH(area, 'one', ?) IS NOT NULL)"));
         Assertions.assertTrue(targetSql.contains("name = ? OR username LIKE ? OR real_name LIKE ?"));
