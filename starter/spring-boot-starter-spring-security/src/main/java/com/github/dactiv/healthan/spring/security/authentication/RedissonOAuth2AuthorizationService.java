@@ -2,7 +2,7 @@ package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.TimeProperties;
-import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.OAuth2Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -26,24 +26,23 @@ public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationSe
 
     private final RedissonClient redissonClient;
 
-
-    private final AuthenticationProperties authenticationProperties;
+    private final OAuth2Properties oAuth2Properties;
 
     public RedissonOAuth2AuthorizationService(RedissonClient redissonClient,
-                                              AuthenticationProperties authenticationProperties) {
+                                              OAuth2Properties oAuth2Properties) {
         this.redissonClient = redissonClient;
-        this.authenticationProperties = authenticationProperties;
+        this.oAuth2Properties = oAuth2Properties;
     }
 
     @Override
     public void save(OAuth2Authorization authorization) {
 
-        TimeProperties time = authenticationProperties.getOauth2().getAuthorizationCache().getExpiresTime();
+        TimeProperties time = oAuth2Properties.getAuthorizationCache().getExpiresTime();
 
         if (Objects.nonNull(authorization.getAccessToken())) {
             String accessTokenKey = authorization.getAccessToken().getToken().getTokenValue();
             String md5AccessTokenKey = DigestUtils.md5DigestAsHex(accessTokenKey.getBytes(StandardCharsets.UTF_8));
-            String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.ACCESS_TOKEN + CacheProperties.DEFAULT_SEPARATOR + md5AccessTokenKey);
+            String cacheKey = oAuth2Properties.getAuthorizationCache().getName(OAuth2ParameterNames.ACCESS_TOKEN + CacheProperties.DEFAULT_SEPARATOR + md5AccessTokenKey);
 
             RBucket<OAuth2Authorization> accessTokenBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
             accessTokenBucket.setAsync(authorization);
@@ -56,7 +55,7 @@ public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationSe
         } else if (authorization.getAttributes().containsKey(OAuth2ParameterNames.STATE)) {
             String state = authorization.getAttributes().getOrDefault(OAuth2ParameterNames.STATE, StringUtils.EMPTY).toString();
             String md5State = DigestUtils.md5DigestAsHex(state.getBytes(StandardCharsets.UTF_8));
-            String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.STATE + CacheProperties.DEFAULT_SEPARATOR + md5State);
+            String cacheKey = oAuth2Properties.getAuthorizationCache().getName(OAuth2ParameterNames.STATE + CacheProperties.DEFAULT_SEPARATOR + md5State);
 
             RBucket<OAuth2Authorization> authorizationCodeBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
             authorizationCodeBucket.setAsync(authorization);
@@ -69,7 +68,7 @@ public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationSe
             if (Objects.nonNull(authorizationCode)) {
                 String codeKey = authorizationCode.getToken().getTokenValue();
                 String md5CodeKey = DigestUtils.md5DigestAsHex(codeKey.getBytes(StandardCharsets.UTF_8));
-                String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.CODE + CacheProperties.DEFAULT_SEPARATOR + md5CodeKey);
+                String cacheKey = oAuth2Properties.getAuthorizationCache().getName(OAuth2ParameterNames.CODE + CacheProperties.DEFAULT_SEPARATOR + md5CodeKey);
 
                 RBucket<OAuth2Authorization> authorizationCodeBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
                 authorizationCodeBucket.setAsync(authorization);
@@ -85,7 +84,7 @@ public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (Objects.nonNull(authorization.getRefreshToken())) {
             String refreshKey = authorization.getRefreshToken().getToken().getTokenValue();
             String md5RefreshKey = DigestUtils.md5DigestAsHex(refreshKey.getBytes(StandardCharsets.UTF_8));
-            String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.REFRESH_TOKEN + CacheProperties.DEFAULT_SEPARATOR + md5RefreshKey);
+            String cacheKey = oAuth2Properties.getAuthorizationCache().getName(OAuth2ParameterNames.REFRESH_TOKEN + CacheProperties.DEFAULT_SEPARATOR + md5RefreshKey);
 
             RBucket<OAuth2Authorization> refreshTokenBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
             refreshTokenBucket.setAsync(authorization);
@@ -110,20 +109,20 @@ public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationSe
         if (Objects.nonNull(authorizationCode)) {
             String codeKey = authorizationCode.getToken().getTokenValue();
             String md5CodeKey = DigestUtils.md5DigestAsHex(codeKey.getBytes(StandardCharsets.UTF_8));
-            String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.CODE + CacheProperties.DEFAULT_SEPARATOR + md5CodeKey);
+            String cacheKey = oAuth2Properties.getAuthorizationCache().getName(OAuth2ParameterNames.CODE + CacheProperties.DEFAULT_SEPARATOR + md5CodeKey);
             redissonClient.getBucket(cacheKey).deleteAsync();
         }
 
         if (authorization.getAttributes().containsKey(OAuth2ParameterNames.STATE)) {
             String state = authorization.getAttributes().getOrDefault(OAuth2ParameterNames.STATE, StringUtils.EMPTY).toString();
             String md5State = DigestUtils.md5DigestAsHex(state.getBytes(StandardCharsets.UTF_8));
-            String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(OAuth2ParameterNames.STATE + CacheProperties.DEFAULT_SEPARATOR + md5State);
+            String cacheKey = oAuth2Properties.getAuthorizationCache().getName(OAuth2ParameterNames.STATE + CacheProperties.DEFAULT_SEPARATOR + md5State);
 
             redissonClient.getBucket(cacheKey).deleteAsync();
         }
 
         if (removeIdCache) {
-            String key = authenticationProperties.getOauth2().getAuthorizationCache().getName(authorization.getId());
+            String key = oAuth2Properties.getAuthorizationCache().getName(authorization.getId());
             redissonClient.getBucket(key).deleteAsync();
         }
     }
@@ -144,7 +143,7 @@ public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationSe
             key = DigestUtils.md5DigestAsHex(token.getBytes());
         }
 
-        String cacheKey = authenticationProperties.getOauth2().getAuthorizationCache().getName(key);
+        String cacheKey = oAuth2Properties.getAuthorizationCache().getName(key);
         RBucket<OAuth2Authorization> bucket =  redissonClient.getBucket(cacheKey, new SerializationCodec());
 
         if (OAuth2ParameterNames.STATE.contains(tokenType.getValue())) {

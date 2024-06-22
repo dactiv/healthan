@@ -4,7 +4,7 @@ import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.crypto.algorithm.Base64;
 import com.github.dactiv.healthan.security.entity.TypeUserDetails;
-import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RememberMeAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
@@ -33,12 +33,12 @@ import java.util.Optional;
  */
 public class CookieRememberService implements RememberMeServices {
 
-    private final AuthenticationProperties properties;
+    private final RememberMeProperties rememberMeProperties;
 
     private final RedissonClient redissonClient;
 
-    public CookieRememberService(AuthenticationProperties properties, RedissonClient redissonClient) {
-        this.properties = properties;
+    public CookieRememberService(RememberMeProperties rememberMeProperties, RedissonClient redissonClient) {
+        this.rememberMeProperties = rememberMeProperties;
         this.redissonClient = redissonClient;
     }
 
@@ -93,11 +93,11 @@ public class CookieRememberService implements RememberMeServices {
             bucket.set(rememberMeToken);
         }
 
-        if (Objects.nonNull(properties.getRememberMe().getCache().getExpiresTime())) {
-            bucket.expireAsync(properties.getRememberMe().getCache().getExpiresTime().toDuration());
+        if (Objects.nonNull(rememberMeProperties.getCache().getExpiresTime())) {
+            bucket.expireAsync(rememberMeProperties.getCache().getExpiresTime().toDuration());
         }
 
-        int maxAge = (int) properties.getRememberMe().getCache().getExpiresTime().toSeconds();
+        int maxAge = (int) rememberMeProperties.getCache().getExpiresTime().toSeconds();
 
         setCookie(rememberMeToken, maxAge, request, response);
     }
@@ -110,7 +110,7 @@ public class CookieRememberService implements RememberMeServices {
      * @return 记住我桶信息
      */
     public RBucket<RememberMeToken> getRememberMeTokenBucket(TypeUserDetails<Object> userDetails) {
-        String key = properties.getRememberMe().getCache().getName(userDetails.getUserType() + CacheProperties.DEFAULT_SEPARATOR + userDetails.getUsername());
+        String key = rememberMeProperties.getCache().getName(userDetails.getUserType() + CacheProperties.DEFAULT_SEPARATOR + userDetails.getUsername());
         return redissonClient.getBucket(key);
     }
 
@@ -140,7 +140,7 @@ public class CookieRememberService implements RememberMeServices {
 
         Optional<Cookie> optional = Arrays
                 .stream(cookies)
-                .filter(c -> c.getName().equals(properties.getRememberMe().getCookie().getName()))
+                .filter(c -> c.getName().equals(rememberMeProperties.getCookie().getName()))
                 .findFirst();
 
         return optional.map(Cookie::getValue).orElse(null);
@@ -154,8 +154,8 @@ public class CookieRememberService implements RememberMeServices {
      * @return true 是，否则 false
      */
     protected boolean isRememberMeRequested(HttpServletRequest request) {
-        String rememberMeValue = request.getParameter(properties.getRememberMe().getParamName());
-        return properties.getRememberMe().isAlways() || BooleanUtils.toBoolean(rememberMeValue);
+        String rememberMeValue = request.getParameter(rememberMeProperties.getParamName());
+        return rememberMeProperties.isAlways() || BooleanUtils.toBoolean(rememberMeValue);
     }
 
     /**
@@ -190,7 +190,7 @@ public class CookieRememberService implements RememberMeServices {
 
         String json = Casts.writeValueAsString(token);
 
-        return properties.getRememberMe().isBase64Value()
+        return rememberMeProperties.isBase64Value()
                 ? Base64.encodeToString(json.getBytes(Charset.defaultCharset()))
                 : json;
     }
@@ -204,7 +204,7 @@ public class CookieRememberService implements RememberMeServices {
      */
     private RememberMeToken getTokenValue(String token) {
 
-        if (properties.getRememberMe().isBase64Value()) {
+        if (rememberMeProperties.isBase64Value()) {
             token = Base64.decodeToString(token);
         }
 
@@ -219,17 +219,17 @@ public class CookieRememberService implements RememberMeServices {
      * @return cookie
      */
     protected Cookie createCookie(HttpServletRequest request) {
-        Cookie cookie = new Cookie(properties.getRememberMe().getCookie().getName(), null);
+        Cookie cookie = new Cookie(rememberMeProperties.getCookie().getName(), null);
         cookie.setPath(getCookiePath(request));
 
-        if (StringUtils.isNotEmpty(properties.getRememberMe().getCookie().getDomain())) {
-            cookie.setDomain(properties.getRememberMe().getCookie().getDomain());
+        if (StringUtils.isNotEmpty(rememberMeProperties.getCookie().getDomain())) {
+            cookie.setDomain(rememberMeProperties.getCookie().getDomain());
         }
 
-        if (properties.getRememberMe().getCookie().getSecure() == null) {
+        if (rememberMeProperties.getCookie().getSecure() == null) {
             cookie.setSecure(request.isSecure());
         } else {
-            cookie.setSecure(properties.getRememberMe().getCookie().getSecure());
+            cookie.setSecure(rememberMeProperties.getCookie().getSecure());
         }
 
         return cookie;
@@ -256,6 +256,6 @@ public class CookieRememberService implements RememberMeServices {
      */
     private String getCookiePath(HttpServletRequest request) {
         String contextPath = request.getContextPath();
-        return contextPath.length() > 0 ? contextPath : AntPathMatcher.DEFAULT_PATH_SEPARATOR;
+        return !contextPath.isEmpty() ? contextPath : AntPathMatcher.DEFAULT_PATH_SEPARATOR;
     }
 }

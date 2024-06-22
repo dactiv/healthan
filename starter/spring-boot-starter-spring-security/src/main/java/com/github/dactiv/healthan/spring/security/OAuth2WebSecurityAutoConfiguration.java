@@ -8,6 +8,7 @@ import com.github.dactiv.healthan.spring.security.authentication.RedissonOAuth2A
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.OAuth2Properties;
 import com.github.dactiv.healthan.spring.security.authentication.handler.*;
 import com.github.dactiv.healthan.spring.security.authentication.oidc.OidcUserInfoAuthenticationMapper;
 import com.github.dactiv.healthan.spring.security.authentication.oidc.OidcUserInfoAuthenticationResolver;
@@ -53,16 +54,16 @@ public class OAuth2WebSecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(JWKSource.class)
-    public JWKSource<SecurityContext> jwkSource(AuthenticationProperties authenticationProperties) {
-        PublicKey publicKey = cipherService.getPublicKey(Base64.decode(authenticationProperties.getOauth2().getPublicKey()));
-        PrivateKey privateKey = cipherService.getPrivateKey(Base64.decode(authenticationProperties.getOauth2().getPrivateKey()));
+    public JWKSource<SecurityContext> jwkSource(OAuth2Properties oAuth2Properties) {
+        PublicKey publicKey = cipherService.getPublicKey(Base64.decode(oAuth2Properties.getPublicKey()));
+        PrivateKey privateKey = cipherService.getPrivateKey(Base64.decode(oAuth2Properties.getPrivateKey()));
 
         RSAPublicKey rsaPublicKey = Casts.cast(publicKey);
         RSAPrivateKey rsaPrivateKey = Casts.cast(privateKey);
 
         RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey)
                 .privateKey(rsaPrivateKey)
-                .keyID(authenticationProperties.getOauth2().getKeyId())
+                .keyID(oAuth2Properties.getKeyId())
                 .build();
         JWKSet jwkSet = new JWKSet(rsaKey);
         return new ImmutableJWKSet<>(jwkSet);
@@ -71,31 +72,33 @@ public class OAuth2WebSecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(JsonAuthenticationSuccessHandler.class)
     public JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler(ObjectProvider<JsonAuthenticationSuccessResponse> successResponse,
-                                                                             AuthenticationProperties properties) {
+                                                                             AuthenticationProperties properties,
+                                                                             OAuth2Properties oAuth2Properties) {
 
         return new JsonAuthenticationSuccessHandler(
                 successResponse.orderedStream().collect(Collectors.toList()),
                 properties,
-                properties.getOauth2().getOauth2Urls()
+                oAuth2Properties.getOauth2Urls()
         );
     }
 
     @Bean
     @ConditionalOnMissingBean(JsonAuthenticationFailureHandler.class)
     public JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler(ObjectProvider<JsonAuthenticationFailureResponse> failureHandlers,
-                                                                             AuthenticationProperties properties) {
+                                                                             AuthenticationProperties properties,
+                                                                             OAuth2Properties oAuth2Properties) {
 
         return new JsonAuthenticationFailureHandler(
                 failureHandlers.orderedStream().collect(Collectors.toList()),
                 properties,
-                properties.getOauth2().getOauth2Urls()
+                oAuth2Properties.getOauth2Urls()
         );
     }
 
     @Bean
     @ConditionalOnMissingBean(OAuth2JsonAuthenticationSuccessResponse.class)
-    public OAuth2JsonAuthenticationSuccessResponse oAuth2JsonAuthenticationSuccessResponse(AuthenticationProperties authenticationProperties) {
-        return new OAuth2JsonAuthenticationSuccessResponse(authenticationProperties);
+    public OAuth2JsonAuthenticationSuccessResponse oAuth2JsonAuthenticationSuccessResponse(OAuth2Properties oAuth2Properties) {
+        return new OAuth2JsonAuthenticationSuccessResponse(oAuth2Properties);
     }
 
     /**
@@ -130,15 +133,15 @@ public class OAuth2WebSecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(RedissonOAuth2AuthorizationService.class)
     public RedissonOAuth2AuthorizationService redissonOAuth2AuthorizationService(RedissonClient redissonClient,
-                                                                                 AuthenticationProperties authenticationProperties) {
-        return new RedissonOAuth2AuthorizationService(redissonClient, authenticationProperties);
+                                                                                 OAuth2Properties oAuth2Properties) {
+        return new RedissonOAuth2AuthorizationService(redissonClient, oAuth2Properties);
     }
 
     @Bean
     @ConditionalOnMissingBean(OAuth2WebSecurityConfigurerAfterAdapter.class)
     public OAuth2WebSecurityConfigurerAfterAdapter oAuth2WebSecurityConfigurerAfterAdapter(JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler,
                                                                                            JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler,
-                                                                                           AuthenticationProperties authenticationProperties,
+                                                                                           OAuth2Properties oAuth2Properties,
                                                                                            OidcUserInfoAuthenticationMapper oidcUserInfoAuthenticationMapper,
                                                                                            ObjectProvider<OAuth2AuthorizationConfigurerAdapter> oAuth2AuthorizationConfigurerAdapters,
                                                                                            ObjectProvider<ErrorResultResolver> resultResolvers) {
@@ -148,7 +151,7 @@ public class OAuth2WebSecurityAutoConfiguration {
                 oidcUserInfoAuthenticationMapper,
                 oAuth2AuthorizationConfigurerAdapters.orderedStream().collect(Collectors.toList()),
                 resultResolvers.orderedStream().collect(Collectors.toList()),
-                authenticationProperties
+                oAuth2Properties
         );
     }
 }

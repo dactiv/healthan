@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,11 +21,17 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
 
     private AuthenticationProperties authenticationProperties;
 
+    private RememberMeProperties rememberMeProperties;
+
     public AbstractUserDetailsService() {
     }
 
     public void setAuthenticationProperties(AuthenticationProperties authenticationProperties) {
         this.authenticationProperties = authenticationProperties;
+    }
+
+    public void setRememberMeProperties(RememberMeProperties rememberMeProperties) {
+        this.rememberMeProperties = rememberMeProperties;
     }
 
     @Override
@@ -49,7 +56,7 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
      * @return true 记住我，否则 false
      */
     protected boolean obtainRememberMe(HttpServletRequest request) {
-        return BooleanUtils.toBoolean(request.getParameter(authenticationProperties.getRememberMe().getParamName()));
+        return BooleanUtils.toBoolean(request.getParameter(rememberMeProperties.getParamName()));
     }
 
     /**

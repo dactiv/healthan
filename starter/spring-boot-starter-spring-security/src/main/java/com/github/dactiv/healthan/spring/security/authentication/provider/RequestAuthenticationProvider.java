@@ -4,6 +4,7 @@ import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.rememberme.RememberMeToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RememberMeAuthenticationToken;
@@ -71,7 +72,9 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      */
     private boolean hideUserNotFoundExceptions = true;
 
-    private final AuthenticationProperties properties;
+    private final AuthenticationProperties authenticationProperties;
+
+    private final RememberMeProperties rememberMeProperties;
 
     /**
      * 当前用户认证供应者实现
@@ -79,10 +82,12 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      * @param userDetailsServices 账户认证的用户明细服务集合
      */
     public RequestAuthenticationProvider(RedissonClient redissonClient,
-                                         AuthenticationProperties properties,
+                                         AuthenticationProperties authenticationProperties,
+                                         RememberMeProperties rememberMeProperties,
                                          List<UserDetailsService> userDetailsServices) {
         this.userDetailsServices = userDetailsServices;
-        this.properties = properties;
+        this.authenticationProperties = authenticationProperties;
+        this.rememberMeProperties = rememberMeProperties;
         this.redissonClient = redissonClient;
     }
 
@@ -118,7 +123,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
     protected SecurityUserDetails doRememberMeAuthentication(RememberMeAuthenticationToken token) {
 
-        String key = properties.getRememberMe().getCache().getName(token.getName());
+        String key = rememberMeProperties.getCache().getName(token.getName());
         RBucket<RememberMeToken> bucket = redissonClient.getBucket(key);
         RememberMeToken redisObject = bucket.get();
 
@@ -139,10 +144,10 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
             throw new RememberMeAuthenticationException(error);
         }
         CacheProperties authenticationCache = null;
-        if (Objects.nonNull(properties.getAuthenticationCache())) {
+        if (Objects.nonNull(authenticationProperties.getAuthenticationCache())) {
             authenticationCache = CacheProperties.of(
-                    properties.getAuthenticationCache().getName(token.getName()),
-                    properties.getAuthenticationCache().getExpiresTime()
+                    authenticationProperties.getAuthenticationCache().getName(token.getName()),
+                    authenticationProperties.getAuthenticationCache().getExpiresTime()
             );
         }
         SecurityUserDetails userDetails = null;
@@ -185,10 +190,10 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         UserDetailsService userDetailsService = optional.orElseThrow(() -> new AuthenticationServiceException(message));
         boolean cache = userDetailsService.isSupportCache(token);
         // 如果启用认证缓存，从认证缓存里获取用户
-        if (Objects.nonNull(properties.getAuthenticationCache()) && userDetailsService.isSupportCache(token)) {
+        if (Objects.nonNull(authenticationProperties.getAuthenticationCache()) && userDetailsService.isSupportCache(token)) {
             authenticationCache = CacheProperties.of(
-                    properties.getAuthenticationCache().getName(token.getName()),
-                    properties.getAuthenticationCache().getExpiresTime()
+                    authenticationProperties.getAuthenticationCache().getName(token.getName()),
+                    authenticationProperties.getAuthenticationCache().getExpiresTime()
             );
         }
 
@@ -324,10 +329,10 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         // 获取认证缓存
         CacheProperties authorizationCache = null;
-        if (Objects.nonNull(properties.getAuthorizationCache()) && userDetailsService.isSupportCache(token)) {
+        if (Objects.nonNull(authenticationProperties.getAuthorizationCache()) && userDetailsService.isSupportCache(token)) {
             authorizationCache = CacheProperties.of(
-                    properties.getAuthorizationCache().getName(token.getName()),
-                    properties.getAuthorizationCache().getExpiresTime()
+                    authenticationProperties.getAuthorizationCache().getName(token.getName()),
+                    authenticationProperties.getAuthorizationCache().getExpiresTime()
             );
         }
 

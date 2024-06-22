@@ -60,16 +60,6 @@ public class AuthenticationProperties {
     private String loginProcessingUrl = DefaultLoginPageGeneratingFilter.DEFAULT_LOGIN_PAGE_URL;
 
     /**
-     * 访问 token 配置
-     */
-    private AccessTokenProperties accessToken = new AccessTokenProperties();
-
-    /**
-     * oauth2 配置信息
-     */
-    private OAuth2Properties oauth2 = new OAuth2Properties();
-
-    /**
      * 认证类型 header 名称
      */
     private String typeHeaderName = SECURITY_FORM_TYPE_HEADER_NAME;
@@ -100,14 +90,9 @@ public class AuthenticationProperties {
     private String passwordParamName = SECURITY_FORM_PASSWORD_PARAM_NAME;
 
     /**
-     * 记住我配置
+     * ip 认证 (ip 白名单) 配置
      */
-    private RememberMeProperties rememberMe = new RememberMeProperties();
-
-    /**
-     * ip 认证配置
-     */
-    private List<IpAuthenticationProperties> ipAuthentication = new LinkedList<>();
+    private List<IpAuthenticationProperties> ipAuthentications = new LinkedList<>();
 
     /**
      * 认证缓存配置信息
@@ -123,29 +108,6 @@ public class AuthenticationProperties {
      * 是否允许访问投票器的拒绝和同意相等时允许访问
      */
     private boolean allowIfEqualGrantedDeniedDecisions = false;
-
-    /**
-     * 验证校验配置
-     */
-    private CaptchaVerificationProperties captchaVerification = new CaptchaVerificationProperties();
-
-    /**
-     * 获取验证码校验配置
-     *
-     * @return 验证码校验配置
-     */
-    public CaptchaVerificationProperties getCaptchaVerification() {
-        return captchaVerification;
-    }
-
-    /**
-     * 设置验证码校验配置
-     *
-     * @param captchaVerification 验证码校验配置
-     */
-    public void setCaptchaVerification(CaptchaVerificationProperties captchaVerification) {
-        this.captchaVerification = captchaVerification;
-    }
 
     /**
      * 获取默认用户信息集合
@@ -181,24 +143,6 @@ public class AuthenticationProperties {
      */
     public void setLoginProcessingUrl(String loginProcessingUrl) {
         this.loginProcessingUrl = loginProcessingUrl;
-    }
-
-    /**
-     * 获取访问 token 配置
-     *
-     * @return 访问 token 配置
-     */
-    public AccessTokenProperties getAccessToken() {
-        return accessToken;
-    }
-
-    /**
-     * 设置访问 token 配置
-     *
-     * @param accessToken 访问 token 配置
-     */
-    public void setAccessToken(AccessTokenProperties accessToken) {
-        this.accessToken = accessToken;
     }
 
     /**
@@ -274,21 +218,21 @@ public class AuthenticationProperties {
     }
 
     /**
-     * 获取 ip 认证配置
+     * 获取 ip 认证 (ip 白名单) 配置
      *
      * @return  ip 认证配置
      */
-    public List<IpAuthenticationProperties> getIpAuthentication() {
-        return ipAuthentication;
+    public List<IpAuthenticationProperties> getIpAuthentications() {
+        return ipAuthentications;
     }
 
     /**
-     * 设置 ip 认证配置
+     * 设置 ip 认证 (ip 白名单) 配置
      *
-     * @param ipAuthentication  ip 认证配置
+     * @param ipAuthentications  ip 认证配置
      */
-    public void setIpAuthentication(List<IpAuthenticationProperties> ipAuthentication) {
-        this.ipAuthentication = ipAuthentication;
+    public void setIpAuthentications(List<IpAuthenticationProperties> ipAuthentications) {
+        this.ipAuthentications = ipAuthentications;
     }
 
     /**
@@ -346,24 +290,6 @@ public class AuthenticationProperties {
     }
 
     /**
-     * 获取记住我配置
-     *
-     * @return 记住我配置
-     */
-    public RememberMeProperties getRememberMe() {
-        return rememberMe;
-    }
-
-    /**
-     * 设置记住我配置
-     *
-     * @param rememberMe 记住我配置
-     */
-    public void setRememberMe(RememberMeProperties rememberMe) {
-        this.rememberMe = rememberMe;
-    }
-
-    /**
      * 获取认证缓存配置信息
      *
      * @return 认证缓存配置信息
@@ -417,21 +343,4 @@ public class AuthenticationProperties {
         this.allowIfEqualGrantedDeniedDecisions = allowIfEqualGrantedDeniedDecisions;
     }
 
-    /**
-     * 获取 oauth2 配置信息
-     *
-     * @return oauth2 配置信息
-     */
-    public OAuth2Properties getOauth2() {
-        return oauth2;
-    }
-
-    /**
-     * 设置 oauth2 配置信息
-     *
-     * @param oauth2 oauth2 配置信息
-     */
-    public void setOauth2(OAuth2Properties oauth2) {
-        this.oauth2 = oauth2;
-    }
 }

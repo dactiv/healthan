@@ -1,5 +1,7 @@
 package com.github.dactiv.healthan.spring.security.authentication.config;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -8,6 +10,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
+@ConfigurationProperties("healthan.authentication.captcha-verification")
 public class CaptchaVerificationProperties {
 
     public static final String DEFAULT_CAPTCHA_TYPE_HEADER_NAME = "X-CAPTCHA-TYPE";

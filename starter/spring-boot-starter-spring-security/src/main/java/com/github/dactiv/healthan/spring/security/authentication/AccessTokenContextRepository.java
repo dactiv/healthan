@@ -11,6 +11,7 @@ import com.github.dactiv.healthan.crypto.algorithm.ByteSource;
 import com.github.dactiv.healthan.crypto.algorithm.cipher.CipherService;
 import com.github.dactiv.healthan.crypto.algorithm.exception.CryptoException;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
+import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.*;
 import com.github.dactiv.healthan.spring.security.entity.MobileUserDetails;
@@ -53,13 +54,18 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
     private final AuthenticationProperties authenticationProperties;
 
+    private final AccessTokenProperties accessTokenProperties;
+
     private final AntPathRequestMatcher loginRequestMatcher;
 
     private final CipherAlgorithmService cipherAlgorithmService = new CipherAlgorithmService();
 
-    public AccessTokenContextRepository(RedissonClient redissonClient, AuthenticationProperties authenticationProperties) {
+    public AccessTokenContextRepository(RedissonClient redissonClient,
+                                        AccessTokenProperties accessTokenProperties,
+                                        AuthenticationProperties authenticationProperties) {
         this.redissonClient = redissonClient;
         this.authenticationProperties = authenticationProperties;
+        this.accessTokenProperties = accessTokenProperties;
         this.loginRequestMatcher = new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl(), HttpMethod.POST.name());
     }
 
@@ -79,9 +85,9 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         if (this.loginRequestMatcher.matches(request)) {
             return null;
         }
-        String token = request.getHeader(authenticationProperties.getAccessToken().getAccessTokenHeaderName());
+        String token = request.getHeader(accessTokenProperties.getAccessTokenHeaderName());
         if (StringUtils.isEmpty(token)) {
-            token = request.getParameter(authenticationProperties.getAccessToken().getAccessTokenParamName());
+            token = request.getParameter(accessTokenProperties.getAccessTokenParamName());
         }
 
         if (StringUtils.isEmpty(token)) {
@@ -97,8 +103,8 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
             return null;
         }
 
-        CipherService cipherService = cipherAlgorithmService.getCipherService(authenticationProperties.getAccessToken().getCipherAlgorithmName());
-        byte[] key = Base64.decode(authenticationProperties.getAccessToken().getCryptoKey());
+        CipherService cipherService = cipherAlgorithmService.getCipherService(accessTokenProperties.getCipherAlgorithmName());
+        byte[] key = Base64.decode(accessTokenProperties.getCryptoKey());
 
         try {
             ByteSource byteSource = cipherService.decrypt(Base64.decode(token), key);
@@ -119,7 +125,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
             }
 
             SecurityUserDetails userDetails = Casts.cast(context.getAuthentication().getDetails());
-            Object tokenValue = userDetails.getMeta().get(authenticationProperties.getAccessToken().getAccessTokenParamName());
+            Object tokenValue = userDetails.getMeta().get(accessTokenProperties.getAccessTokenParamName());
             if (Objects.isNull(tokenValue)) {
                 return null;
             }
@@ -142,19 +148,19 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 }
             }
 
-            RBucket<ExpiredToken> accessTokenBucket = getAccessTokenBucket(token, authenticationProperties.getAccessToken().getAccessTokenCache());
+            RBucket<ExpiredToken> accessTokenBucket = getAccessTokenBucket(token, accessTokenProperties.getAccessTokenCache());
             if (accessTokenBucket.isExists()) {
                 return context;
             }
 
-            TimeProperties expiresTime = authenticationProperties.getAccessToken().getAccessTokenCache().getExpiresTime();
+            TimeProperties expiresTime = accessTokenProperties.getAccessTokenCache().getExpiresTime();
             if (Objects.nonNull(expiresTime)) {
                 bucket.expireAsync(expiresTime.toDuration());
             }
 
             return context;
         } catch (CryptoException e) {
-            LOGGER.warn("通过密钥:{} 解密 token:{} 失败", authenticationProperties.getAccessToken().getCryptoKey(), token);
+            LOGGER.warn("通过密钥:{} 解密 token:{} 失败", accessTokenProperties.getCryptoKey(), token);
         }
 
         return null;
@@ -166,11 +172,11 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     }
 
     public String getAccessTokenKey(String type, Object deviceIdentified) {
-        return authenticationProperties.getAccessToken().getAccessTokenCache().getName(type + CacheProperties.DEFAULT_SEPARATOR + deviceIdentified);
+        return accessTokenProperties.getAccessTokenCache().getName(type + CacheProperties.DEFAULT_SEPARATOR + deviceIdentified);
     }
 
     public String generatePlaintextString(SecurityUserDetails userDetails) {
-        return generatePlaintextString(userDetails, authenticationProperties.getAccessToken().getCryptoKey());
+        return generatePlaintextString(userDetails, accessTokenProperties.getCryptoKey());
     }
 
     public String generatePlaintextString(SecurityUserDetails userDetails, String aesKey) {
@@ -188,7 +194,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
         String plaintext = Casts.writeValueAsString(json);
 
-        CipherService cipherService = cipherAlgorithmService.getCipherService(authenticationProperties.getAccessToken().getCipherAlgorithmName());
+        CipherService cipherService = cipherAlgorithmService.getCipherService(accessTokenProperties.getCipherAlgorithmName());
         byte[] key = Base64.decode(aesKey);
         ByteSource source = cipherService.encrypt(plaintext.getBytes(Charset.defaultCharset()), key);
 
@@ -262,17 +268,17 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
             return ;
         }
 
-        Object accessTokenValue = userDetails.getMeta().get(authenticationProperties.getAccessToken().getAccessTokenParamName());
+        Object accessTokenValue = userDetails.getMeta().get(accessTokenProperties.getAccessTokenParamName());
         if (Objects.isNull(accessTokenValue)) {
             return ;
         }
 
-        TimeProperties timeProperties = authenticationProperties.getAccessToken().getAccessTokenCache().getExpiresTime();
+        TimeProperties timeProperties = accessTokenProperties.getAccessTokenCache().getExpiresTime();
         if (AccessToken.class.isAssignableFrom(accessTokenValue.getClass())){
             ExpiredToken accessToken = Casts.cast(accessTokenValue);
             RBucket<ExpiredToken> accessTokenBucket = getAccessTokenBucket(
                     accessToken.getToken(),
-                    authenticationProperties.getAccessToken().getAccessTokenCache()
+                    accessTokenProperties.getAccessTokenCache()
             );
             accessTokenBucket.setAsync(accessToken);
             timeProperties = accessToken.getExpiresTime();
@@ -280,12 +286,12 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 accessTokenBucket.expireAsync(timeProperties.toDuration());
             }
 
-            Object refreshTokenValue = userDetails.getMeta().get(authenticationProperties.getAccessToken().getRefreshTokenParamName());
+            Object refreshTokenValue = userDetails.getMeta().get(accessTokenProperties.getRefreshTokenParamName());
             if (Objects.nonNull(refreshTokenValue) && ExpiredToken.class.isAssignableFrom(refreshTokenValue.getClass())) {
                 AccessToken refreshToken = Casts.cast(refreshTokenValue);
                 RBucket<ExpiredToken> refreshBucket = getAccessTokenBucket(
                         refreshToken.getToken(),
-                        authenticationProperties.getAccessToken().getRefreshTokenCache()
+                        accessTokenProperties.getRefreshTokenCache()
                 );
                 RefreshToken token = new RefreshToken(refreshToken, accessToken);
                 refreshBucket.setAsync(token);

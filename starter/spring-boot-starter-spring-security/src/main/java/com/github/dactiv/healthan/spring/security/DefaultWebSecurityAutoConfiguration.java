@@ -129,7 +129,6 @@ public class DefaultWebSecurityAutoConfiguration {
 
         RequestAuthenticationFilter filter = getRequestAuthenticationFilter();
 
-
         httpSecurity.addFilter(filter);
         httpSecurity.addFilterBefore(new IpAuthenticationFilter(this.properties), RequestAuthenticationFilter.class);
 

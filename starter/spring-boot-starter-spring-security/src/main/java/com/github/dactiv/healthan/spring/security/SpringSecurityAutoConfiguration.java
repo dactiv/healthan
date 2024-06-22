@@ -4,7 +4,7 @@ import com.github.dactiv.healthan.spring.security.audit.ControllerAuditHandlerIn
 import com.github.dactiv.healthan.spring.security.audit.RequestBodyAttributeAdviceAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
 import com.github.dactiv.healthan.spring.security.authentication.UserDetailsService;
-import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.*;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureResponse;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
@@ -46,7 +46,13 @@ import java.util.stream.Collectors;
  */
 @Configuration
 @AutoConfigureAfter(RedissonAutoConfiguration.class)
-@EnableConfigurationProperties(AuthenticationProperties.class)
+@EnableConfigurationProperties({
+        AuthenticationProperties.class,
+        AccessTokenProperties.class,
+        CaptchaVerificationProperties.class,
+        OAuth2Properties.class,
+        RememberMeProperties.class
+})
 @ConditionalOnProperty(prefix = "healthan.authentication.spring.security", value = "enabled", matchIfMissing = true)
 public class SpringSecurityAutoConfiguration {
 
@@ -72,8 +78,8 @@ public class SpringSecurityAutoConfiguration {
     @ConditionalOnProperty(prefix = "healthan.authentication.access-token", value = "enable-controller", havingValue = "true")
     TokenController accessTokenController(AccessTokenContextRepository accessTokenContextRepository,
                                           RedissonClient redissonClient,
-                                          AuthenticationProperties authenticationProperties) {
-        return new TokenController(accessTokenContextRepository, redissonClient, authenticationProperties);
+                                          AccessTokenProperties accessTokenProperties) {
+        return new TokenController(accessTokenContextRepository, redissonClient, accessTokenProperties);
     }
 
     @Bean
@@ -86,18 +92,21 @@ public class SpringSecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(AccessTokenContextRepository.class)
     public AccessTokenContextRepository accessTokenContextRepository(AuthenticationProperties properties,
+                                                                     AccessTokenProperties accessTokenProperties,
                                                                      RedissonClient redissonClient) {
 
         return new AccessTokenContextRepository(
                 redissonClient,
+                accessTokenProperties,
                 properties
         );
     }
 
     @Bean
     @ConditionalOnMissingBean(RememberMeServices.class)
-    public CookieRememberService cookieRememberService(AuthenticationProperties properties, RedissonClient redissonClient) {
-        return new CookieRememberService(properties, redissonClient);
+    public CookieRememberService cookieRememberService(RememberMeProperties rememberMeProperties,
+                                                       RedissonClient redissonClient) {
+        return new CookieRememberService(rememberMeProperties, redissonClient);
     }
 
     @Bean
@@ -124,10 +133,12 @@ public class SpringSecurityAutoConfiguration {
     @ConditionalOnMissingBean(AuthenticationManager.class)
     public AuthenticationManager authenticationManager(RedissonClient redissonClient,
                                                        AuthenticationProperties authenticationProperties,
+                                                       RememberMeProperties rememberMeProperties,
                                                        ObjectProvider<UserDetailsService> userDetailsService) {
         return new RequestAuthenticationProvider(
                 redissonClient,
                 authenticationProperties,
+                rememberMeProperties,
                 userDetailsService.orderedStream().collect(Collectors.toList())
         );
     }

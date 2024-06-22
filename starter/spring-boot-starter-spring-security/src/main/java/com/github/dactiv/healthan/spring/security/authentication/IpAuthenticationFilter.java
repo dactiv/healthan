@@ -51,7 +51,7 @@ public class IpAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         List<String> ips = authenticationProperties
-                .getIpAuthentication()
+                .getIpAuthentications()
                 .stream()
                 .filter(ip -> new AntPathRequestMatcher(ip.getUrl()).matches(request))
                 .flatMap(ip -> ip.getIps().stream())

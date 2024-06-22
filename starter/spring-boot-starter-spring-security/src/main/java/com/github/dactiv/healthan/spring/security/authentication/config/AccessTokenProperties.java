@@ -3,12 +3,14 @@ package com.github.dactiv.healthan.spring.security.authentication.config;
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.crypto.CipherAlgorithmService;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * 访问 token 配置
  *
  * @author maurice.chen
  */
+@ConfigurationProperties("healthan.authentication.access-token")
 public class AccessTokenProperties {
 
     public final static String DEFAULT_ACCESS_TOKEN_HEADER_NAME = "X-ACCESS-TOKEN";

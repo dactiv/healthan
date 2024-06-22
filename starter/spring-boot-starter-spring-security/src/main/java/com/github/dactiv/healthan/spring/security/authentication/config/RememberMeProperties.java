@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.spring.security.authentication.config;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.TimeProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.concurrent.TimeUnit;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author maurice.chen
  */
+@ConfigurationProperties("healthan.authentication.remember-me")
 public class RememberMeProperties {
 
     /**

@@ -2,7 +2,7 @@ package com.github.dactiv.healthan.spring.security.authentication.adapter;
 
 
 import com.github.dactiv.healthan.spring.security.authentication.RestResultAuthenticationEntryPoint;
-import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.OAuth2Properties;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.healthan.spring.security.authentication.oidc.OidcUserInfoAuthenticationMapper;
@@ -32,20 +32,20 @@ public class OAuth2WebSecurityConfigurerAfterAdapter implements WebSecurityConfi
 
     private final List<OAuth2AuthorizationConfigurerAdapter> oAuth2AuthorizationConfigurerAdapters;
 
-    private final AuthenticationProperties authenticationProperties;
+    private final OAuth2Properties oAuth2Properties;
 
     public OAuth2WebSecurityConfigurerAfterAdapter(JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler,
                                                    JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler,
                                                    OidcUserInfoAuthenticationMapper oidcUserInfoAuthenticationMapper,
                                                    List<OAuth2AuthorizationConfigurerAdapter> oAuth2AuthorizationConfigurerAdapters,
                                                    List<ErrorResultResolver> resultResolvers,
-                                                   AuthenticationProperties authenticationProperties) {
+                                                   OAuth2Properties oAuth2Properties) {
         this.jsonAuthenticationFailureHandler = jsonAuthenticationFailureHandler;
         this.jsonAuthenticationSuccessHandler = jsonAuthenticationSuccessHandler;
         this.oidcUserInfoAuthenticationMapper = oidcUserInfoAuthenticationMapper;
         this.oAuth2AuthorizationConfigurerAdapters = oAuth2AuthorizationConfigurerAdapters;
         this.resultResolvers = resultResolvers;
-        this.authenticationProperties = authenticationProperties;
+        this.oAuth2Properties = oAuth2Properties;
     }
 
     @Override
@@ -100,7 +100,7 @@ public class OAuth2WebSecurityConfigurerAfterAdapter implements WebSecurityConfi
 
     private void configAuthorizationEndpoint(OAuth2AuthorizationEndpointConfigurer authorizationEndpoint) {
         authorizationEndpoint
-                .consentPage(authenticationProperties.getOauth2().getConsentPageUri())
+                .consentPage(oAuth2Properties.getConsentPageUri())
                 .authorizationResponseHandler(jsonAuthenticationSuccessHandler)
                 .errorResponseHandler(jsonAuthenticationFailureHandler);
 
