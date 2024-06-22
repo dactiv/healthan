@@ -3,9 +3,8 @@ package com.github.dactiv.healthan.security;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.audit.AuditType;
-import com.github.dactiv.healthan.security.audit.PluginAuditEventRepository;
-import com.github.dactiv.healthan.security.audit.elasticsearch.ElasticsearchAuditEventRepository;
-import com.github.dactiv.healthan.security.audit.mongo.MongoAuditEventRepository;
+import com.github.dactiv.healthan.security.audit.elasticsearch.ElasticsearchAuditConfiguration;
+import com.github.dactiv.healthan.security.audit.mongo.MongoAuditConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
@@ -21,8 +20,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.util.*;
 
@@ -144,58 +141,5 @@ public class AuditConfiguration {
         }
     }
 
-    /**
-     * Mongo 审计仓库配置
-     *
-     * @author maurice.chen
-     */
-    @Conditional(AuditImportSelectorCondition.class)
-    @ConditionalOnClass(MongoAuditEventRepository.class)
-    @ConditionalOnMissingBean(AuditEventRepository.class)
-    @EnableConfigurationProperties(SecurityProperties.class)
-    @ConditionalOnProperty(prefix = "healthan.authentication.audit", value = "enabled", matchIfMissing = true)
-    public static class MongoAuditConfiguration {
 
-        @Bean
-        public PluginAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
-                                                               SecurityProperties securityProperties) {
-
-            List<String> ignorePrincipals = new ArrayList<>(PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS);
-            ignorePrincipals.add(securityProperties.getUser().getName());
-
-            return new MongoAuditEventRepository(
-                    mongoTemplate,
-                    MongoAuditEventRepository.DEFAULT_COLLECTION_NAME,
-                    ignorePrincipals
-            );
-
-        }
-    }
-
-    /**
-     * Elasticsearch 审计仓库配置
-     *
-     * @author maurice.chen
-     */
-    @Conditional(AuditImportSelectorCondition.class)
-    @ConditionalOnMissingBean(AuditEventRepository.class)
-    @EnableConfigurationProperties(SecurityProperties.class)
-    @ConditionalOnClass(ElasticsearchAuditEventRepository.class)
-    @ConditionalOnProperty(prefix = "healthan.authentication.audit", value = "enabled", matchIfMissing = true)
-    public static class ElasticsearchAuditConfiguration {
-
-        @Bean
-        public PluginAuditEventRepository auditEventRepository(ElasticsearchOperations elasticsearchOperations,
-                                                               SecurityProperties securityProperties) {
-            List<String> ignorePrincipals = new ArrayList<>(PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS);
-            ignorePrincipals.add(securityProperties.getUser().getName());
-
-            return new ElasticsearchAuditEventRepository(
-                    elasticsearchOperations,
-                    ElasticsearchAuditEventRepository.DEFAULT_INDEX_NAME,
-                    ignorePrincipals
-            );
-
-        }
-    }
 }
