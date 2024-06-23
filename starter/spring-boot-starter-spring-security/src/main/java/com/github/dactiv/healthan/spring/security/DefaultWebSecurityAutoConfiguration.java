@@ -7,6 +7,7 @@ import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecu
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
+import com.github.dactiv.healthan.spring.security.authentication.provider.RequestAuthenticationProvider;
 import com.github.dactiv.healthan.spring.security.authentication.rememberme.CookieRememberService;
 import com.github.dactiv.healthan.spring.security.plugin.PluginSourceTypeVoter;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
@@ -127,30 +128,11 @@ public class DefaultWebSecurityAutoConfiguration {
             }
         }
 
-        RequestAuthenticationFilter filter = getRequestAuthenticationFilter();
-
-        httpSecurity.addFilter(filter);
         httpSecurity.addFilterBefore(new IpAuthenticationFilter(this.properties), RequestAuthenticationFilter.class);
 
         addConsensusBasedToMethodSecurityInterceptor(httpSecurity, properties);
         return httpSecurity.build();
     }
-
-    private RequestAuthenticationFilter getRequestAuthenticationFilter() {
-        RequestAuthenticationFilter filter = new RequestAuthenticationFilter(
-                properties,
-                authenticationTypeTokenResolvers,
-                userDetailsServices
-        );
-
-        filter.setAuthenticationManager(authenticationManager);
-        filter.setApplicationEventPublisher(eventPublisher);
-        filter.setRememberMeServices(cookieRememberService);
-        filter.setAuthenticationSuccessHandler(jsonAuthenticationSuccessHandler);
-        filter.setAuthenticationFailureHandler(jsonAuthenticationFailureHandler);
-        return filter;
-    }
-
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {

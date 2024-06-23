@@ -32,7 +32,9 @@ import java.util.Objects;
 public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestAuthenticationFilter.class);
+
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
+
     private final AuthenticationProperties authenticationProperties;
 
     private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
@@ -76,19 +78,6 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
             LOGGER.error("记住我认证出现异常", ex);
             unsuccessfulAuthentication(Casts.cast(request), Casts.cast(response), ex);
         }
-    }
-
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-
-        super.successfulAuthentication(request, response, chain, authResult);
-        String token = request.getHeader(authenticationProperties.getTokenHeaderName());
-
-        if (StringUtils.isEmpty(StringUtils.trimToEmpty(token))) {
-            return ;
-        }
-
-        chain.doFilter(request, response);
     }
 
     @Override

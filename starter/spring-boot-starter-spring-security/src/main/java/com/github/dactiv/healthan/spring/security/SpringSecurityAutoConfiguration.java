@@ -17,11 +17,13 @@ import com.github.dactiv.healthan.spring.security.authentication.service.feign.F
 import com.github.dactiv.healthan.spring.security.authentication.service.feign.FeignExceptionResultResolver;
 import com.github.dactiv.healthan.spring.security.controller.TokenController;
 import com.github.dactiv.healthan.spring.security.plugin.PluginEndpoint;
+import feign.FeignException;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -146,31 +148,6 @@ public class SpringSecurityAutoConfiguration {
     @Bean
     public DefaultAuthenticationFailureResponse defaultAuthenticationFailureResponse(AuthenticationProperties properties) {
         return new DefaultAuthenticationFailureResponse(properties);
-    }
-
-    @Bean
-    public FeignExceptionResultResolver feignExceptionResultResolver() {
-        if (isFeignExceptionClassAvailable()) {
-            return new FeignExceptionResultResolver();
-        }
-        return null;
-    }
-
-    @Bean
-    public FeignAuthenticationTypeTokenResolver feignAuthenticationTypeTokenResolver(AuthenticationProperties properties) {
-        if (isFeignExceptionClassAvailable()) {
-            return new FeignAuthenticationTypeTokenResolver(properties);
-        }
-        return null;
-    }
-
-    private boolean isFeignExceptionClassAvailable() {
-        try {
-            Class.forName("feign.FeignException");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
     }
 
     @Configuration

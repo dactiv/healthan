@@ -2,8 +2,28 @@ healthan:
   authentication:
     audit:
       type: memory
+    captcha-verification:
+      verify-urls:
+        - "/login/**"
+    permit-uri-ant-matchers:
+      - "/prepare/**"
+      - "/login/**"
+      - "/logout/**"
+      - "/actuator/**"
 
+
+management:
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 
 spring:
   redis:
-    password: 19880602
+    host: 17.0.0.14
+    port: 6379
+    password: 33DEfda34VD
+    database: 11
