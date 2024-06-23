@@ -7,8 +7,10 @@ import com.github.dactiv.healthan.spring.security.authentication.UserDetailsServ
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RequestAuthenticationConfigurer;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +33,7 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -64,19 +67,30 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
 
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
 
+    private final SecurityContextRepository securityContextRepository;
+
+    private final RedissonClient redissonClient;
+
+    private final RememberMeProperties rememberMeProperties;
+
     public SpringSecurityConfig(RememberMeServices rememberMeServices,
                                 AuthenticationProperties authenticationProperties,
                                 AuthenticationFailureHandler authenticationFailureHandler,
                                 AuthenticationSuccessHandler authenticationSuccessHandler,
+                                SecurityContextRepository securityContextRepository,
                                 ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
-                                ObjectProvider<UserDetailsService> userDetailsServices) {
+                                ObjectProvider<UserDetailsService> userDetailsServices,
+                                RedissonClient redissonClient,
+                                RememberMeProperties rememberMeProperties) {
         this.rememberMeServices = rememberMeServices;
         this.authenticationProperties = authenticationProperties;
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolvers.stream().collect(Collectors.toList());
         this.userDetailsServices = userDetailsServices.stream().collect(Collectors.toList());
-        
+        this.securityContextRepository = securityContextRepository;
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
+        this.redissonClient = redissonClient;
+        this.rememberMeProperties = rememberMeProperties;
     }
 
     @Override
@@ -209,7 +223,16 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
         try {
 
             httpSecurity
-                    .apply(new RequestAuthenticationConfigurer<>(authenticationProperties, authenticationTypeTokenResolvers, userDetailsServices))
+                    .apply(
+                            new RequestAuthenticationConfigurer<>(
+                                    authenticationProperties,
+                                    authenticationTypeTokenResolvers,
+                                    userDetailsServices,
+                                    rememberMeProperties,
+                                    redissonClient
+                            )
+                    )
+                    .securityContextRepository(securityContextRepository)
                     .failureHandler(authenticationFailureHandler)
                     .successHandler(authenticationSuccessHandler)
                     .and()

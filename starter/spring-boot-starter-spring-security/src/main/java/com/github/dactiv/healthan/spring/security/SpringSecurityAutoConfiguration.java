@@ -3,13 +3,11 @@ package com.github.dactiv.healthan.spring.security;
 import com.github.dactiv.healthan.spring.security.audit.ControllerAuditHandlerInterceptor;
 import com.github.dactiv.healthan.spring.security.audit.RequestBodyAttributeAdviceAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
-import com.github.dactiv.healthan.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.healthan.spring.security.authentication.config.*;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureResponse;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessResponse;
-import com.github.dactiv.healthan.spring.security.authentication.provider.RequestAuthenticationProvider;
 import com.github.dactiv.healthan.spring.security.authentication.rememberme.CookieRememberService;
 import com.github.dactiv.healthan.spring.security.authentication.service.DefaultAuthenticationFailureResponse;
 import com.github.dactiv.healthan.spring.security.authentication.service.DefaultUserDetailsService;
@@ -28,7 +26,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.RememberMeServices;
@@ -124,20 +121,6 @@ public class SpringSecurityAutoConfiguration {
         return new JsonAuthenticationSuccessHandler(
                 successResponse.orderedStream().collect(Collectors.toList()),
                 properties
-        );
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(AuthenticationManager.class)
-    public AuthenticationManager authenticationManager(RedissonClient redissonClient,
-                                                       AuthenticationProperties authenticationProperties,
-                                                       RememberMeProperties rememberMeProperties,
-                                                       ObjectProvider<UserDetailsService> userDetailsService) {
-        return new RequestAuthenticationProvider(
-                redissonClient,
-                authenticationProperties,
-                rememberMeProperties,
-                userDetailsService.orderedStream().collect(Collectors.toList())
         );
     }
 
