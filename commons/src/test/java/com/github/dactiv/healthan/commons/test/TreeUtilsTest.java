@@ -1,8 +1,8 @@
 package com.github.dactiv.healthan.commons.test;
 
+import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import com.github.dactiv.healthan.commons.tree.Tree;
 import com.github.dactiv.healthan.commons.tree.TreeUtils;
-import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

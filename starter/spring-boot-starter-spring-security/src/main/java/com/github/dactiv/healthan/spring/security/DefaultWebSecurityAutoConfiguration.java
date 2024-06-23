@@ -2,13 +2,12 @@ package com.github.dactiv.healthan.spring.security;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
-import com.github.dactiv.healthan.spring.security.authentication.*;
+import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
+import com.github.dactiv.healthan.spring.security.authentication.IpAuthenticationFilter;
+import com.github.dactiv.healthan.spring.security.authentication.RequestAuthenticationFilter;
+import com.github.dactiv.healthan.spring.security.authentication.RestResultAuthenticationEntryPoint;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
-import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
-import com.github.dactiv.healthan.spring.security.authentication.provider.RequestAuthenticationProvider;
-import com.github.dactiv.healthan.spring.security.authentication.rememberme.CookieRememberService;
 import com.github.dactiv.healthan.spring.security.plugin.PluginSourceTypeVoter;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -24,7 +22,6 @@ import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor;
 import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.ConsensusBased;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -46,44 +43,16 @@ public class DefaultWebSecurityAutoConfiguration {
 
     private final AuthenticationProperties properties;
 
-    private final JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler;
-
-    private final JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler;
-
-    private final CookieRememberService cookieRememberService;
-
-    private final AuthenticationManager authenticationManager;
-
-    private final ApplicationEventPublisher eventPublisher;
-
-    private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
-
     private final List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters;
-
-    private final List<UserDetailsService> userDetailsServices;
 
     private final List<ErrorResultResolver> resultResolvers;
 
     public DefaultWebSecurityAutoConfiguration(AccessTokenContextRepository accessTokenContextRepository,
                                                AuthenticationProperties properties,
-                                               JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler,
-                                               JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler,
-                                               ApplicationEventPublisher eventPublisher,
-                                               AuthenticationManager authenticationManager,
-                                               CookieRememberService cookieRememberService,
-                                               ObjectProvider<UserDetailsService> userDetailsServices,
                                                ObjectProvider<ErrorResultResolver> resultResolvers,
-                                               ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
         this.accessTokenContextRepository = accessTokenContextRepository;
         this.properties = properties;
-        this.jsonAuthenticationFailureHandler = jsonAuthenticationFailureHandler;
-        this.jsonAuthenticationSuccessHandler = jsonAuthenticationSuccessHandler;
-        this.eventPublisher = eventPublisher;
-        this.authenticationManager = authenticationManager;
-        this.cookieRememberService = cookieRememberService;
-        this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver.stream().collect(Collectors.toList());
-        this.userDetailsServices = userDetailsServices.stream().collect(Collectors.toList());
         this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().collect(Collectors.toList());
         this.resultResolvers = resultResolvers.stream().collect(Collectors.toList());
     }

@@ -1,7 +1,6 @@
 package com.github.dactiv.healthan.mybatis.plus.baisc.support;
 
 import com.baomidou.mybatisplus.annotation.Version;
-import com.github.dactiv.healthan.commons.id.number.IntegerIdEntity;
 import com.github.dactiv.healthan.commons.id.number.LongIdEntity;
 import com.github.dactiv.healthan.mybatis.plus.baisc.VersionEntity;
 
