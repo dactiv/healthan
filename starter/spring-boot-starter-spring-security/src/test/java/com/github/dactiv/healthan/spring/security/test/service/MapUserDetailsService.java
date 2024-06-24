@@ -1,25 +1,24 @@
 package com.github.dactiv.healthan.spring.security.test.service;
 
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
+import com.github.dactiv.healthan.security.entity.SimpleSecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.AbstractUserDetailsService;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
-import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class MapUserDetailsService extends AbstractUserDetailsService implements InitializingBean {
 
-    private static final Map<String, SecurityUserDetails> USER_DETAILS = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<String, SimpleSecurityPrincipal> USER_DETAILS = Collections.synchronizedMap(new HashMap<>());
 
     private final PasswordEncoder passwordEncoder;
 
@@ -38,13 +37,18 @@ public class MapUserDetailsService extends AbstractUserDetailsService implements
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        USER_DETAILS.put("test", new SecurityUserDetails(1, "test", getPasswordEncoder().encode("123456")));
+    public void afterPropertiesSet()  {
+        USER_DETAILS.put("test", new SimpleSecurityPrincipal(1, getPasswordEncoder().encode("123456"), "test", "test"));
     }
 
     @Override
-    public SecurityUserDetails getAuthenticationUserDetails(RequestAuthenticationToken token) throws AuthenticationException {
+    public SecurityPrincipal getSecurityPrincipal(RequestAuthenticationToken token) throws AuthenticationException {
         return USER_DETAILS.get(token.getPrincipal().toString());
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getPrincipalAuthorities(SecurityPrincipal principal) {
+        return Collections.emptyList();
     }
 
     @Override

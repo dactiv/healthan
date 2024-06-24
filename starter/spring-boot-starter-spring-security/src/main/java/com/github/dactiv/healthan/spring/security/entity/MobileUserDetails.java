@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.spring.security.entity;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
+import com.github.dactiv.healthan.security.entity.SimpleSecurityPrincipal;
 import com.github.dactiv.healthan.security.enumerate.UserStatus;
 
 
@@ -10,7 +11,7 @@ import com.github.dactiv.healthan.security.enumerate.UserStatus;
  *
  * @author maurice
  */
-public class MobileUserDetails extends SecurityUserDetails implements DeviceIdentifiedUserDetails {
+public class MobileUserDetails extends SimpleSecurityPrincipal implements DeviceIdentifiedUserDetails {
 
     
     private static final long serialVersionUID = -848955060608795664L;
@@ -40,8 +41,8 @@ public class MobileUserDetails extends SecurityUserDetails implements DeviceIden
      * @param password         密码
      * @param deviceIdentified 设备唯一是被
      */
-    public MobileUserDetails(Integer id, String username, String password, String deviceIdentified) {
-        super(id, username, password, UserStatus.Enabled);
+    public MobileUserDetails(Object id, String username, String password, String deviceIdentified) {
+        super(id, password, username, DEFAULT_TYPE, UserStatus.Enabled);
         this.deviceIdentified = deviceIdentified;
     }
 

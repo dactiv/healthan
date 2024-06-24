@@ -1,10 +1,10 @@
 package com.github.dactiv.healthan.spring.security.authentication.token;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.github.dactiv.healthan.commons.CacheProperties;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.util.MultiValueMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import java.util.LinkedHashSet;
 
 
 /**
@@ -12,56 +12,57 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author maurice
  */
-public class RequestAuthenticationToken extends SimpleAuthenticationToken {
+public class RequestAuthenticationToken extends AbstractAuthenticationToken {
 
-    
     private static final long serialVersionUID = 8070060147431763553L;
 
-    /**
-     * http servlet request
-     */
-    private final HttpServletRequest httpServletRequest;
+    private final MultiValueMap<String, String> parameterMap;
 
-    /**
-     * http servlet response
-     */
-    private final HttpServletResponse httpServletResponse;
+    private final Object principal;
 
-    /**
-     * 请求认证 token
-     *
-     * @param httpServletRequest  http servlet request
-     * @param httpServletResponse http servlet response
-     * @param token               登陆账户密码认证令牌
-     * @param type                认证类型
-     * @param rememberMe 是否记住我
-     */
-    public RequestAuthenticationToken(HttpServletRequest httpServletRequest,
-                                      HttpServletResponse httpServletResponse,
-                                      UsernamePasswordAuthenticationToken token,
+    private final Object credentials;
+
+    private final String type;
+
+    private final boolean rememberMe;
+
+    public RequestAuthenticationToken(MultiValueMap<String, String> parameterMap,
+                                      Object principal,
+                                      Object credentials,
                                       String type,
                                       boolean rememberMe) {
-        super(token, type, rememberMe);
-
-        this.httpServletResponse = httpServletResponse;
-        this.httpServletRequest = httpServletRequest;
+        super(new LinkedHashSet<>());
+        this.parameterMap = parameterMap;
+        this.principal = principal;
+        this.credentials = credentials;
+        this.rememberMe = rememberMe;
+        this.type = type;
     }
 
-    /**
-     * 获取 http servlet request
-     *
-     * @return http servlet request
-     */
-    public HttpServletRequest getHttpServletRequest() {
-        return httpServletRequest;
+    @Override
+    public Object getCredentials() {
+        return credentials;
     }
 
-    /**
-     * 获取 http servlet response
-     *
-     * @return http servlet response
-     */
-    public HttpServletResponse getHttpServletResponse() {
-        return httpServletResponse;
+    @Override
+    public Object getPrincipal() {
+        return principal;
+    }
+
+    public MultiValueMap<String, String> getParameterMap() {
+        return parameterMap;
+    }
+
+    public boolean isRememberMe() {
+        return rememberMe;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    @Override
+    public String getName() {
+        return getType() + CacheProperties.DEFAULT_SEPARATOR + getPrincipal();
     }
 }

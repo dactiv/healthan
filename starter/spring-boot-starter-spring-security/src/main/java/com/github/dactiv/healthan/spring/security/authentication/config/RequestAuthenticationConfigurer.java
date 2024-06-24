@@ -17,24 +17,17 @@ public final class RequestAuthenticationConfigurer<H extends HttpSecurityBuilder
 
     private final RedissonClient redissonClient;
 
-    private final RememberMeProperties rememberMeProperties;
-
-    private final AuthenticationProperties authenticationProperties;
-
     private final List<UserDetailsService> userDetailsServices;
 
     public RequestAuthenticationConfigurer(AuthenticationProperties authenticationProperties,
                                            List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
                                            List<UserDetailsService> userDetailsServices,
-                                           RememberMeProperties rememberMeProperties,
                                            RedissonClient redissonClient) {
         super(
                 new RequestAuthenticationFilter(authenticationProperties, authenticationTypeTokenResolvers, userDetailsServices),
                 authenticationProperties.getLoginProcessingUrl()
         );
         this.redissonClient = redissonClient;
-        this.rememberMeProperties = rememberMeProperties;
-        this.authenticationProperties = authenticationProperties;
         this.userDetailsServices = userDetailsServices;
 
     }
@@ -47,6 +40,6 @@ public final class RequestAuthenticationConfigurer<H extends HttpSecurityBuilder
     @Override
     public void init(H http) throws Exception {
         super.init(http);
-        http.authenticationProvider(new RequestAuthenticationProvider(redissonClient, authenticationProperties, rememberMeProperties, userDetailsServices));
+        http.authenticationProvider(new RequestAuthenticationProvider(redissonClient, userDetailsServices));
     }
 }

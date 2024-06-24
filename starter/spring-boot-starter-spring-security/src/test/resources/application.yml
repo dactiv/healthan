@@ -1,5 +1,7 @@
 healthan:
   authentication:
+    remember-me:
+      always: true
     audit:
       type: memory
     captcha-verification:

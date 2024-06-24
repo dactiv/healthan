@@ -1,55 +1,53 @@
 package com.github.dactiv.healthan.spring.security.authentication.token;
 
-import com.github.dactiv.healthan.spring.security.authentication.rememberme.RememberMeToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 
-import java.util.Collection;
+import java.util.LinkedHashSet;
 
 /**
  * 记住我认证 token
  *
  * @author maurice.chen
  */
-public class RememberMeAuthenticationToken extends SimpleAuthenticationToken {
+public class RememberMeAuthenticationToken extends AbstractAuthenticationToken {
 
     private static final long serialVersionUID = -3891156895932143485L;
 
-    private Object id;
+    /**
+     * 登陆账户
+     */
+    private final String username;
 
-    public RememberMeAuthenticationToken(String username, String type, Object id) {
-        super(username, type, true);
-        this.id = id;
+    /**
+     * token
+     */
+    private final String token;
+
+    /**
+     * 类型, 用于区别每个 remember me token 的分类，该值取决于 {@link com.github.dactiv.healthan.security.entity.SecurityPrincipal#getType}
+     *
+     * @see com.github.dactiv.healthan.security.entity.SecurityPrincipal
+     */
+    private final String type;
+
+    public RememberMeAuthenticationToken(String username, String token, String type) {
+        super(new LinkedHashSet<>());
+        this.username = username;
+        this.token = token;
+        this.type = type;
     }
 
-    public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, Object id) {
-        super(token, type, true);
-        this.id = id;
+    @Override
+    public Object getCredentials() {
+        return token;
     }
 
-    public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, UserDetails userDetails, Collection<? extends GrantedAuthority> authorities, Object id) {
-        super(token, type, userDetails, authorities, true);
-        this.id = id;
+    @Override
+    public Object getPrincipal() {
+        return username;
     }
 
-    public RememberMeAuthenticationToken(UsernamePasswordAuthenticationToken token, String type, Object id, Collection<? extends GrantedAuthority> authorities) {
-        super(token, type, true, authorities);
-        this.id = id;
+    public String getType() {
+        return type;
     }
-
-    public Object getId() {
-        return id;
-    }
-
-    public void setId(Object id) {
-        this.id = id;
-    }
-
-    public RememberMeToken toRememberToken() {
-        RememberMeToken result = new RememberMeToken(getPrincipal().toString(), getCredentials().toString(), getType());
-        result.setId(getId());
-        return result;
-    }
-
 }

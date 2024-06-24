@@ -5,8 +5,8 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.audit.Auditable;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.entity.BasicUserDetails;
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.plugin.Plugin;
-import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -178,8 +178,8 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             }
         }
 
-        if (SecurityUserDetails.class.isAssignableFrom(principal.getClass())) {
-            SecurityUserDetails securityUserDetails = Casts.cast(principal, SecurityUserDetails.class);
+        if (SecurityPrincipal.class.isAssignableFrom(principal.getClass())) {
+            SecurityPrincipal securityUserDetails = Casts.cast(principal, SecurityPrincipal.class);
 
             PluginAuditEvent auditEvent = new PluginAuditEvent(
                     Instant.now(),
@@ -188,12 +188,12 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
                     data
             );
 
-            if (MapUtils.isNotEmpty(securityUserDetails.getMeta())) {
-                auditEvent.setPrincipalMeta(securityUserDetails.getMeta());
+            if (MapUtils.isNotEmpty(securityUserDetails.getMetadata())) {
+                auditEvent.setMeta(securityUserDetails.getMetadata());
             }
 
-            auditEvent.getPrincipalMeta().put(BasicUserDetails.USER_ID_FIELD_NAME, securityUserDetails.getId());
-            auditEvent.getPrincipalMeta().put(BasicUserDetails.USER_TYPE_FIELD_NAME, securityUserDetails.getType());
+            auditEvent.getMeta().put(BasicUserDetails.USER_ID_FIELD_NAME, securityUserDetails.getId());
+            auditEvent.getMeta().put(BasicUserDetails.USER_TYPE_FIELD_NAME, securityUserDetails.getType());
             Object trace = request.getAttribute(OPERATION_DATA_TRACE_ATT_NAME);
 
             if (Objects.nonNull(trace) && Boolean.TRUE.equals(trace)) {

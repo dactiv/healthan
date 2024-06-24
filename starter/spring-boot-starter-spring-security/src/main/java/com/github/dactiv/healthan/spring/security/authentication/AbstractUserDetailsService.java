@@ -1,12 +1,13 @@
 package com.github.dactiv.healthan.spring.security.authentication;
 
+import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,13 +40,13 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
         String username = obtainUsername(request);
         String password = obtainPassword(request);
 
-        username = StringUtils.defaultString(username, StringUtils.EMPTY).trim();
+        username = StringUtils.defaultString(username, StringUtils.EMPTY);
         password = StringUtils.defaultString(password, StringUtils.EMPTY);
 
         boolean rememberMe = obtainRememberMe(request);
-        UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(username, password);
+        MultiValueMap<String, String> parameterMap = Casts.castMapToMultiValueMap(request.getParameterMap());
 
-        return new RequestAuthenticationToken(request, response, usernamePasswordToken, type, rememberMe);
+        return new RequestAuthenticationToken(parameterMap, username, password, type, rememberMe);
     }
 
     /**

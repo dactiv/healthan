@@ -1,8 +1,8 @@
 package com.github.dactiv.healthan.spring.security.plugin;
 
 import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.plugin.Plugin;
-import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -47,7 +47,7 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
             return AccessDecisionVoter.ACCESS_ABSTAIN;
         }
 
-        if (!SecurityUserDetails.class.isAssignableFrom(authentication.getDetails().getClass())) {
+        if (!SecurityPrincipal.class.isAssignableFrom(authentication.getPrincipal().getClass())) {
             return AccessDecisionVoter.ACCESS_ABSTAIN;
         }
 
@@ -66,9 +66,9 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
             return AccessDecisionVoter.ACCESS_GRANTED;
         }
 
-        if (SecurityUserDetails.class.isAssignableFrom(authentication.getDetails().getClass())) {
+        if (SecurityPrincipal.class.isAssignableFrom(authentication.getPrincipal().getClass())) {
 
-            SecurityUserDetails userDetails = Casts.cast(authentication.getDetails(), SecurityUserDetails.class);
+            SecurityPrincipal userDetails = Casts.cast(authentication.getPrincipal(), SecurityPrincipal.class);
 
             if (!resourceTypes.contains(userDetails.getType())) {
                 return AccessDecisionVoter.ACCESS_DENIED;

@@ -1,19 +1,17 @@
-package com.github.dactiv.healthan.spring.security.authentication.rememberme;
+package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.crypto.algorithm.Base64;
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.entity.TypeUserDetails;
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
-import com.github.dactiv.healthan.spring.security.authentication.token.PrincipalAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RememberMeAuthenticationToken;
-import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
+import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.util.AntPathMatcher;
@@ -50,17 +48,7 @@ public class CookieRememberService implements RememberMeServices {
             return null;
         }
 
-        RememberMeToken rememberMeToken = getTokenValue(rememberMeCookie);
-
-        if (Objects.isNull(rememberMeToken)) {
-            return null;
-        }
-
-        return new RememberMeAuthenticationToken(
-                new UsernamePasswordAuthenticationToken(rememberMeToken.getUsername(), rememberMeToken.getToken()),
-                rememberMeToken.getType(),
-                rememberMeToken.getId()
-        );
+        return getTokenValue(rememberMeCookie);
     }
 
     @Override
@@ -71,35 +59,38 @@ public class CookieRememberService implements RememberMeServices {
     @Override
     public void loginSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
-        if (!PrincipalAuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
+        if (!SimpleAuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
             return ;
         }
 
-        PrincipalAuthenticationToken token = Casts.cast(authentication);
-        if (!isRememberMeRequested(request) && !token.isRememberMe()) {
+        SimpleAuthenticationToken authenticationToken = Casts.cast(authentication);
+        if (!authenticationToken.isRememberMe()) {
             return;
         }
 
-        if (!SecurityUserDetails.class.isAssignableFrom(authentication.getDetails().getClass())) {
+        if (!SecurityPrincipal.class.isAssignableFrom(authentication.getDetails().getClass())) {
             return;
         }
 
-        SecurityUserDetails details = Casts.cast(authentication.getDetails());
-        RBucket<RememberMeToken> bucket = getRememberMeTokenBucket(details.toBasicUserDetails());
+        SecurityPrincipal principal = Casts.cast(authentication.getDetails());
+        String rememberMeToken = principal.toTypeUserDetails().toUniqueValue()
+                + CacheProperties.DEFAULT_SEPARATOR
+                + System.currentTimeMillis();
+        RBucket<RememberMeAuthenticationToken> bucket = getRememberMeTokenBucket(principal.toTypeUserDetails());
 
-        RememberMeToken rememberMeToken = bucket.get();
-        if (Objects.isNull(rememberMeToken)) {
-            rememberMeToken = new RememberMeToken(details);
-            bucket.set(rememberMeToken);
-        }
-
+        RememberMeAuthenticationToken rememberMeAuthenticationToken = new RememberMeAuthenticationToken(
+                principal.getUsername(),
+                rememberMeToken,
+                principal.getType()
+        );
+        bucket.set(rememberMeAuthenticationToken);
         if (Objects.nonNull(rememberMeProperties.getCache().getExpiresTime())) {
             bucket.expireAsync(rememberMeProperties.getCache().getExpiresTime().toDuration());
         }
 
         int maxAge = (int) rememberMeProperties.getCache().getExpiresTime().toSeconds();
 
-        setCookie(rememberMeToken, maxAge, request, response);
+        setCookie(rememberMeAuthenticationToken, maxAge, request, response);
     }
 
     /**
@@ -109,8 +100,8 @@ public class CookieRememberService implements RememberMeServices {
      *
      * @return 记住我桶信息
      */
-    public RBucket<RememberMeToken> getRememberMeTokenBucket(TypeUserDetails<Object> userDetails) {
-        String key = rememberMeProperties.getCache().getName(userDetails.getUserType() + CacheProperties.DEFAULT_SEPARATOR + userDetails.getUsername());
+    public RBucket<RememberMeAuthenticationToken> getRememberMeTokenBucket(TypeUserDetails<Object> userDetails) {
+        String key = rememberMeProperties.getCache().getName(userDetails.toUniqueValue());
         return redissonClient.getBucket(key);
     }
 
@@ -120,7 +111,7 @@ public class CookieRememberService implements RememberMeServices {
      * @param userDetails 用户明细
      */
     public void deleteRememberMeToken(TypeUserDetails<Object> userDetails) {
-        RBucket<RememberMeToken> bucket = getRememberMeTokenBucket(userDetails);
+        RBucket<RememberMeAuthenticationToken> bucket = getRememberMeTokenBucket(userDetails);
         bucket.deleteAsync();
     }
 
@@ -147,18 +138,6 @@ public class CookieRememberService implements RememberMeServices {
     }
 
     /**
-     * 是否记住我请求
-     *
-     * @param request http 请求
-     *
-     * @return true 是，否则 false
-     */
-    protected boolean isRememberMeRequested(HttpServletRequest request) {
-        String rememberMeValue = request.getParameter(rememberMeProperties.getParamName());
-        return rememberMeProperties.isAlways() || BooleanUtils.toBoolean(rememberMeValue);
-    }
-
-    /**
      * 设置 cookie 内容
      *
      * @param token    token 信息
@@ -166,7 +145,7 @@ public class CookieRememberService implements RememberMeServices {
      * @param request  http 请求信息
      * @param response http 请求信息
      */
-    protected void setCookie(RememberMeToken token, int maxAge, HttpServletRequest request, HttpServletResponse response) {
+    protected void setCookie(RememberMeAuthenticationToken token, int maxAge, HttpServletRequest request, HttpServletResponse response) {
         String cookieValue = encodeTokenValue(token);
 
         Cookie cookie = createCookie(request);
@@ -186,7 +165,7 @@ public class CookieRememberService implements RememberMeServices {
      *
      * @return 编码后的 token 值
      */
-    private String encodeTokenValue(RememberMeToken token) {
+    private String encodeTokenValue(RememberMeAuthenticationToken token) {
 
         String json = Casts.writeValueAsString(token);
 
@@ -202,13 +181,13 @@ public class CookieRememberService implements RememberMeServices {
      *
      * @return 记住我 token
      */
-    private RememberMeToken getTokenValue(String token) {
+    private RememberMeAuthenticationToken getTokenValue(String token) {
 
         if (rememberMeProperties.isBase64Value()) {
             token = Base64.decodeToString(token);
         }
 
-        return Casts.readValue(token, RememberMeToken.class);
+        return Casts.readValue(token, RememberMeAuthenticationToken.class);
     }
 
     /**

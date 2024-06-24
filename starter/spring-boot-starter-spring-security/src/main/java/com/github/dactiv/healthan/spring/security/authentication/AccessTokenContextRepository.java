@@ -11,11 +11,11 @@ import com.github.dactiv.healthan.crypto.algorithm.ByteSource;
 import com.github.dactiv.healthan.crypto.algorithm.cipher.CipherService;
 import com.github.dactiv.healthan.crypto.algorithm.exception.CryptoException;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.*;
 import com.github.dactiv.healthan.spring.security.entity.MobileUserDetails;
-import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.healthan.spring.web.device.DeviceUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -124,8 +124,8 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 return null;
             }
 
-            SecurityUserDetails userDetails = Casts.cast(context.getAuthentication().getDetails());
-            Object tokenValue = userDetails.getMeta().get(accessTokenProperties.getAccessTokenParamName());
+            SecurityPrincipal userDetails = Casts.cast(context.getAuthentication().getPrincipal());
+            Object tokenValue = userDetails.getMetadata().get(accessTokenProperties.getAccessTokenParamName());
             if (Objects.isNull(tokenValue)) {
                 return null;
             }
@@ -175,11 +175,11 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         return accessTokenProperties.getAccessTokenCache().getName(type + CacheProperties.DEFAULT_SEPARATOR + deviceIdentified);
     }
 
-    public String generatePlaintextString(SecurityUserDetails userDetails) {
+    public String generatePlaintextString(SecurityPrincipal userDetails) {
         return generatePlaintextString(userDetails, accessTokenProperties.getCryptoKey());
     }
 
-    public String generatePlaintextString(SecurityUserDetails userDetails, String aesKey) {
+    public String generatePlaintextString(SecurityPrincipal userDetails, String aesKey) {
         Map<String, Object> json = new LinkedHashMap<>();
 
         json.put(IdEntity.ID_FIELD_NAME, userDetails.getId());
@@ -221,7 +221,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
      *
      * @param userDetails 移动端的用户明细实现
      */
-    public void deleteContext(SecurityUserDetails userDetails) {
+    public void deleteContext(SecurityPrincipal userDetails) {
         RBucket<SecurityContext> bucket = getSecurityContextBucket(userDetails.getType(), userDetails.getId());
         bucket.deleteAsync();
     }
@@ -245,10 +245,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         Authentication authentication = context.getAuthentication();
 
         if (authentication instanceof RememberMeAuthenticationToken) {
-            RememberMeAuthenticationToken rememberMeToken = Casts.cast(authentication);
-            if (rememberMeToken.isRememberMe()) {
-                return;
-            }
+            return;
         }
 
         if (authentication instanceof SimpleAuthenticationToken) {
@@ -258,17 +255,17 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
             }
         }
 
-        Object details = authentication.getDetails();
-        if (Objects.isNull(details) || !SecurityUserDetails.class.isAssignableFrom(details.getClass())) {
+        Object details = authentication.getPrincipal();
+        if (Objects.isNull(details) || !SecurityPrincipal.class.isAssignableFrom(details.getClass())) {
             return;
         }
 
-        SecurityUserDetails userDetails = Casts.cast(details);
-        if (MapUtils.isEmpty(userDetails.getMeta())) {
+        SecurityPrincipal userDetails = Casts.cast(details);
+        if (MapUtils.isEmpty(userDetails.getMetadata())) {
             return ;
         }
 
-        Object accessTokenValue = userDetails.getMeta().get(accessTokenProperties.getAccessTokenParamName());
+        Object accessTokenValue = userDetails.getMetadata().get(accessTokenProperties.getAccessTokenParamName());
         if (Objects.isNull(accessTokenValue)) {
             return ;
         }
@@ -286,7 +283,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 accessTokenBucket.expireAsync(timeProperties.toDuration());
             }
 
-            Object refreshTokenValue = userDetails.getMeta().get(accessTokenProperties.getRefreshTokenParamName());
+            Object refreshTokenValue = userDetails.getMetadata().get(accessTokenProperties.getRefreshTokenParamName());
             if (Objects.nonNull(refreshTokenValue) && ExpiredToken.class.isAssignableFrom(refreshTokenValue.getClass())) {
                 AccessToken refreshToken = Casts.cast(refreshTokenValue);
                 RBucket<ExpiredToken> refreshBucket = getAccessTokenBucket(

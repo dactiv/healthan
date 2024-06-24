@@ -4,8 +4,8 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
 import com.github.dactiv.healthan.security.entity.BasicUserDetails;
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
-import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.healthan.spring.security.entity.UserDetailsOperationDataTraceRecord;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import net.sf.jsqlparser.statement.Statement;
@@ -59,15 +59,15 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
             return null;
         }
 
-        if (context.getAuthentication() instanceof SimpleAuthenticationToken && context.getAuthentication().getDetails() instanceof SecurityUserDetails) {
+        if (context.getAuthentication() instanceof SimpleAuthenticationToken && context.getAuthentication().getDetails() instanceof SecurityPrincipal) {
             SimpleAuthenticationToken authenticationToken = Casts.cast(context.getAuthentication());
-            SecurityUserDetails userDetails = Casts.cast(authenticationToken.getDetails());
+            SecurityPrincipal userDetails = Casts.cast(authenticationToken.getPrincipal());
             String username = userDetails.getUsername();
             if (ignorePrincipals.contains(username)) {
                 return null;
             }
 
-            Map<String, Object> meta = userDetails.getMeta();
+            Map<String, Object> meta = userDetails.getMetadata();
             if (MapUtils.isEmpty(meta)) {
                 meta = new LinkedHashMap<>();
             }

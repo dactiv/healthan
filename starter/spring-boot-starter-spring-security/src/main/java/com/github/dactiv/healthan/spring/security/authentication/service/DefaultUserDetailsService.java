@@ -1,20 +1,23 @@
 package com.github.dactiv.healthan.spring.security.authentication.service;
 
-import com.github.dactiv.healthan.security.entity.RoleAuthority;
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
+import com.github.dactiv.healthan.security.entity.SimpleSecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.AbstractUserDetailsService;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
-import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
-import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -26,43 +29,23 @@ public class DefaultUserDetailsService extends AbstractUserDetailsService {
 
     public static final String DEFAULT_TYPES = "Default";
 
-    private final Map<String, SecurityUserDetails> userDetailsMap = new LinkedHashMap<>();
-
     private final PasswordEncoder passwordEncoder;
 
     public DefaultUserDetailsService(AuthenticationProperties properties,
                                      PasswordEncoder passwordEncoder) {
         setAuthenticationProperties(properties);
-        for (SecurityProperties.User user : properties.getUsers()) {
-            SecurityUserDetails userDetails = new SecurityUserDetails(
-                    DigestUtils.md5DigestAsHex(user.getName().getBytes(StandardCharsets.UTF_8)),
-                    user.getName(),
-                    passwordEncoder.encode(user.getPassword())
-            );
-
-            userDetails.setRoleAuthorities(
-                    user.getRoles().stream().map(RoleAuthority::new).collect(Collectors.toList())
-            );
-
-            userDetailsMap.put(userDetails.getUsername(), userDetails);
-        }
-
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public SecurityUserDetails getAuthenticationUserDetails(RequestAuthenticationToken token) throws AuthenticationException {
-        return getUser(token.getPrincipal().toString());
+    public SecurityPrincipal getSecurityPrincipal(RequestAuthenticationToken token) throws AuthenticationException {
+        return getSecurityPrincipal(token.getPrincipal().toString());
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getPrincipalAuthorities(SecurityUserDetails userDetails) {
-        return userDetails.getAuthorities();
-    }
-
-    @Override
-    public boolean isSupportCache(SimpleAuthenticationToken token) {
-        return false;
+    public Collection<? extends GrantedAuthority> getPrincipalAuthorities(SecurityPrincipal principal) {
+        SecurityProperties.User user = getSpringSecurityUserConfig(principal.getUsername());
+        return user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 
     @Override
@@ -75,15 +58,28 @@ public class DefaultUserDetailsService extends AbstractUserDetailsService {
         return this.passwordEncoder;
     }
 
-    private SecurityUserDetails getUser(String username) {
+    private SecurityPrincipal getSecurityPrincipal(String username) {
+        SecurityProperties.User user = getSpringSecurityUserConfig(username);
+        return new SimpleSecurityPrincipal(
+                DigestUtils.md5DigestAsHex(user.getName().getBytes(StandardCharsets.UTF_8)),
+                user.getName(),
+                user.getPassword(),
+                DEFAULT_TYPES
+        );
+    }
 
-        SecurityUserDetails userDetails = userDetailsMap.get(username);
+    private SecurityProperties.User getSpringSecurityUserConfig(String username) {
+        Optional<SecurityProperties.User> optional = getAuthenticationProperties()
+                .getUsers()
+                .stream()
+                .filter(u -> u.getName().equals(username))
+                .findFirst();
 
-        if (Objects.isNull(userDetails)) {
+        if (!optional.isPresent()) {
             throw new BadCredentialsException("用户名密码错误");
         }
 
-        return userDetails;
+        return optional.get();
     }
 
 }

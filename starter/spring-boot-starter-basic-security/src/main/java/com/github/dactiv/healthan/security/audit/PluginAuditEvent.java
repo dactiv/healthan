@@ -28,7 +28,7 @@ public class PluginAuditEvent extends AuditEvent {
      */
     private String id;
 
-    private Map<String, Object> principalMeta = new LinkedHashMap<>();
+    private Map<String, Object> meta = new LinkedHashMap<>();
 
     /**
      * 操作数据留痕 ID
@@ -73,17 +73,17 @@ public class PluginAuditEvent extends AuditEvent {
      *
      * @return 当事人元数据
      */
-    public Map<String, Object> getPrincipalMeta() {
-        return principalMeta;
+    public Map<String, Object> getMeta() {
+        return meta;
     }
 
     /**
      * 设置当事人元数据
      *
-     * @param principalMeta 当事人元数据
+     * @param meta 当事人元数据
      */
-    public void setPrincipalMeta(Map<String, Object> principalMeta) {
-        this.principalMeta = principalMeta;
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     /**

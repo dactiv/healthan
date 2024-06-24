@@ -7,7 +7,6 @@ import com.github.dactiv.healthan.spring.security.authentication.UserDetailsServ
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RequestAuthenticationConfigurer;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import org.redisson.api.RedissonClient;
@@ -55,9 +54,9 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
 
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1";
 
-    private final RememberMeServices rememberMeServices;
-
     private final AuthenticationProperties authenticationProperties;
+
+    private final RememberMeServices rememberMeServices;
 
     private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
@@ -71,8 +70,6 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
 
     private final RedissonClient redissonClient;
 
-    private final RememberMeProperties rememberMeProperties;
-
     public SpringSecurityConfig(RememberMeServices rememberMeServices,
                                 AuthenticationProperties authenticationProperties,
                                 AuthenticationFailureHandler authenticationFailureHandler,
@@ -80,8 +77,7 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                                 SecurityContextRepository securityContextRepository,
                                 ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
                                 ObjectProvider<UserDetailsService> userDetailsServices,
-                                RedissonClient redissonClient,
-                                RememberMeProperties rememberMeProperties) {
+                                RedissonClient redissonClient) {
         this.rememberMeServices = rememberMeServices;
         this.authenticationProperties = authenticationProperties;
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolvers.stream().collect(Collectors.toList());
@@ -90,7 +86,6 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.redissonClient = redissonClient;
-        this.rememberMeProperties = rememberMeProperties;
     }
 
     @Override
@@ -228,7 +223,6 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                                     authenticationProperties,
                                     authenticationTypeTokenResolvers,
                                     userDetailsServices,
-                                    rememberMeProperties,
                                     redissonClient
                             )
                     )
@@ -239,7 +233,6 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                     .logout()
                     .and()
                     .rememberMe()
-                    .alwaysRemember(true)
                     .rememberMeServices(rememberMeServices)
                     .and()
                     .sessionManagement()

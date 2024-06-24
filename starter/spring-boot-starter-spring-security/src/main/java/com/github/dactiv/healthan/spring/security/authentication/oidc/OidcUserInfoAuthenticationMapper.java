@@ -1,8 +1,8 @@
 package com.github.dactiv.healthan.spring.security.authentication.oidc;
 
 import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.spring.security.authentication.token.PrincipalAuthenticationToken;
-import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
+import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationContext;
@@ -32,10 +32,10 @@ public class OidcUserInfoAuthenticationMapper implements Function<OidcUserInfoAu
 
         Object principal = oAuth2Authorization.getAttributes().get(Principal.class.getName());
 
-        if (Objects.nonNull(principal) && principal instanceof PrincipalAuthenticationToken) {
-            PrincipalAuthenticationToken authenticationToken = Casts.cast(principal);
+        if (Objects.nonNull(principal) && principal instanceof SimpleAuthenticationToken) {
+            SimpleAuthenticationToken authenticationToken = Casts.cast(principal);
 
-            SecurityUserDetails userDetails = Casts.cast(authenticationToken.getDetails());
+            SecurityPrincipal userDetails = Casts.cast(authenticationToken.getPrincipal());
 
             Optional<OidcUserInfoAuthenticationResolver> optional = oidcUserInfoAuthenticationResolvers
                     .stream()

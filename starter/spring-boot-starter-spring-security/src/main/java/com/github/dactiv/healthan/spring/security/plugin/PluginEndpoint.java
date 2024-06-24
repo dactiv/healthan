@@ -10,7 +10,6 @@ import com.github.dactiv.healthan.security.enumerate.ResourceType;
 import com.github.dactiv.healthan.security.plugin.Plugin;
 import com.github.dactiv.healthan.security.plugin.PluginInfo;
 import com.github.dactiv.healthan.security.plugin.TargetObject;
-import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -59,6 +58,25 @@ import java.util.stream.Collectors;
 //FIXME 添加 plugin 配置，不要通过 ConfigurationProperties 配置信息
 @Endpoint(id = PluginEndpoint.DEFAULT_PLUGIN_KEY_NAME)
 public class PluginEndpoint {
+
+    public static final String DEFAULT_IS_AUTHENTICATED_METHOD_NAME = "isAuthenticated";
+
+    public static final String DEFAULT_HAS_ANY_ROLE_METHOD_NAME = "hasAnyRole";
+
+    public static final String DEFAULT_HAS_ROLE_METHOD_NAME = "hasRole";
+
+    public static final List<String> DEFAULT_SUPPORT_SECURITY_METHOD_NAME = Arrays.asList(
+            "hasAuthority",
+            "hasAnyAuthority",
+            DEFAULT_HAS_ROLE_METHOD_NAME,
+            DEFAULT_HAS_ANY_ROLE_METHOD_NAME,
+            DEFAULT_IS_AUTHENTICATED_METHOD_NAME
+    );
+
+    public static final List<String> DEFAULT_ROLE_PREFIX_METHOD_NAME = Arrays.asList(
+            DEFAULT_HAS_ANY_ROLE_METHOD_NAME,
+            DEFAULT_HAS_ROLE_METHOD_NAME
+    );
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PluginEndpoint.class);
 
@@ -384,15 +402,15 @@ public class PluginEndpoint {
         if (MethodReference.class.isAssignableFrom(spelNode.getClass())) {
 
             MethodReference mr = (MethodReference) spelNode;
-            if (SecurityUserDetails.DEFAULT_SUPPORT_SECURITY_METHOD_NAME.contains(mr.getName())) {
+            if (DEFAULT_SUPPORT_SECURITY_METHOD_NAME.contains(mr.getName())) {
 
-                if (mr.getName().equals(SecurityUserDetails.DEFAULT_IS_AUTHENTICATED_METHOD_NAME)) {
-                    result.add(SecurityUserDetails.DEFAULT_IS_AUTHENTICATED_METHOD_NAME);
+                if (mr.getName().equals(DEFAULT_IS_AUTHENTICATED_METHOD_NAME)) {
+                    result.add(DEFAULT_IS_AUTHENTICATED_METHOD_NAME);
                 } else {
                     for (int i = 0; i < mr.getChildCount(); i++) {
                         String value = mr.getChild(i).toString().replaceAll("'", StringUtils.EMPTY);
 
-                        if (SecurityUserDetails.DEFAULT_ROLE_PREFIX_METHOD_NAME.contains(mr.getName())) {
+                        if (DEFAULT_ROLE_PREFIX_METHOD_NAME.contains(mr.getName())) {
                             value = RoleAuthority.DEFAULT_ROLE_PREFIX + value;
                         }
 

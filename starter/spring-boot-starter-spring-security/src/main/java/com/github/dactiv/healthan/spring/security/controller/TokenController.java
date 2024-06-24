@@ -2,11 +2,11 @@ package com.github.dactiv.healthan.spring.security.controller;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.AccessToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
-import com.github.dactiv.healthan.spring.security.entity.SecurityUserDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -48,9 +48,9 @@ public class TokenController {
     @PostMapping("refreshAccessToken")
     public RestResult<Map<String, Object>> refreshAccessToken(@RequestParam String refreshToken,
                                                               @CurrentSecurityContext SecurityContext securityContext) {
-        Object details = securityContext.getAuthentication().getDetails();
-        Assert.notNull(details, "当前存在未认证用户,请确保 accessToken 是否未过期或值是否正确。");
-        Assert.isTrue(SecurityUserDetails.class.isAssignableFrom(details.getClass()),"当前用户非安全用户明细");
+        Object principal = securityContext.getAuthentication().getPrincipal();
+        Assert.notNull(principal, "当前存在未认证用户,请确保 accessToken 是否未过期或值是否正确。");
+        Assert.isTrue(SecurityPrincipal.class.isAssignableFrom(principal.getClass()),"当前用户非安全用户明细");
 
         String refreshMd5 = DigestUtils.md5DigestAsHex(refreshToken.getBytes());
         String refresh = accessTokenProperties.getRefreshTokenCache().getName(refreshMd5);
@@ -68,8 +68,8 @@ public class TokenController {
         AccessToken redisAccessToken = accessTokenBucket.get();
         Assert.isTrue(!redisAccessToken.isExpired(), "[" + redisAccessToken.getToken() + "] 令牌已过期");
 
-        SecurityUserDetails userDetails = Casts.cast(details);
-        AccessToken securityUserAccessToken = Casts.cast(userDetails.getMeta().get(accessTokenProperties.getAccessTokenParamName()));
+        SecurityPrincipal userDetails = Casts.cast(principal);
+        AccessToken securityUserAccessToken = Casts.cast(userDetails.getMetadata().get(accessTokenProperties.getAccessTokenParamName()));
         Assert.isTrue(StringUtils.equals(redisAccessToken.getToken(), securityUserAccessToken.getToken()), "令牌匹配不正确");
 
         RBucket<SecurityContext> securityContextBucket = accessTokenContextRepository.getSecurityContextBucket(
@@ -93,8 +93,8 @@ public class TokenController {
         }
 
         AccessToken newRefreshToken = Casts.of(refreshTokenValue, AccessToken.class);
-        userDetails.getMeta().put(accessTokenProperties.getAccessTokenParamName(), redisAccessToken);
-        userDetails.getMeta().put(accessTokenProperties.getRefreshTokenParamName(), newRefreshToken);
+        userDetails.getMetadata().put(accessTokenProperties.getAccessTokenParamName(), redisAccessToken);
+        userDetails.getMetadata().put(accessTokenProperties.getRefreshTokenParamName(), newRefreshToken);
 
         Map<String, Object> result = new LinkedHashMap<>();
 

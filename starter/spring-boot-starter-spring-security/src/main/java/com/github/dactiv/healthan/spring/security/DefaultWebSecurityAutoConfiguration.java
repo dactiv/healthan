@@ -2,15 +2,14 @@ package com.github.dactiv.healthan.spring.security;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
-import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
-import com.github.dactiv.healthan.spring.security.authentication.IpAuthenticationFilter;
-import com.github.dactiv.healthan.spring.security.authentication.RequestAuthenticationFilter;
-import com.github.dactiv.healthan.spring.security.authentication.RestResultAuthenticationEntryPoint;
+import com.github.dactiv.healthan.spring.security.authentication.*;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.RequestAuthenticationConfigurer;
 import com.github.dactiv.healthan.spring.security.plugin.PluginSourceTypeVoter;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import org.apache.commons.collections4.CollectionUtils;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -25,6 +24,9 @@ import org.springframework.security.access.vote.ConsensusBased;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.context.SecurityContextRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,30 +43,66 @@ public class DefaultWebSecurityAutoConfiguration {
 
     private final AccessTokenContextRepository accessTokenContextRepository;
 
-    private final AuthenticationProperties properties;
+    private final AuthenticationProperties authenticationProperties;
 
     private final List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters;
 
     private final List<ErrorResultResolver> resultResolvers;
 
+    private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
+
+    private final List<UserDetailsService> userDetailsServices;
+
+    private final AuthenticationFailureHandler authenticationFailureHandler;
+
+    private final AuthenticationSuccessHandler authenticationSuccessHandler;
+
+    private final SecurityContextRepository securityContextRepository;
+
+    private final RedissonClient redissonClient;
+
     public DefaultWebSecurityAutoConfiguration(AccessTokenContextRepository accessTokenContextRepository,
-                                               AuthenticationProperties properties,
-                                               ObjectProvider<ErrorResultResolver> resultResolvers,
+                                               AuthenticationProperties authenticationProperties,
+                                               AuthenticationFailureHandler authenticationFailureHandler,
+                                               AuthenticationSuccessHandler authenticationSuccessHandler,
+                                               RedissonClient redissonClient,
+                                               SecurityContextRepository securityContextRepository,
+                                               ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
+                                               ObjectProvider<ErrorResultResolver> errorResultResolvers,
+                                               ObjectProvider<UserDetailsService> userDetailsServices,
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
         this.accessTokenContextRepository = accessTokenContextRepository;
-        this.properties = properties;
+        this.authenticationProperties = authenticationProperties;
+        this.authenticationFailureHandler = authenticationFailureHandler;
+        this.authenticationSuccessHandler = authenticationSuccessHandler;
+        this.securityContextRepository = securityContextRepository;
+        this.redissonClient = redissonClient;
+        this.userDetailsServices = userDetailsServices.stream().collect(Collectors.toList());
+        this.authenticationTypeTokenResolvers = authenticationTypeTokenResolvers.stream().collect(Collectors.toList());
         this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().collect(Collectors.toList());
-        this.resultResolvers = resultResolvers.stream().collect(Collectors.toList());
+        this.resultResolvers = errorResultResolvers.stream().collect(Collectors.toList());
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .authorizeHttpRequests()
-                .antMatchers(properties.getPermitUriAntMatchers().toArray(new String[0]))
+                .antMatchers(authenticationProperties.getPermitUriAntMatchers().toArray(new String[0]))
                 .permitAll()
                 .anyRequest()
                 .authenticated()
+                .and()
+                .apply(
+                        new RequestAuthenticationConfigurer<>(
+                                authenticationProperties,
+                                authenticationTypeTokenResolvers,
+                                userDetailsServices,
+                                redissonClient
+                        )
+                )
+                .securityContextRepository(securityContextRepository)
+                .failureHandler(authenticationFailureHandler)
+                .successHandler(authenticationSuccessHandler)
                 .and()
                 .httpBasic()
                 .disable()
@@ -97,9 +135,9 @@ public class DefaultWebSecurityAutoConfiguration {
             }
         }
 
-        httpSecurity.addFilterBefore(new IpAuthenticationFilter(this.properties), RequestAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(new IpAuthenticationFilter(this.authenticationProperties), RequestAuthenticationFilter.class);
 
-        addConsensusBasedToMethodSecurityInterceptor(httpSecurity, properties);
+        addConsensusBasedToMethodSecurityInterceptor(httpSecurity, authenticationProperties);
         return httpSecurity.build();
     }
 
