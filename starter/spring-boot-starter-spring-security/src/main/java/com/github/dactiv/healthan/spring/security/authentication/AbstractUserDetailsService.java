@@ -4,9 +4,7 @@ import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -24,17 +22,11 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
 
     private AuthenticationProperties authenticationProperties;
 
-    private RememberMeProperties rememberMeProperties;
-
     public AbstractUserDetailsService() {
     }
 
     public void setAuthenticationProperties(AuthenticationProperties authenticationProperties) {
         this.authenticationProperties = authenticationProperties;
-    }
-
-    public void setRememberMeProperties(RememberMeProperties rememberMeProperties) {
-        this.rememberMeProperties = rememberMeProperties;
     }
 
     @Override
@@ -45,21 +37,9 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
         username = StringUtils.defaultString(username, StringUtils.EMPTY);
         password = StringUtils.defaultString(password, StringUtils.EMPTY);
 
-        boolean rememberMe = obtainRememberMe(request);
         MultiValueMap<String, String> parameterMap = Casts.castMapToMultiValueMap(request.getParameterMap());
 
-        return new RequestAuthenticationToken(parameterMap, username, password, type, rememberMe);
-    }
-
-    /**
-     * 获取记住我
-     *
-     * @param request http servlet request
-     *
-     * @return true 记住我，否则 false
-     */
-    protected boolean obtainRememberMe(HttpServletRequest request) {
-        return BooleanUtils.toBoolean(request.getParameter(rememberMeProperties.getParamName()));
+        return new RequestAuthenticationToken(parameterMap, username, password, type);
     }
 
     /**
@@ -96,7 +76,7 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
     @Override
     public CacheProperties getAuthorizationCache(RequestAuthenticationToken token, SecurityPrincipal principal) {
         return CacheProperties.of(
-                authenticationProperties.getAuthorizationCache().getName(principal),
+                authenticationProperties.getAuthorizationCache().getName(principal.getName()),
                 authenticationProperties.getAuthorizationCache().getExpiresTime()
         ) ;
     }

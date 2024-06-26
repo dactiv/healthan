@@ -6,7 +6,6 @@ import com.github.dactiv.healthan.spring.security.authentication.token.RememberM
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import org.redisson.api.RBucket;
-import org.redisson.api.RSet;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,10 +36,11 @@ public interface UserDetailsService {
     /**
      * 获取用户授权集合
      *
+     * @param token     请求认证 token
      * @param principal 安全用户接口
      * @return 用户授权集合
      */
-    Collection<GrantedAuthority> getPrincipalAuthorities(SecurityPrincipal principal);
+    Collection<GrantedAuthority> getPrincipalAuthorities(RequestAuthenticationToken token, SecurityPrincipal principal);
 
     /**
      * 获取支持的用户类型
@@ -117,7 +117,9 @@ public interface UserDetailsService {
                                                                   RequestAuthenticationToken token,
                                                                   Collection<? extends GrantedAuthority> grantedAuthorities) {
 
-        return new SimpleAuthenticationToken(principal, token, grantedAuthorities);
+        SimpleAuthenticationToken result = new SimpleAuthenticationToken(principal, token, grantedAuthorities);
+        result.setAuthenticated(true);
+        return result;
     }
 
     /**
@@ -164,10 +166,11 @@ public interface UserDetailsService {
     /**
      * 当授权缓存完成时候触发此方法，前提必须要 {@link #getAuthorizationCache(RequestAuthenticationToken, SecurityPrincipal)} 返回非 null 值时，此方法才生效
      *
-     * @param cache              缓存信息
-     * @param grantedAuthorities 授权信息
+     * @param token     请求 token
+     * @param principal 当前用户
+     * @param cache     授权信息
      */
-    default void onAuthorizationCache(RSet<GrantedAuthority> cache, Collection<GrantedAuthority> grantedAuthorities) {
+    default void onAuthorizationCache(RequestAuthenticationToken token, SecurityPrincipal principal, Collection<GrantedAuthority> cache) {
 
     }
 

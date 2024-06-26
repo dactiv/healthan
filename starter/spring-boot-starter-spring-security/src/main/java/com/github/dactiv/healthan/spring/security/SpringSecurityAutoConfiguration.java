@@ -3,8 +3,10 @@ package com.github.dactiv.healthan.spring.security;
 import com.github.dactiv.healthan.spring.security.audit.ControllerAuditHandlerInterceptor;
 import com.github.dactiv.healthan.spring.security.audit.RequestBodyAttributeAdviceAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
-import com.github.dactiv.healthan.spring.security.authentication.CookieRememberService;
-import com.github.dactiv.healthan.spring.security.authentication.config.*;
+import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.CaptchaVerificationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.OAuth2Properties;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureResponse;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
@@ -28,7 +30,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -45,8 +46,7 @@ import java.util.stream.Collectors;
         AuthenticationProperties.class,
         AccessTokenProperties.class,
         CaptchaVerificationProperties.class,
-        OAuth2Properties.class,
-        RememberMeProperties.class
+        OAuth2Properties.class
 })
 @ConditionalOnProperty(prefix = "healthan.authentication.spring.security", value = "enabled", matchIfMissing = true)
 public class SpringSecurityAutoConfiguration {
@@ -95,13 +95,6 @@ public class SpringSecurityAutoConfiguration {
                 accessTokenProperties,
                 properties
         );
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(RememberMeServices.class)
-    public CookieRememberService cookieRememberService(RememberMeProperties rememberMeProperties,
-                                                       RedissonClient redissonClient) {
-        return new CookieRememberService(rememberMeProperties, redissonClient);
     }
 
     @Bean

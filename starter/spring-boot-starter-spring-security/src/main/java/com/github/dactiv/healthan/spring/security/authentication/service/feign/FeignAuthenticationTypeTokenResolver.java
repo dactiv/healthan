@@ -41,7 +41,7 @@ public class FeignAuthenticationTypeTokenResolver implements AuthenticationTypeT
 
         MultiValueMap<String, String> parameterMap = Casts.castMapToMultiValueMap(request.getParameterMap());
 
-        return new RequestAuthenticationToken(parameterMap, username, password, DEFAULT_TYPE, false);
+        return new RequestAuthenticationToken(parameterMap, username, password, DEFAULT_TYPE);
     }
 
     /**

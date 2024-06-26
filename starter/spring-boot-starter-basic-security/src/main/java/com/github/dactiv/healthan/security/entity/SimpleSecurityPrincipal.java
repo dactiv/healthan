@@ -100,21 +100,25 @@ public class SimpleSecurityPrincipal implements SecurityPrincipal {
     }
 
     @Override
+    @JsonIgnore
     public boolean isNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isNonLocked() {
         return !UserStatus.Lock.equals(status);
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isDisabled() {
         return UserStatus.Disabled.equals(status);
     }

@@ -2,10 +2,12 @@ package com.github.dactiv.healthan.spring.security.authentication.provider;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.UserDetailsService;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
+import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RSet;
 import org.redisson.api.RedissonClient;
@@ -23,7 +25,10 @@ import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 请求认证供应者实现
@@ -37,12 +42,12 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
     /**
      * 认证缓存块名称
      */
-    public static String DEFAULT_AUTHENTICATION_KEY_NAME = "spring:security:authentication:";
+    public static String DEFAULT_AUTHENTICATION_KEY_NAME = "healthan:spring:security:authentication:";
 
     /**
      * 授权缓存块名称
      */
-    public static String DEFAULT_AUTHORIZATION_KEY_NAME = "spring:security:authorization:";
+    public static String DEFAULT_AUTHORIZATION_KEY_NAME = "healthan:spring:security:authorization:";
 
     /**
      * 国际化信息
@@ -82,81 +87,15 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         RequestAuthenticationToken requestAuthenticationToken = Casts.cast(authentication);
 
         try {
-            /*if (authentication instanceof RequestAuthenticationToken) {
-                RequestAuthenticationToken requestAuthenticationToken = Casts.cast(authentication);
-                // 开始授权，如果失败抛出异常
-                userDetails = doPrincipalAuthenticate(requestAuthenticationToken);
-            } else if (authentication instanceof RememberMeAuthenticationToken) {
-                RememberMeAuthenticationToken rememberMeAuthenticationToken = Casts.cast(authentication);
-                userDetails = doRememberMeAuthentication(rememberMeAuthenticationToken);
-            } else {
-                String error = messages.getMessage(
-                        "PrincipalAuthenticationProvider.authenticateNotFound",
-                        "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
-                );
-                throw new AuthenticationServiceException(error);
-            }*/
             SecurityPrincipal userDetails = doPrincipalAuthenticate(requestAuthenticationToken);
             return createSuccessAuthentication(userDetails, requestAuthenticationToken);
         } catch (Exception e) {
-            LOGGER.error("用户认证发生异常", e);
+            if (e instanceof AuthenticationServiceException) {
+                throw e;
+            }
             throw new AuthenticationServiceException(e.getMessage());
         }
     }
-
-    /*protected SecurityPrincipal doRememberMeAuthentication(RememberMeAuthenticationToken token) {
-
-        String key = rememberMeProperties.getCache().getName(token.getName());
-        RBucket<RememberMeToken> bucket = redissonClient.getBucket(key);
-        RememberMeToken redisObject = bucket.get();
-
-        if (Objects.isNull(redisObject)) {
-            String error = messages.getMessage(
-                    "PrincipalAuthenticationProvider.rememberMeCredentialsExpired",
-                    "记住我凭证已超时"
-            );
-            throw new CredentialsExpiredException(error);
-        }
-
-        // 如果两个 token 不相等，报错
-        if (!redisObject.equals(token.toRememberToken())) {
-            String error = messages.getMessage(
-                    "PrincipalAuthenticationProvider.rememberMeBadCredentials",
-                    "记住我凭证错误"
-            );
-            throw new RememberMeAuthenticationException(error);
-        }
-        CacheProperties authenticationCache = null;
-        if (Objects.nonNull(authenticationProperties.getAuthenticationCache())) {
-            authenticationCache = CacheProperties.of(
-                    authenticationProperties.getAuthenticationCache().getName(token.getName()),
-                    authenticationProperties.getAuthenticationCache().getExpiresTime()
-            );
-        }
-        SecurityPrincipal userDetails = null;
-        // 如果启用认证缓存，从认证缓存里获取用户
-        if (Objects.nonNull(authenticationCache)) {
-            RBucket<SecurityPrincipal> userDetailsBucket = redissonClient.getBucket(authenticationCache.getName());
-            userDetails = userDetailsBucket.get();
-        }
-
-        if (Objects.isNull(userDetails)) {
-            Optional<UserDetailsService> optional = getUserDetailsService(token);
-            if (optional.isPresent()) {
-                userDetails = optional.get().getRememberMeUserDetails(token);
-            }
-        }
-
-        if (Objects.isNull(userDetails)) {
-            String error = messages.getMessage(
-                    "PrincipalAuthenticationProvider.rememberMeUserDetailsNotFound",
-                    "记住我凭证错误"
-            );
-            throw new RememberMeAuthenticationException(error);
-        }
-
-        return userDetails;
-    }*/
 
     protected SecurityPrincipal doPrincipalAuthenticate(RequestAuthenticationToken token) {
 
@@ -208,12 +147,18 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         // 如果启用认证缓存，存储用户信息到缓存里
         if (Objects.nonNull(authenticationCache)) {
-            RBucket<SecurityPrincipal> bucket = redissonClient.getBucket(authenticationCache.getName());
-            bucket.setAsync(userDetails);
-            if (Objects.nonNull(authenticationCache.getExpiresTime())) {
-                bucket.expireAsync(authenticationCache.getExpiresTime().toDuration());
+            RBucket<SecurityPrincipal> authenticationCacheBucket = redissonClient.getBucket(authenticationCache.getName());
+            TimeProperties expiresTime = authenticationCache.getExpiresTime();
+            final SecurityPrincipal principal = userDetails;
+            if (Objects.isNull(expiresTime)) {
+                authenticationCacheBucket
+                        .setAsync(userDetails)
+                        .thenAccept(unused -> userDetailsService.onAuthenticationCache(principal, authenticationCacheBucket));
+            } else {
+                authenticationCacheBucket
+                        .setAsync(userDetails, expiresTime.getValue(), expiresTime.getUnit())
+                        .thenAccept(unused -> userDetailsService.onAuthenticationCache(principal, authenticationCacheBucket));
             }
-            userDetailsService.onAuthenticationCache(userDetails, bucket);
         }
 
         return userDetails;
@@ -282,23 +227,46 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         }
 
         UserDetailsService userDetailsService = optional.get();
-        Collection<GrantedAuthority> grantedAuthorities = new LinkedHashSet<>();
+        Collection<GrantedAuthority> grantedAuthorities;
 
         // 如果启用缓存获取缓存得用户授权信息，否则获取 userDetailsService.getPrincipalAuthorities 的实际数据
         CacheProperties authorizationCache = userDetailsService.getAuthorizationCache(token, principal);
         if (Objects.nonNull(authorizationCache)) {
-            RSet<GrantedAuthority> cache = redissonClient.getSet(authorizationCache.getName(token.getName()));
-            grantedAuthorities.addAll(cache);
-            if (Objects.nonNull(authorizationCache.getExpiresTime())) {
-                cache.expireAsync(authorizationCache.getExpiresTime().toDuration());
-            }
-            userDetailsService.onAuthorizationCache(cache, grantedAuthorities);
+            grantedAuthorities = getCacheGrantedAuthorities(principal, token, authorizationCache, userDetailsService);
         } else {
             // 获取用户授权信息
-            grantedAuthorities = userDetailsService.getPrincipalAuthorities(principal);
+            grantedAuthorities = userDetailsService.getPrincipalAuthorities(token, principal);
         }
 
         return userDetailsService.createSuccessAuthentication(principal, token, grantedAuthorities);
+    }
+
+    private Collection<GrantedAuthority> getCacheGrantedAuthorities(SecurityPrincipal principal,
+                                                                    RequestAuthenticationToken token,
+                                                                    CacheProperties authorizationCache,
+                                                                    UserDetailsService userDetailsService) {
+        Collection<GrantedAuthority> grantedAuthorities;
+        RSet<GrantedAuthority> authorizationCacheSet = redissonClient.getSet(authorizationCache.getName());
+        if (CollectionUtils.isEmpty(authorizationCacheSet)) {
+            grantedAuthorities = userDetailsService.getPrincipalAuthorities(token, principal);
+        } else {
+            grantedAuthorities = authorizationCacheSet;
+        }
+
+        if (RSet.class.isAssignableFrom(grantedAuthorities.getClass())) {
+            return grantedAuthorities;
+        }
+
+        if (CollectionUtils.isNotEmpty(grantedAuthorities)) {
+            authorizationCacheSet
+                    .addAllAsync(grantedAuthorities)
+                    .thenAccept(success -> userDetailsService.onAuthorizationCache(token, principal, authorizationCacheSet));
+            if (Objects.nonNull(authorizationCache.getExpiresTime())) {
+                authorizationCacheSet.expireAsync(authorizationCache.getExpiresTime().toDuration());
+            }
+        }
+
+        return grantedAuthorities;
     }
 
     /**
@@ -317,7 +285,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return SimpleAuthenticationToken.class.isAssignableFrom(authentication);
+        return RequestAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
 

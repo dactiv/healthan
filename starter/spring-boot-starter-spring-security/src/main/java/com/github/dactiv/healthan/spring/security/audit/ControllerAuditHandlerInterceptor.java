@@ -259,7 +259,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
         } else {
             Authentication authentication = securityContext.getAuthentication();
-            return authentication.getDetails();
+            return authentication.getPrincipal();
         }
     }
 

@@ -59,7 +59,7 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
             return null;
         }
 
-        if (context.getAuthentication() instanceof SimpleAuthenticationToken && context.getAuthentication().getDetails() instanceof SecurityPrincipal) {
+        if (context.getAuthentication() instanceof SimpleAuthenticationToken && context.getAuthentication().getPrincipal() instanceof SecurityPrincipal) {
             SimpleAuthenticationToken authenticationToken = Casts.cast(context.getAuthentication());
             SecurityPrincipal userDetails = Casts.cast(authenticationToken.getPrincipal());
             String username = userDetails.getUsername();

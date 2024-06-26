@@ -24,18 +24,14 @@ public class RequestAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String type;
 
-    private final boolean rememberMe;
-
     public RequestAuthenticationToken(MultiValueMap<String, String> parameterMap,
                                       Object principal,
                                       Object credentials,
-                                      String type,
-                                      boolean rememberMe) {
+                                      String type) {
         super(new LinkedHashSet<>());
         this.parameterMap = parameterMap;
         this.principal = principal;
         this.credentials = credentials;
-        this.rememberMe = rememberMe;
         this.type = type;
     }
 
@@ -51,10 +47,6 @@ public class RequestAuthenticationToken extends AbstractAuthenticationToken {
 
     public MultiValueMap<String, String> getParameterMap() {
         return parameterMap;
-    }
-
-    public boolean isRememberMe() {
-        return rememberMe;
     }
 
     public String getType() {

@@ -4,12 +4,12 @@ import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.entity.SimpleSecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.AbstractUserDetailsService;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -31,11 +31,6 @@ public class MapUserDetailsService extends AbstractUserDetailsService implements
         super.setAuthenticationProperties(authenticationProperties);
     }
 
-    @Autowired
-    public void setRememberMeProperties(RememberMeProperties rememberMeProperties) {
-        super.setRememberMeProperties(rememberMeProperties);
-    }
-
     @Override
     public void afterPropertiesSet()  {
         USER_DETAILS.put("test", new SimpleSecurityPrincipal(1, getPasswordEncoder().encode("123456"), "test", "test"));
@@ -47,8 +42,10 @@ public class MapUserDetailsService extends AbstractUserDetailsService implements
     }
 
     @Override
-    public Collection<GrantedAuthority> getPrincipalAuthorities(SecurityPrincipal principal) {
-        return Collections.emptyList();
+    public Collection<GrantedAuthority> getPrincipalAuthorities(RequestAuthenticationToken token, SecurityPrincipal principal) {
+        Collection<GrantedAuthority> result = new LinkedHashSet<>();
+        result.add(new SimpleGrantedAuthority("perms[operate]"));
+        return result;
     }
 
     @Override

@@ -1,11 +1,11 @@
 package com.github.dactiv.healthan.spring.security.test;
 
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
-import org.apache.commons.lang3.StringUtils;
+import com.github.dactiv.healthan.spring.security.authentication.provider.RequestAuthenticationProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -13,8 +13,6 @@ import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfig
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import javax.servlet.http.Cookie;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,7 +32,7 @@ public class SpringSecurityTest {
     private AuthenticationProperties authenticationProperties;
 
     @Autowired
-    private RememberMeProperties rememberMeProperties;
+    private RedissonClient redissonClient;
 
     @BeforeEach
     public void setup() {
@@ -47,7 +45,7 @@ public class SpringSecurityTest {
     @Test
     public void testLoginSuccess() throws Exception {
 
-        String rememberMeCookie = mockMvc
+        mockMvc
                 .perform(
                     post(authenticationProperties.getLoginProcessingUrl())
                         .param(authenticationProperties.getUsernameParamName(),"test")
@@ -57,22 +55,18 @@ public class SpringSecurityTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("{\"status\":200}"))
-                .andExpect(content().json("{\"data\":{\"username\":\"test\"}}"))
-                .andReturn()
-                .getResponse()
-                .getCookie(rememberMeProperties.getCookie().getName())
-                .getValue();
+                .andExpect(content().json("{\"data\":{\"username\":\"test\"}}"));
 
-        Cookie cookie = new Cookie(rememberMeProperties.getCookie().getName(), rememberMeCookie);
-        Assertions.assertTrue(StringUtils.isNotEmpty(cookie.getValue()));
+        Assertions.assertTrue(redissonClient.getBucket(RequestAuthenticationProvider.DEFAULT_AUTHENTICATION_KEY_NAME + "test:test").isExists());
+        Assertions.assertFalse(redissonClient.getSet(RequestAuthenticationProvider.DEFAULT_AUTHORIZATION_KEY_NAME + "test:1:test").isEmpty());
 
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"id\":1,\"username\":\"test\",\"roleAuthorities\":[],\"status\":{\"name\":\"启用\",\"value\":1},\"type\":\"test\",\"resourceAuthorityStrings\":[]}}}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
 
         mockMvc
-                .perform(get("/operate/isAuthenticated").cookie(cookie))
+                .perform(get("/operate/isAuthenticated"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"message\":\"isAuthenticated\"}"));
 
@@ -90,7 +84,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"id\":1,\"username\":\"test\",\"roleAuthorities\":[],\"status\":{\"name\":\"启用\",\"value\":1},\"type\":\"test\",\"resourceAuthorityStrings\":[]}}},{\"principal\":\"test:test\",\"type\":\"AUTHENTICATION_FAILURE\"}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:test\",\"type\":\"AUTHENTICATION_FAILURE\"}]}"));
     }
 
 }

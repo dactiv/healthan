@@ -31,7 +31,6 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationEndpointConfigurer;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
@@ -56,8 +55,6 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
 
     private final AuthenticationProperties authenticationProperties;
 
-    private final RememberMeServices rememberMeServices;
-
     private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
     private final List<UserDetailsService> userDetailsServices;
@@ -70,15 +67,13 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
 
     private final RedissonClient redissonClient;
 
-    public SpringSecurityConfig(RememberMeServices rememberMeServices,
-                                AuthenticationProperties authenticationProperties,
+    public SpringSecurityConfig(AuthenticationProperties authenticationProperties,
                                 AuthenticationFailureHandler authenticationFailureHandler,
                                 AuthenticationSuccessHandler authenticationSuccessHandler,
                                 SecurityContextRepository securityContextRepository,
                                 ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
                                 ObjectProvider<UserDetailsService> userDetailsServices,
                                 RedissonClient redissonClient) {
-        this.rememberMeServices = rememberMeServices;
         this.authenticationProperties = authenticationProperties;
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolvers.stream().collect(Collectors.toList());
         this.userDetailsServices = userDetailsServices.stream().collect(Collectors.toList());
@@ -231,9 +226,6 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                     .successHandler(authenticationSuccessHandler)
                     .and()
                     .logout()
-                    .and()
-                    .rememberMe()
-                    .rememberMeServices(rememberMeServices)
                     .and()
                     .sessionManagement()
                     .maximumSessions(Integer.MAX_VALUE);
