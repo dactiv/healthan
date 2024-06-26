@@ -6,6 +6,7 @@ import com.github.dactiv.healthan.spring.security.authentication.token.RememberM
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import org.redisson.api.RBucket;
+import org.redisson.api.RSet;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -39,7 +40,7 @@ public interface UserDetailsService {
      * @param principal 安全用户接口
      * @return 用户授权集合
      */
-    Collection<? extends GrantedAuthority> getPrincipalAuthorities(SecurityPrincipal principal);
+    Collection<GrantedAuthority> getPrincipalAuthorities(SecurityPrincipal principal);
 
     /**
      * 获取支持的用户类型
@@ -75,9 +76,23 @@ public interface UserDetailsService {
      * @param principal   目标用户
      * @param oldPassword 旧密码
      * @param newPassword 新密码
+     * @deprecated 业务内容的方法，由业务系统自己定义，跟框架无关，移植后删除
      */
+    @Deprecated
     default void updatePassword(SecurityPrincipal principal, String oldPassword, String newPassword) {
         throw new UnsupportedOperationException(getType() + " 类型用户不支持更新密码操作");
+    }
+
+    /**
+     * 管理员重置密码
+     *
+     * @param id 唯一识别
+     * @return 新密码
+     * @deprecated 业务内容的方法，由业务系统自己定义，跟框架无关，移植后删除
+     */
+    @Deprecated
+    default String adminRestPassword(Serializable id) {
+        throw new UnsupportedOperationException(getType() + "类型用户不支持管理员重置密码操作");
     }
 
     /**
@@ -116,17 +131,6 @@ public interface UserDetailsService {
     }
 
     /**
-     * 管理员重置密码
-     *
-     * @param id 唯一识别
-     *
-     * @return 新密码
-     */
-    default String adminRestPassword(Serializable id) {
-        throw new UnsupportedOperationException(getType() + "类型用户不支持管理员重置密码操作");
-    }
-
-    /**
      * 获取认证缓存配置
      *
      * @param token 请求认证 token
@@ -137,7 +141,7 @@ public interface UserDetailsService {
     }
 
     /**
-     * 当缓存完成时候触发此方法，前提必须要 {@link #getAuthenticationCache(RequestAuthenticationToken)} 返回非 null 值时，此方法才生效
+     * 当认证缓存完成时候触发此方法，前提必须要 {@link #getAuthenticationCache(RequestAuthenticationToken)} 返回非 null 值时，此方法才生效
      *
      * @param principal 当前用户
      * @param bucket    缓存捅信息
@@ -151,11 +155,20 @@ public interface UserDetailsService {
      *
      * @param token     请求认证 token
      * @param principal 当前用户
-     *
      * @return 缓存配置
      */
     default CacheProperties getAuthorizationCache(RequestAuthenticationToken token, SecurityPrincipal principal) {
         return null;
+    }
+
+    /**
+     * 当授权缓存完成时候触发此方法，前提必须要 {@link #getAuthorizationCache(RequestAuthenticationToken, SecurityPrincipal)} 返回非 null 值时，此方法才生效
+     *
+     * @param cache              缓存信息
+     * @param grantedAuthorities 授权信息
+     */
+    default void onAuthorizationCache(RSet<GrantedAuthority> cache, Collection<GrantedAuthority> grantedAuthorities) {
+
     }
 
 }

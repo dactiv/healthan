@@ -47,7 +47,7 @@ public class MapUserDetailsService extends AbstractUserDetailsService implements
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getPrincipalAuthorities(SecurityPrincipal principal) {
+    public Collection<GrantedAuthority> getPrincipalAuthorities(SecurityPrincipal principal) {
         return Collections.emptyList();
     }
 

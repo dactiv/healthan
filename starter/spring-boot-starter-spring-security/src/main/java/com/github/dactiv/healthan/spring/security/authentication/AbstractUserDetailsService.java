@@ -1,6 +1,8 @@
 package com.github.dactiv.healthan.spring.security.authentication;
 
+import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
@@ -89,5 +91,21 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
      */
     public AuthenticationProperties getAuthenticationProperties() {
         return authenticationProperties;
+    }
+
+    @Override
+    public CacheProperties getAuthorizationCache(RequestAuthenticationToken token, SecurityPrincipal principal) {
+        return CacheProperties.of(
+                authenticationProperties.getAuthorizationCache().getName(principal),
+                authenticationProperties.getAuthorizationCache().getExpiresTime()
+        ) ;
+    }
+
+    @Override
+    public CacheProperties getAuthenticationCache(RequestAuthenticationToken token) {
+        return CacheProperties.of(
+                authenticationProperties.getAuthenticationCache().getName(token.getName()),
+                authenticationProperties.getAuthenticationCache().getExpiresTime()
+        ) ;
     }
 }

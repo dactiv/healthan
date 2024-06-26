@@ -43,7 +43,7 @@ public class DefaultUserDetailsService extends AbstractUserDetailsService {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getPrincipalAuthorities(SecurityPrincipal principal) {
+    public Collection<GrantedAuthority> getPrincipalAuthorities(SecurityPrincipal principal) {
         SecurityProperties.User user = getSpringSecurityUserConfig(principal.getUsername());
         return user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
