@@ -2,9 +2,8 @@ package com.github.dactiv.healthan.spring.security.authentication.handler;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
-import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
-import com.github.dactiv.healthan.security.entity.SimpleSecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -69,10 +68,9 @@ public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
                                         Authentication authentication) throws IOException{
 
         RestResult<Object> result = RestResult.of(HttpStatus.OK.getReasonPhrase());
-        if (authentication.getPrincipal() instanceof SecurityPrincipal) {
-            SecurityPrincipal userDetails = Casts.cast(authentication.getPrincipal());
-            SecurityPrincipal returnValue = Casts.of(userDetails, SimpleSecurityPrincipal.class);
-            result.setData(returnValue);
+        if (authentication instanceof SimpleAuthenticationToken) {
+            SimpleAuthenticationToken simpleAuthenticationToken = Casts.cast(authentication);
+            result.setData(simpleAuthenticationToken.toMap());
         } else {
             result.setData(authentication);
         }

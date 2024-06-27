@@ -4,9 +4,8 @@ import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.audit.Auditable;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
-import com.github.dactiv.healthan.security.entity.BasicUserDetails;
-import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.plugin.Plugin;
+import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +15,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.method.HandlerMethod;
@@ -178,22 +176,22 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             }
         }
 
-        if (SecurityPrincipal.class.isAssignableFrom(principal.getClass())) {
-            SecurityPrincipal securityUserDetails = Casts.cast(principal, SecurityPrincipal.class);
+        if (SimpleAuthenticationToken.class.isAssignableFrom(principal.getClass())) {
+            SimpleAuthenticationToken authenticationToken = Casts.cast(principal);
 
             PluginAuditEvent auditEvent = new PluginAuditEvent(
                     Instant.now(),
-                    securityUserDetails.getUsername(),
+                    authenticationToken.getName(),
                     type,
                     data
             );
 
-            if (MapUtils.isNotEmpty(securityUserDetails.getMetadata())) {
-                auditEvent.setMeta(securityUserDetails.getMetadata());
+            Map<String, Object> principalMetadata = authenticationToken.toMap(false);
+
+            if (MapUtils.isNotEmpty(principalMetadata)) {
+                auditEvent.setMetadata(principalMetadata);
             }
 
-            auditEvent.getMeta().put(BasicUserDetails.USER_ID_FIELD_NAME, securityUserDetails.getId());
-            auditEvent.getMeta().put(BasicUserDetails.USER_TYPE_FIELD_NAME, securityUserDetails.getType());
             Object trace = request.getAttribute(OPERATION_DATA_TRACE_ATT_NAME);
 
             if (Objects.nonNull(trace) && Boolean.TRUE.equals(trace)) {
@@ -258,8 +256,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             return principal;
 
         } else {
-            Authentication authentication = securityContext.getAuthentication();
-            return authentication.getPrincipal();
+            return securityContext.getAuthentication();
         }
     }
 

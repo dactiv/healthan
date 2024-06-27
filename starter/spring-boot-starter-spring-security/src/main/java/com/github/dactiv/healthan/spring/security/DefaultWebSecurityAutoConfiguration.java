@@ -51,7 +51,7 @@ public class DefaultWebSecurityAutoConfiguration {
 
     private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
-    private final List<UserDetailsService> userDetailsServices;
+    private final List<TypeSecurityPrincipalService> typeSecurityPrincipalServices;
 
     private final AuthenticationFailureHandler authenticationFailureHandler;
 
@@ -69,7 +69,7 @@ public class DefaultWebSecurityAutoConfiguration {
                                                SecurityContextRepository securityContextRepository,
                                                ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
                                                ObjectProvider<ErrorResultResolver> errorResultResolvers,
-                                               ObjectProvider<UserDetailsService> userDetailsServices,
+                                               ObjectProvider<TypeSecurityPrincipalService> userDetailsServices,
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
         this.accessTokenContextRepository = accessTokenContextRepository;
         this.authenticationProperties = authenticationProperties;
@@ -77,7 +77,7 @@ public class DefaultWebSecurityAutoConfiguration {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.securityContextRepository = securityContextRepository;
         this.redissonClient = redissonClient;
-        this.userDetailsServices = userDetailsServices.stream().collect(Collectors.toList());
+        this.typeSecurityPrincipalServices = userDetailsServices.stream().collect(Collectors.toList());
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolvers.stream().collect(Collectors.toList());
         this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().collect(Collectors.toList());
         this.resultResolvers = errorResultResolvers.stream().collect(Collectors.toList());
@@ -96,7 +96,7 @@ public class DefaultWebSecurityAutoConfiguration {
                         new RequestAuthenticationConfigurer<>(
                                 authenticationProperties,
                                 authenticationTypeTokenResolvers,
-                                userDetailsServices,
+                                typeSecurityPrincipalServices,
                                 redissonClient
                         )
                 )

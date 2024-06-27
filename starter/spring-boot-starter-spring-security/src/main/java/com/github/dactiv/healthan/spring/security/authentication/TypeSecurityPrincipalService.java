@@ -2,9 +2,9 @@ package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
-import com.github.dactiv.healthan.spring.security.authentication.token.RememberMeAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.entity.AuthenticationSuccessDetails;
 import org.redisson.api.RBucket;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ import java.util.List;
  *
  * @author maurice.chen
  */
-public interface UserDetailsService {
+public interface TypeSecurityPrincipalService {
 
     /**
      * 获取认证用户明细
@@ -119,17 +120,16 @@ public interface UserDetailsService {
 
         SimpleAuthenticationToken result = new SimpleAuthenticationToken(principal, token, grantedAuthorities);
         result.setAuthenticated(true);
+
+        result.setDetails(getPrincipalDetails(principal, token, grantedAuthorities));
+
         return result;
     }
 
-    /**
-     * 获取记住我用户信息
-     *
-     * @param token 记住我认证 token
-     * @return spring security 用户实现
-     */
-    default RequestAuthenticationToken getRememberMeUserDetails(RememberMeAuthenticationToken token) {
-        throw new UnsupportedOperationException(getType() + "类型用户不支持获取记住我用户明细操作");
+    default Object getPrincipalDetails(SecurityPrincipal principal,
+                                       RequestAuthenticationToken token,
+                                       Collection<? extends GrantedAuthority> grantedAuthorities) {
+        return new AuthenticationSuccessDetails(token.getDetails(), new LinkedHashMap<>());
     }
 
     /**

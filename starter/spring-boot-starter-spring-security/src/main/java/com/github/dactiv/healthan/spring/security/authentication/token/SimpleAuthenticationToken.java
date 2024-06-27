@@ -1,12 +1,16 @@
 package com.github.dactiv.healthan.spring.security.authentication.token;
 
+import com.github.dactiv.healthan.commons.CacheProperties;
+import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
+import com.github.dactiv.healthan.security.entity.TypePrincipal;
+import com.github.dactiv.healthan.security.entity.support.SimpleSecurityPrincipal;
+import com.github.dactiv.healthan.security.entity.support.SimpleTypePrincipal;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedHashSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 简单的用户认证 token
@@ -17,20 +21,26 @@ public class SimpleAuthenticationToken extends AbstractAuthenticationToken {
 
     private static final long serialVersionUID = 3747271533448473641L;
 
+    public static final String PRINCIPAL_KEY = "principal";
+
+    public static final String DETAILS_KEY = "details";
+
+    public static final String AUTHORITIES_KEY = "authorities";
+
     /**
      * 当前用户
      */
     private final SecurityPrincipal principal;
 
     /**
-     * 是否记住我认证
-     */
-    private final boolean rememberMe;
-
-    /**
      * 最后登录时间
      */
     private final Date lastAuthenticationTime;
+
+    /**
+     * 当前用户类型
+     */
+    private final String principalType;
 
     /**
      * 当前用户认证 token
@@ -39,12 +49,12 @@ public class SimpleAuthenticationToken extends AbstractAuthenticationToken {
      * @param authorities 授权信息
      */
     public SimpleAuthenticationToken(SecurityPrincipal principal,
-                                     boolean rememberMe,
+                                     String principalType,
                                      Collection<? extends GrantedAuthority> authorities,
                                      Date lastAuthenticationTime) {
         super(authorities);
         this.principal = principal;
-        this.rememberMe = rememberMe;
+        this.principalType = principalType;
         this.lastAuthenticationTime = lastAuthenticationTime;
     }
 
@@ -56,7 +66,7 @@ public class SimpleAuthenticationToken extends AbstractAuthenticationToken {
     public SimpleAuthenticationToken(SecurityPrincipal principal,
                                      RequestAuthenticationToken token,
                                      Collection<? extends GrantedAuthority> grantedAuthorities) {
-        this(principal, token.isRememberMe(), grantedAuthorities, new Date());
+        this(principal, token.getType(), grantedAuthorities, new Date());
     }
 
     @Override
@@ -71,16 +81,26 @@ public class SimpleAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public String getName() {
-        return principal.getName();
+        return getPrincipalType() + CacheProperties.DEFAULT_SEPARATOR + principal.getName();
     }
 
     /**
-     * 获取是否记住我认证
+     * 获取用户基本信息
      *
-     * @return 是否记住我认证
+     * @return 用户基本信息
+     *
      */
-    public boolean isRememberMe() {
-        return rememberMe;
+    public <T> TypePrincipal<T> toTypeUserDetails() {
+        return new SimpleTypePrincipal<>(Casts.cast(principal.getId()), principal.getUsername(), getPrincipalType());
+    }
+
+    /**
+     * 获取用户类型
+     *
+     * @return 用户类型
+     */
+    public String getPrincipalType() {
+        return principalType;
     }
 
     /**
@@ -90,5 +110,38 @@ public class SimpleAuthenticationToken extends AbstractAuthenticationToken {
      */
     public Date getLastAuthenticationTime() {
         return lastAuthenticationTime;
+    }
+
+    /**
+     * 转换为 map 数据
+     *
+     * @return map 数据
+     */
+    public Map<String, Object> toMap() {
+        return toMap(true);
+    }
+
+    /**
+     * 转换为 map 数据
+     *
+     * @param loadAuthorities 是否加载 权限信息
+     *
+     * @return map 数据
+     */
+    public Map<String, Object> toMap(boolean loadAuthorities) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put(SimpleTypePrincipal.TYPE_FIELD_NAME, getPrincipalType());
+        map.put(PRINCIPAL_KEY, Casts.of(getPrincipal(), SimpleSecurityPrincipal.class));
+        map.put(DETAILS_KEY, getDetails());
+
+        if (loadAuthorities) {
+            List<String> authorities = getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+            map.put(AUTHORITIES_KEY, authorities);
+        }
+
+        return map;
     }
 }

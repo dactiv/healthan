@@ -18,11 +18,11 @@ import javax.servlet.http.HttpServletResponse;
  * @author maurice.chen
  *
  */
-public abstract class AbstractUserDetailsService implements UserDetailsService {
+public abstract class AbstractTypeSecurityPrincipalService implements TypeSecurityPrincipalService {
 
     private AuthenticationProperties authenticationProperties;
 
-    public AbstractUserDetailsService() {
+    public AbstractTypeSecurityPrincipalService() {
     }
 
     public void setAuthenticationProperties(AuthenticationProperties authenticationProperties) {
@@ -75,8 +75,9 @@ public abstract class AbstractUserDetailsService implements UserDetailsService {
 
     @Override
     public CacheProperties getAuthorizationCache(RequestAuthenticationToken token, SecurityPrincipal principal) {
+        String suffix = token.getType() + CacheProperties.DEFAULT_SEPARATOR + principal.getName();
         return CacheProperties.of(
-                authenticationProperties.getAuthorizationCache().getName(principal.getName()),
+                authenticationProperties.getAuthorizationCache().getName(suffix),
                 authenticationProperties.getAuthorizationCache().getExpiresTime()
         ) ;
     }

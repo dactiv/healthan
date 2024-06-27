@@ -4,7 +4,7 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.exception.SystemException;
 import com.github.dactiv.healthan.crypto.algorithm.Base64;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.service.DefaultUserDetailsService;
+import com.github.dactiv.healthan.spring.security.authentication.service.DefaultTypeSecurityPrincipalService;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -53,7 +53,7 @@ public class FeignAuthenticationConfiguration {
                 .findFirst()
                 .orElseThrow(() -> new SystemException("找不到类型为:" + FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE + "的默认用户"));
 
-        requestTemplate.header(properties.getTypeHeaderName(), DefaultUserDetailsService.DEFAULT_TYPES);
+        requestTemplate.header(properties.getTypeHeaderName(), DefaultTypeSecurityPrincipalService.DEFAULT_TYPES);
 
         String base64 = encodeUserProperties(properties, user);
 
@@ -100,7 +100,7 @@ public class FeignAuthenticationConfiguration {
 
         String base64 = encodeUserProperties(properties, user);
 
-        httpHeaders.add(properties.getTypeHeaderName(), DefaultUserDetailsService.DEFAULT_TYPES);
+        httpHeaders.add(properties.getTypeHeaderName(), DefaultTypeSecurityPrincipalService.DEFAULT_TYPES);
         httpHeaders.add(properties.getTokenHeaderName(), base64);
         httpHeaders.add(properties.getTokenResolverHeaderName(), FeignAuthenticationTypeTokenResolver.DEFAULT_TYPE);
 

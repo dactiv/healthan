@@ -1,8 +1,8 @@
 package com.github.dactiv.healthan.spring.security.plugin;
 
 import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.plugin.Plugin;
+import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -47,7 +47,7 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
             return AccessDecisionVoter.ACCESS_ABSTAIN;
         }
 
-        if (!SecurityPrincipal.class.isAssignableFrom(authentication.getPrincipal().getClass())) {
+        if (!SimpleAuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
             return AccessDecisionVoter.ACCESS_ABSTAIN;
         }
 
@@ -66,18 +66,13 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
             return AccessDecisionVoter.ACCESS_GRANTED;
         }
 
-        if (SecurityPrincipal.class.isAssignableFrom(authentication.getPrincipal().getClass())) {
+        SimpleAuthenticationToken authenticationToken = Casts.cast(authentication);
 
-            SecurityPrincipal userDetails = Casts.cast(authentication.getPrincipal(), SecurityPrincipal.class);
-
-            if (!resourceTypes.contains(userDetails.getType())) {
-                return AccessDecisionVoter.ACCESS_DENIED;
-            } else {
-                return AccessDecisionVoter.ACCESS_GRANTED;
-            }
+        if (!resourceTypes.contains(authenticationToken.getPrincipalType())) {
+            return AccessDecisionVoter.ACCESS_DENIED;
+        } else {
+            return AccessDecisionVoter.ACCESS_GRANTED;
         }
-
-        return AccessDecisionVoter.ACCESS_ABSTAIN;
     }
 
     /**

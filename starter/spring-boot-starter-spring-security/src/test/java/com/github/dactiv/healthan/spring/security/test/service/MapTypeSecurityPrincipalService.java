@@ -1,8 +1,8 @@
 package com.github.dactiv.healthan.spring.security.test.service;
 
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
-import com.github.dactiv.healthan.security.entity.SimpleSecurityPrincipal;
-import com.github.dactiv.healthan.spring.security.authentication.AbstractUserDetailsService;
+import com.github.dactiv.healthan.security.entity.support.SimpleSecurityPrincipal;
+import com.github.dactiv.healthan.spring.security.authentication.AbstractTypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import org.springframework.beans.factory.InitializingBean;
@@ -16,13 +16,13 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class MapUserDetailsService extends AbstractUserDetailsService implements InitializingBean {
+public class MapTypeSecurityPrincipalService extends AbstractTypeSecurityPrincipalService implements InitializingBean {
 
     private static final Map<String, SimpleSecurityPrincipal> USER_DETAILS = Collections.synchronizedMap(new HashMap<>());
 
     private final PasswordEncoder passwordEncoder;
 
-    public MapUserDetailsService(PasswordEncoder passwordEncoder) {
+    public MapTypeSecurityPrincipalService(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -33,7 +33,7 @@ public class MapUserDetailsService extends AbstractUserDetailsService implements
 
     @Override
     public void afterPropertiesSet()  {
-        USER_DETAILS.put("test", new SimpleSecurityPrincipal(1, getPasswordEncoder().encode("123456"), "test", "test"));
+        USER_DETAILS.put("test", new SimpleSecurityPrincipal(1, getPasswordEncoder().encode("123456"), "test"));
     }
 
     @Override

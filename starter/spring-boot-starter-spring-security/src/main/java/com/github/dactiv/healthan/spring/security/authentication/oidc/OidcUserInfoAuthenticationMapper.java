@@ -1,7 +1,6 @@
 package com.github.dactiv.healthan.spring.security.authentication.oidc;
 
 import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
@@ -35,15 +34,13 @@ public class OidcUserInfoAuthenticationMapper implements Function<OidcUserInfoAu
         if (Objects.nonNull(principal) && principal instanceof SimpleAuthenticationToken) {
             SimpleAuthenticationToken authenticationToken = Casts.cast(principal);
 
-            SecurityPrincipal userDetails = Casts.cast(authenticationToken.getPrincipal());
-
             Optional<OidcUserInfoAuthenticationResolver> optional = oidcUserInfoAuthenticationResolvers
                     .stream()
-                    .filter(s -> s.isSupport(userDetails.getType()))
+                    .filter(s -> s.isSupport(authenticationToken.getPrincipalType()))
                     .findFirst();
 
             if (optional.isPresent()) {
-                return optional.get().mappingOidcUserInfoClaims(oAuth2Authorization, claims, userDetails);
+                return optional.get().mappingOidcUserInfoClaims(oAuth2Authorization, claims, authenticationToken);
             }
 
         }

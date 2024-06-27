@@ -78,7 +78,7 @@ public interface PluginAuditEventRepository extends AuditEventRepository {
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(instant, principal, type, data);
 
         Map<String, Object> principalMeta = Casts.cast(map.getOrDefault(PluginAuditEvent.PRINCIPAL_META_FIELD_NAME, new LinkedHashMap<>()));
-        pluginAuditEvent.setMeta(principalMeta);
+        pluginAuditEvent.setMetadata(principalMeta);
 
         return pluginAuditEvent;
     }

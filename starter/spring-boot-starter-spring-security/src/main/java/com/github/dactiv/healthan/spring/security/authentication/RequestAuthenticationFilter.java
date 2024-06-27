@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -14,18 +15,12 @@ import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 /**
- * 认证 filter 实现, 用于结合 {@link UserDetailsService} 多用户类型认证的统一入口
+ * 认证 filter 实现, 用于结合 {@link TypeSecurityPrincipalService} 多用户类型认证的统一入口
  *
  * @author maurice.chen
  */
@@ -39,11 +34,11 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
 
     private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
-    private final List<UserDetailsService> userDetailsServices;
+    private final List<TypeSecurityPrincipalService> typeSecurityPrincipalServices;
 
     public RequestAuthenticationFilter(AuthenticationProperties authenticationProperties,
                                        List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolver,
-                                       List<UserDetailsService> userDetailsServices) {
+                                       List<TypeSecurityPrincipalService> typeSecurityPrincipalServices) {
         this.authenticationProperties = authenticationProperties;
 
         setRequiresAuthenticationRequestMatcher(
@@ -54,10 +49,10 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
         setPasswordParameter(authenticationProperties.getPasswordParamName());
 
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver;
-        this.userDetailsServices = userDetailsServices;
+        this.typeSecurityPrincipalServices = typeSecurityPrincipalServices;
     }
 
-    @Override
+    /*@Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (this.securityContextHolderStrategy.getContext().getAuthentication() != null) {
             super.doFilter(request, response, chain);
@@ -78,7 +73,7 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
             LOGGER.error("记住我认证出现异常", ex);
             unsuccessfulAuthentication(Casts.cast(request), Casts.cast(response), ex);
         }
-    }
+    }*/
 
     @Override
     protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
@@ -100,7 +95,10 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
         }
 
         Authentication token = createToken(request, response);
-
+        if (AbstractAuthenticationToken.class.isAssignableFrom(token.getClass())) {
+            AbstractAuthenticationToken authenticationToken = Casts.cast(token);
+            authenticationToken.setDetails(this.authenticationDetailsSource.buildDetails(request));
+        }
         return getAuthenticationManager().authenticate(token);
     }
 
@@ -137,13 +135,13 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
             return resolver.createToken(request, response, token);
 
         } else {
-            UserDetailsService userDetailsService = userDetailsServices
+            TypeSecurityPrincipalService typeSecurityPrincipalService = typeSecurityPrincipalServices
                     .stream()
                     .filter(u -> u.getType().contains(type))
                     .findFirst()
                     .orElseThrow(() -> new AuthenticationServiceException("找不到类型为 [" + type + "] 的用户明细服务实现"));
 
-            return userDetailsService.createToken(request, response, type);
+            return typeSecurityPrincipalService.createToken(request, response, type);
         }
 
     }

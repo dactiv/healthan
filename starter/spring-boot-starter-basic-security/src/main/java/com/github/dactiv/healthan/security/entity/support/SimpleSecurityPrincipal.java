@@ -1,10 +1,8 @@
-package com.github.dactiv.healthan.security.entity;
+package com.github.dactiv.healthan.security.entity.support;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.enumerate.UserStatus;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * 简单的安全用户实现
@@ -23,40 +21,23 @@ public class SimpleSecurityPrincipal implements SecurityPrincipal {
     @JsonIgnore
     private UserStatus status;
 
-    private String type;
-
-    private Map<String, Object> metadata = new LinkedHashMap<>();
-
     public SimpleSecurityPrincipal() {
     }
 
     public SimpleSecurityPrincipal(Object id,
                                    Object credentials,
-                                   String username,
-                                   String type) {
-        this(id, credentials, username, type, UserStatus.Enabled);
+                                   String username) {
+        this(id, credentials, username, UserStatus.Enabled);
     }
 
     public SimpleSecurityPrincipal(Object id,
                                    Object credentials,
                                    String username,
-                                   String type,
                                    UserStatus status) {
-        this(id,credentials, username, status, type, new LinkedHashMap<>());
-    }
-
-    public SimpleSecurityPrincipal(Object id,
-                                   Object credentials,
-                                   String username,
-                                   UserStatus status,
-                                   String type,
-                                   Map<String, Object> metadata) {
         this.id = id;
         this.credentials = credentials;
         this.username = username;
         this.status = status;
-        this.type = type;
-        this.metadata = metadata;
     }
 
     @Override
@@ -95,11 +76,6 @@ public class SimpleSecurityPrincipal implements SecurityPrincipal {
     }
 
     @Override
-    public String getType() {
-        return type;
-    }
-
-    @Override
     @JsonIgnore
     public boolean isNonExpired() {
         return true;
@@ -121,18 +97,5 @@ public class SimpleSecurityPrincipal implements SecurityPrincipal {
     @JsonIgnore
     public boolean isDisabled() {
         return UserStatus.Disabled.equals(status);
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    @Override
-    public Map<String, Object> getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(Map<String, Object> metadata) {
-        this.metadata = metadata;
     }
 }

@@ -2,7 +2,7 @@ package com.github.dactiv.healthan.spring.security.authentication.config;
 
 import com.github.dactiv.healthan.spring.security.authentication.AuthenticationTypeTokenResolver;
 import com.github.dactiv.healthan.spring.security.authentication.RequestAuthenticationFilter;
-import com.github.dactiv.healthan.spring.security.authentication.UserDetailsService;
+import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.provider.RequestAuthenticationProvider;
 import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpMethod;
@@ -17,18 +17,18 @@ public final class RequestAuthenticationConfigurer<H extends HttpSecurityBuilder
 
     private final RedissonClient redissonClient;
 
-    private final List<UserDetailsService> userDetailsServices;
+    private final List<TypeSecurityPrincipalService> typeSecurityPrincipalServices;
 
     public RequestAuthenticationConfigurer(AuthenticationProperties authenticationProperties,
                                            List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
-                                           List<UserDetailsService> userDetailsServices,
+                                           List<TypeSecurityPrincipalService> typeSecurityPrincipalServices,
                                            RedissonClient redissonClient) {
         super(
-                new RequestAuthenticationFilter(authenticationProperties, authenticationTypeTokenResolvers, userDetailsServices),
+                new RequestAuthenticationFilter(authenticationProperties, authenticationTypeTokenResolvers, typeSecurityPrincipalServices),
                 authenticationProperties.getLoginProcessingUrl()
         );
         this.redissonClient = redissonClient;
-        this.userDetailsServices = userDetailsServices;
+        this.typeSecurityPrincipalServices = typeSecurityPrincipalServices;
 
     }
 
@@ -40,6 +40,6 @@ public final class RequestAuthenticationConfigurer<H extends HttpSecurityBuilder
     @Override
     public void init(H http) throws Exception {
         super.init(http);
-        http.authenticationProvider(new RequestAuthenticationProvider(redissonClient, userDetailsServices));
+        http.authenticationProvider(new RequestAuthenticationProvider(redissonClient, typeSecurityPrincipalServices));
     }
 }

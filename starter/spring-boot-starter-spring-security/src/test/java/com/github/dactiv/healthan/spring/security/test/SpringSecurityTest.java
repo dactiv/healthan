@@ -40,6 +40,11 @@ public class SpringSecurityTest {
                 .webAppContextSetup(context)
                 .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
+
+        redissonClient.getKeys().delete(
+                RequestAuthenticationProvider.DEFAULT_AUTHENTICATION_KEY_NAME + "test:test",
+                RequestAuthenticationProvider.DEFAULT_AUTHORIZATION_KEY_NAME + "test:1:test"
+        );
     }
 
     @Test
@@ -55,7 +60,7 @@ public class SpringSecurityTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("{\"status\":200}"))
-                .andExpect(content().json("{\"data\":{\"username\":\"test\"}}"));
+                .andExpect(content().json("{\"data\":{\"type\":\"test\", \"principal\":{\"id\":1,\"username\":\"test\"}}}"));
 
         Assertions.assertTrue(redissonClient.getBucket(RequestAuthenticationProvider.DEFAULT_AUTHENTICATION_KEY_NAME + "test:test").isExists());
         Assertions.assertFalse(redissonClient.getSet(RequestAuthenticationProvider.DEFAULT_AUTHORIZATION_KEY_NAME + "test:1:test").isEmpty());
@@ -85,6 +90,11 @@ public class SpringSecurityTest {
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:test\",\"type\":\"AUTHENTICATION_FAILURE\"}]}"));
+
+        redissonClient.getKeys().delete(
+                RequestAuthenticationProvider.DEFAULT_AUTHENTICATION_KEY_NAME + "test:test",
+                RequestAuthenticationProvider.DEFAULT_AUTHORIZATION_KEY_NAME + "test:1:test"
+        );
     }
 
 }

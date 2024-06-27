@@ -26,7 +26,7 @@ public class DefaultAuthenticationFailureResponse implements JsonAuthenticationF
     @Override
     public void setting(RestResult<Map<String, Object>> result, HttpServletRequest request, AuthenticationException e) {
         String authHeader = request.getHeader(properties.getTypeHeaderName());
-        if (!StringUtils.equals(authHeader,DefaultUserDetailsService.DEFAULT_TYPES)) {
+        if (!StringUtils.equals(authHeader, DefaultTypeSecurityPrincipalService.DEFAULT_TYPES)) {
             return;
         }
 

@@ -1,8 +1,8 @@
 package com.github.dactiv.healthan.spring.security.authentication.service;
 
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
-import com.github.dactiv.healthan.security.entity.SimpleSecurityPrincipal;
-import com.github.dactiv.healthan.spring.security.authentication.AbstractUserDetailsService;
+import com.github.dactiv.healthan.security.entity.support.SimpleSecurityPrincipal;
+import com.github.dactiv.healthan.spring.security.authentication.AbstractTypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -25,14 +25,14 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class DefaultUserDetailsService extends AbstractUserDetailsService {
+public class DefaultTypeSecurityPrincipalService extends AbstractTypeSecurityPrincipalService {
 
     public static final String DEFAULT_TYPES = "Default";
 
     private final PasswordEncoder passwordEncoder;
 
-    public DefaultUserDetailsService(AuthenticationProperties properties,
-                                     PasswordEncoder passwordEncoder) {
+    public DefaultTypeSecurityPrincipalService(AuthenticationProperties properties,
+                                               PasswordEncoder passwordEncoder) {
         setAuthenticationProperties(properties);
         this.passwordEncoder = passwordEncoder;
     }
@@ -63,8 +63,7 @@ public class DefaultUserDetailsService extends AbstractUserDetailsService {
         return new SimpleSecurityPrincipal(
                 DigestUtils.md5DigestAsHex(user.getName().getBytes(StandardCharsets.UTF_8)),
                 user.getName(),
-                user.getPassword(),
-                DEFAULT_TYPES
+                user.getPassword()
         );
     }
 

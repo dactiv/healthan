@@ -1,10 +1,11 @@
 package com.github.dactiv.healthan.spring.security.audit;
 
 import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.commons.id.IdEntity;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
-import com.github.dactiv.healthan.security.entity.BasicUserDetails;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
+import com.github.dactiv.healthan.security.entity.support.SimpleTypePrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.entity.UserDetailsOperationDataTraceRecord;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
@@ -59,7 +60,7 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
             return null;
         }
 
-        if (context.getAuthentication() instanceof SimpleAuthenticationToken && context.getAuthentication().getPrincipal() instanceof SecurityPrincipal) {
+        if (context.getAuthentication() instanceof SimpleAuthenticationToken) {
             SimpleAuthenticationToken authenticationToken = Casts.cast(context.getAuthentication());
             SecurityPrincipal userDetails = Casts.cast(authenticationToken.getPrincipal());
             String username = userDetails.getUsername();
@@ -67,13 +68,13 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
                 return null;
             }
 
-            Map<String, Object> meta = userDetails.getMetadata();
+            Map<String, Object> meta = Casts.convertValue(authenticationToken.getDetails(), Casts.MAP_TYPE_REFERENCE);
             if (MapUtils.isEmpty(meta)) {
                 meta = new LinkedHashMap<>();
             }
 
-            meta.put(BasicUserDetails.USER_TYPE_FIELD_NAME, userDetails.getType());
-            meta.put(BasicUserDetails.USER_ID_FIELD_NAME, userDetails.getId());
+            meta.put(SimpleTypePrincipal.TYPE_FIELD_NAME, authenticationToken.getPrincipalType());
+            meta.put(IdEntity.ID_FIELD_NAME, userDetails.getId());
 
             List<OperationDataTraceRecord> records = super.createOperationDataTraceRecord(
                     mappedStatement,

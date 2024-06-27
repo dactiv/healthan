@@ -12,29 +12,29 @@ public class RefreshToken extends AccessToken {
     /**
      * 对应的访问 token
      */
-    private ExpiredToken accessToken;
+    private AccessToken accessToken;
 
     public RefreshToken() {
     }
 
-    public RefreshToken(ExpiredToken accessToken) {
+    public RefreshToken(AccessToken accessToken) {
         this.accessToken = accessToken;
     }
 
-    public RefreshToken(String token, TimeProperties expiresTime, ExpiredToken accessToken) {
+    public RefreshToken(String token, TimeProperties expiresTime, AccessToken accessToken) {
         super(token, expiresTime);
         this.accessToken = accessToken;
     }
 
-    public RefreshToken(AccessToken refreshToken, ExpiredToken accessToken) {
+    public RefreshToken(AccessToken refreshToken, AccessToken accessToken) {
         this(refreshToken.getToken(), refreshToken.getExpiresTime(), accessToken);
     }
 
-    public ExpiredToken getAccessToken() {
+    public AccessToken getAccessToken() {
         return accessToken;
     }
 
-    public void setAccessToken(ExpiredToken accessToken) {
+    public void setAccessToken(AccessToken accessToken) {
         this.accessToken = accessToken;
     }
 }

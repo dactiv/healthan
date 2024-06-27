@@ -12,7 +12,7 @@ import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAut
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessResponse;
 import com.github.dactiv.healthan.spring.security.authentication.service.DefaultAuthenticationFailureResponse;
-import com.github.dactiv.healthan.spring.security.authentication.service.DefaultUserDetailsService;
+import com.github.dactiv.healthan.spring.security.authentication.service.DefaultTypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.controller.TokenController;
 import com.github.dactiv.healthan.spring.security.plugin.PluginEndpoint;
 import org.redisson.api.RedissonClient;
@@ -78,10 +78,10 @@ public class SpringSecurityAutoConfiguration {
     }
 
     @Bean
-    DefaultUserDetailsService defaultUserDetailsService(PasswordEncoder passwordEncoder,
-                                                        AuthenticationProperties properties) {
+    DefaultTypeSecurityPrincipalService defaultUserDetailsService(PasswordEncoder passwordEncoder,
+                                                                  AuthenticationProperties properties) {
 
-        return new DefaultUserDetailsService(properties, passwordEncoder);
+        return new DefaultTypeSecurityPrincipalService(properties, passwordEncoder);
     }
 
     @Bean

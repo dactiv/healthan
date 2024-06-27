@@ -14,8 +14,11 @@ import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.token.*;
-import com.github.dactiv.healthan.spring.security.entity.MobileUserDetails;
+import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.entity.AccessTokenDetails;
+import com.github.dactiv.healthan.spring.security.entity.support.MobileSecurityPrincipal;
 import com.github.dactiv.healthan.spring.web.device.DeviceUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +40,6 @@ import org.springframework.web.util.WebUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -52,8 +54,6 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
     private final RedissonClient redissonClient;
 
-    private final AuthenticationProperties authenticationProperties;
-
     private final AccessTokenProperties accessTokenProperties;
 
     private final AntPathRequestMatcher loginRequestMatcher;
@@ -64,9 +64,11 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                                         AccessTokenProperties accessTokenProperties,
                                         AuthenticationProperties authenticationProperties) {
         this.redissonClient = redissonClient;
-        this.authenticationProperties = authenticationProperties;
         this.accessTokenProperties = accessTokenProperties;
-        this.loginRequestMatcher = new AntPathRequestMatcher(authenticationProperties.getLoginProcessingUrl(), HttpMethod.POST.name());
+        this.loginRequestMatcher = new AntPathRequestMatcher(
+                authenticationProperties.getLoginProcessingUrl(),
+                HttpMethod.POST.name()
+        );
     }
 
     @Override
@@ -110,7 +112,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
             ByteSource byteSource = cipherService.decrypt(Base64.decode(token), key);
             String plaintext = new String(byteSource.obtainBytes(), Charset.defaultCharset());
 
-            Map<String, Object> plaintextUserDetail = convertPlaintext(plaintext);
+            Map<String, Object> plaintextUserDetail = Casts.readValue(plaintext, Casts.MAP_TYPE_REFERENCE);
             if (MapUtils.isEmpty(plaintextUserDetail)) {
                 return null;
             }
@@ -124,32 +126,40 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 return null;
             }
 
-            SecurityPrincipal userDetails = Casts.cast(context.getAuthentication().getPrincipal());
-            Object tokenValue = userDetails.getMetadata().get(accessTokenProperties.getAccessTokenParamName());
-            if (Objects.isNull(tokenValue)) {
+            if (!SimpleAuthenticationToken.class.isAssignableFrom(context.getAuthentication().getClass())) {
                 return null;
             }
 
-            String existToken = tokenValue.toString();
-            if (AccessToken.class.isAssignableFrom(tokenValue.getClass())) {
-                AccessToken accessToken = Casts.cast(tokenValue);
-                existToken = accessToken.getToken();
+            SimpleAuthenticationToken authenticationToken = Casts.cast(context.getAuthentication());
+            if (!AccessTokenDetails.class.isAssignableFrom(authenticationToken.getDetails().getClass())) {
+                return null;
             }
 
+            AccessTokenDetails accessTokenDetails = Casts.cast(authenticationToken.getDetails());
+            if (Objects.isNull(accessTokenDetails)) {
+                return null;
+            }
+
+            ExpiredToken accessToken = accessTokenDetails.getToken();
+            if (Objects.isNull(accessToken)) {
+                return null;
+            }
+
+            String existToken = accessToken.getToken();
             if (!StringUtils.equals(existToken, token)) {
                 return null;
             }
 
-            if (userDetails instanceof MobileUserDetails) {
-                MobileUserDetails mobileUserDetails = Casts.cast(userDetails);
+            SecurityPrincipal principal = Casts.cast(authenticationToken.getPrincipal());
+            if (principal instanceof MobileSecurityPrincipal) {
+                MobileSecurityPrincipal mobileSecurityPrincipal = Casts.cast(principal);
                 Object deviceIdentified = plaintextUserDetail.get(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME);
-                if (!Objects.equals(deviceIdentified, mobileUserDetails.getDeviceIdentified())) {
+                if (!Objects.equals(deviceIdentified, mobileSecurityPrincipal.getDeviceIdentified())) {
                     return null;
                 }
             }
 
-            RBucket<ExpiredToken> accessTokenBucket = getAccessTokenBucket(token, accessTokenProperties.getAccessTokenCache());
-            if (accessTokenBucket.isExists()) {
+            if (RefreshToken.class.isAssignableFrom(accessToken.getClass())) {
                 return context;
             }
 
@@ -175,21 +185,18 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         return accessTokenProperties.getAccessTokenCache().getName(type + CacheProperties.DEFAULT_SEPARATOR + deviceIdentified);
     }
 
-    public String generatePlaintextString(SecurityPrincipal userDetails) {
-        return generatePlaintextString(userDetails, accessTokenProperties.getCryptoKey());
+    public String generateCiphertext(SimpleAuthenticationToken token) {
+        return generateCiphertext(token, accessTokenProperties.getCryptoKey());
     }
 
-    public String generatePlaintextString(SecurityPrincipal userDetails, String aesKey) {
-        Map<String, Object> json = new LinkedHashMap<>();
+    public String generateCiphertext(SimpleAuthenticationToken token, String aesKey) {
+        Map<String, Object> json = Casts.convertValue(token.toTypeUserDetails(), Casts.MAP_TYPE_REFERENCE);
 
-        json.put(IdEntity.ID_FIELD_NAME, userDetails.getId());
-        json.put(authenticationProperties.getUsernameParamName(), userDetails.getUsername());
-        json.put(PluginAuditEvent.TYPE_FIELD_NAME, userDetails.getType());
         json.put(NumberIdEntity.CREATION_TIME_FIELD_NAME, System.currentTimeMillis());
 
-        if (userDetails instanceof MobileUserDetails) {
-            MobileUserDetails mobileUserDetails = Casts.cast(userDetails);
-            json.put(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME, mobileUserDetails.getDeviceIdentified());
+        if (token.getPrincipal() instanceof MobileSecurityPrincipal) {
+            MobileSecurityPrincipal mobileSecurityPrincipal = Casts.cast(token.getPrincipal());
+            json.put(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME, mobileSecurityPrincipal.getDeviceIdentified());
         }
 
         String plaintext = Casts.writeValueAsString(json);
@@ -199,10 +206,6 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         ByteSource source = cipherService.encrypt(plaintext.getBytes(Charset.defaultCharset()), key);
 
         return source.getBase64();
-    }
-
-    public Map<String, Object> convertPlaintext(String plaintext) {
-        return Casts.readValue(plaintext, Casts.MAP_TYPE_REFERENCE);
     }
 
     @Override
@@ -219,10 +222,11 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     /**
      * 删除缓存
      *
-     * @param userDetails 移动端的用户明细实现
+     * @param token 认证 token
      */
-    public void deleteContext(SecurityPrincipal userDetails) {
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(userDetails.getType(), userDetails.getId());
+    public void deleteContext(SimpleAuthenticationToken token) {
+        SecurityPrincipal principal = Casts.cast(token.getPrincipal());
+        RBucket<SecurityContext> bucket = getSecurityContextBucket(token.getPrincipalType(), principal.getId());
         bucket.deleteAsync();
     }
 
@@ -244,66 +248,64 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
         Authentication authentication = context.getAuthentication();
 
-        if (authentication instanceof RememberMeAuthenticationToken) {
+        if (!SimpleAuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
             return;
         }
 
-        if (authentication instanceof SimpleAuthenticationToken) {
-            SimpleAuthenticationToken simpleToken = Casts.cast(authentication);
-            if (simpleToken.isRememberMe()) {
-                return;
-            }
-        }
-
-        Object details = authentication.getPrincipal();
-        if (Objects.isNull(details) || !SecurityPrincipal.class.isAssignableFrom(details.getClass())) {
-            return;
-        }
-
-        SecurityPrincipal userDetails = Casts.cast(details);
-        if (MapUtils.isEmpty(userDetails.getMetadata())) {
+        SimpleAuthenticationToken authenticationToken = Casts.cast(authentication);
+        Object details = authenticationToken.getDetails();
+        if (!AccessTokenDetails.class.isAssignableFrom(details.getClass())) {
             return ;
         }
 
-        Object accessTokenValue = userDetails.getMetadata().get(accessTokenProperties.getAccessTokenParamName());
+        AccessTokenDetails accessTokenDetails = Casts.cast(details);
+        ExpiredToken accessTokenValue = accessTokenDetails.getToken();
         if (Objects.isNull(accessTokenValue)) {
             return ;
         }
 
+        if (RefreshToken.class.isAssignableFrom(accessTokenValue.getClass())) {
+            saveAccessToken(Casts.cast(accessTokenValue));
+        }
+
+        SecurityPrincipal principal = Casts.cast(authenticationToken.getPrincipal());
+        RBucket<SecurityContext> bucket = getSecurityContextBucket(authenticationToken.getPrincipalType(), principal.getId());
         TimeProperties timeProperties = accessTokenProperties.getAccessTokenCache().getExpiresTime();
-        if (AccessToken.class.isAssignableFrom(accessTokenValue.getClass())){
-            ExpiredToken accessToken = Casts.cast(accessTokenValue);
-            RBucket<ExpiredToken> accessTokenBucket = getAccessTokenBucket(
-                    accessToken.getToken(),
-                    accessTokenProperties.getAccessTokenCache()
-            );
-            accessTokenBucket.setAsync(accessToken);
-            timeProperties = accessToken.getExpiresTime();
-            if (Objects.nonNull(timeProperties)) {
-                accessTokenBucket.expireAsync(timeProperties.toDuration());
-            }
-
-            Object refreshTokenValue = userDetails.getMetadata().get(accessTokenProperties.getRefreshTokenParamName());
-            if (Objects.nonNull(refreshTokenValue) && ExpiredToken.class.isAssignableFrom(refreshTokenValue.getClass())) {
-                AccessToken refreshToken = Casts.cast(refreshTokenValue);
-                RBucket<ExpiredToken> refreshBucket = getAccessTokenBucket(
-                        refreshToken.getToken(),
-                        accessTokenProperties.getRefreshTokenCache()
-                );
-                RefreshToken token = new RefreshToken(refreshToken, accessToken);
-                refreshBucket.setAsync(token);
-                if (Objects.nonNull(refreshToken.getExpiresTime())) {
-                    refreshBucket.expireAsync(token.getExpiresTime().toDuration());
-                }
-            }
-        }
-
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(userDetails.getType(), userDetails.getId());
-        bucket.set(context);
-
         if (Objects.nonNull(timeProperties)) {
-            bucket.expireAsync(timeProperties.toDuration());
+            bucket.setAsync(context, timeProperties.getValue(), timeProperties.getUnit());
+        } else {
+            bucket.setAsync(context);
         }
+    }
+
+    private void saveAccessToken(RefreshToken refreshToken) {
+
+        RBucket<ExpiredToken> refreshTokenBucket = getAccessTokenBucket(
+                refreshToken.getToken(),
+                accessTokenProperties.getRefreshTokenCache()
+        );
+        TimeProperties refreshExpiresTime = refreshToken.getExpiresTime();
+        if (Objects.nonNull(refreshExpiresTime)) {
+            refreshTokenBucket.setAsync(refreshToken, refreshExpiresTime.getValue(), refreshExpiresTime.getUnit());
+        } else {
+            refreshTokenBucket.setAsync(refreshToken);
+        }
+
+        RBucket<ExpiredToken> accessTokenBucket = getAccessTokenBucket(
+                refreshToken.getToken(),
+                accessTokenProperties.getAccessTokenCache()
+        );
+        TimeProperties accessTokenExpiresTime = refreshToken.getAccessToken().getExpiresTime();
+        if (Objects.nonNull(accessTokenExpiresTime)) {
+            accessTokenBucket.setAsync(
+                    refreshToken.getAccessToken(),
+                    accessTokenExpiresTime.getValue(),
+                    accessTokenExpiresTime.getUnit()
+            );
+        } else {
+            accessTokenBucket.setAsync(refreshToken.getAccessToken());
+        }
+
     }
 
     private RBucket<ExpiredToken> getAccessTokenBucket(String tokenValue, CacheProperties cacheProperties) {

@@ -2,11 +2,14 @@ package com.github.dactiv.healthan.spring.security.controller;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
+import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
-import com.github.dactiv.healthan.spring.security.authentication.token.AccessToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.entity.AccessTokenDetails;
+import com.github.dactiv.healthan.spring.security.entity.AuthenticationSuccessDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -48,9 +51,11 @@ public class TokenController {
     @PostMapping("refreshAccessToken")
     public RestResult<Map<String, Object>> refreshAccessToken(@RequestParam String refreshToken,
                                                               @CurrentSecurityContext SecurityContext securityContext) {
-        Object principal = securityContext.getAuthentication().getPrincipal();
-        Assert.notNull(principal, "当前存在未认证用户,请确保 accessToken 是否未过期或值是否正确。");
-        Assert.isTrue(SecurityPrincipal.class.isAssignableFrom(principal.getClass()),"当前用户非安全用户明细");
+
+        Assert.isTrue(
+                SimpleAuthenticationToken.class.isAssignableFrom(securityContext.getAuthentication().getClass()),
+                "当前用户非安全用户明细"
+        );
 
         String refreshMd5 = DigestUtils.md5DigestAsHex(refreshToken.getBytes());
         String refresh = accessTokenProperties.getRefreshTokenCache().getName(refreshMd5);
@@ -61,47 +66,55 @@ public class TokenController {
         RefreshToken refreshTokenValue = refreshTokenBucket.get();
         Assert.isTrue(!refreshTokenValue.isExpired(), "[" + refreshToken + "] 刷新令牌已过期");
 
-        String tokenMd5 = DigestUtils.md5DigestAsHex(refreshTokenValue.getAccessToken().getToken().getBytes());
-        String access = accessTokenProperties.getAccessTokenCache().getName(tokenMd5);
-        RBucket<AccessToken> accessTokenBucket = redissonClient.getBucket(access);
+        SimpleAuthenticationToken authenticationToken = Casts.cast(securityContext.getAuthentication());
 
-        AccessToken redisAccessToken = accessTokenBucket.get();
-        Assert.isTrue(!redisAccessToken.isExpired(), "[" + redisAccessToken.getToken() + "] 令牌已过期");
+        Object details = authenticationToken.getDetails();
+        Assert.isTrue(
+                AccessTokenDetails.class.isAssignableFrom(details.getClass()),
+                "当前认证明细非访问令牌明细"
+        );
 
-        SecurityPrincipal userDetails = Casts.cast(principal);
-        AccessToken securityUserAccessToken = Casts.cast(userDetails.getMetadata().get(accessTokenProperties.getAccessTokenParamName()));
-        Assert.isTrue(StringUtils.equals(redisAccessToken.getToken(), securityUserAccessToken.getToken()), "令牌匹配不正确");
+        AccessTokenDetails accessTokenDetails = Casts.cast(details);
+        Assert.isTrue(
+                RefreshToken.class.isAssignableFrom(accessTokenDetails.getToken().getClass()),
+                "当前认证明细非刷新令牌明细"
+        );
+        RefreshToken authenticationRefreshToken = Casts.cast(accessTokenDetails.getToken());
+        Assert.isTrue(
+                StringUtils.equals(refreshTokenValue.getToken(), authenticationRefreshToken.getToken()),
+                "刷新令牌匹配不正确"
+        );
 
+        SecurityPrincipal principal = Casts.cast(authenticationToken.getPrincipal());
         RBucket<SecurityContext> securityContextBucket = accessTokenContextRepository.getSecurityContextBucket(
-                userDetails.getType(),
-                userDetails.getId()
+                authenticationToken.getPrincipalType(),
+                principal.getId()
         );
         Assert.isTrue(securityContextBucket.isExists(), "找不到令牌对应的用户明细");
 
         securityContextBucket.expireAsync(refreshTokenValue.getAccessToken().getExpiresTime().toDuration());
 
-        redisAccessToken.setCreationTime(new Date());
-        accessTokenBucket.setAsync(redisAccessToken);
-        if (Objects.nonNull(redisAccessToken.getExpiresTime())) {
-            refreshTokenBucket.expireAsync(redisAccessToken.getExpiresTime().toDuration());
-        }
-
         refreshTokenValue.setCreationTime(new Date());
-        refreshTokenBucket.setAsync(refreshTokenValue);
-        if (Objects.nonNull(refreshTokenValue.getExpiresTime())) {
-            refreshTokenBucket.expireAsync(refreshTokenValue.getExpiresTime().toDuration());
-        }
+        refreshTokenValue.getAccessToken().setCreationTime(new Date());
 
-        AccessToken newRefreshToken = Casts.of(refreshTokenValue, AccessToken.class);
-        userDetails.getMetadata().put(accessTokenProperties.getAccessTokenParamName(), redisAccessToken);
-        userDetails.getMetadata().put(accessTokenProperties.getRefreshTokenParamName(), newRefreshToken);
+        TimeProperties timeProperties = refreshTokenValue.getExpiresTime();
+        if (Objects.nonNull(timeProperties)) {
+            refreshTokenBucket.setAsync(refreshTokenValue, timeProperties.getValue(), timeProperties.getUnit());
+        } else {
+            refreshTokenBucket.setAsync(refreshTokenValue);
+        }
 
         Map<String, Object> result = new LinkedHashMap<>();
 
-        result.put(accessTokenProperties.getRefreshTokenParamName(), newRefreshToken);
-        result.put(accessTokenProperties.getAccessTokenParamName(), redisAccessToken);
+        result.put(accessTokenProperties.getRefreshTokenParamName(), refreshTokenValue.getToken());
+        result.put(accessTokenProperties.getAccessTokenParamName(), refreshTokenValue.getAccessToken().getToken());
 
-        return RestResult.ofSuccess("延期 [" + redisAccessToken.getToken() + "] 令牌成功", result);
+        if (AuthenticationSuccessDetails.class.isAssignableFrom(accessTokenDetails.getClass())) {
+            AuthenticationSuccessDetails successDetails = Casts.cast(accessTokenDetails);
+            successDetails.getMetadata().putAll(result);
+        }
+
+        return RestResult.ofSuccess("延期 [" + refreshTokenValue.getAccessToken().getToken() + "] 令牌成功", result);
     }
 
 }
