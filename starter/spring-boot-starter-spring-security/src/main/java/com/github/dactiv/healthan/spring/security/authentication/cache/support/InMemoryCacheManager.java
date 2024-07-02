@@ -3,18 +3,18 @@ package com.github.dactiv.healthan.spring.security.authentication.cache.support;
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
-import com.github.dactiv.healthan.commons.id.IdEntity;
-import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
+import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.util.DigestUtils;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -63,11 +63,24 @@ public class InMemoryCacheManager implements CacheManager {
 
     @Override
     public void saveSecurityContextRefreshToken(RefreshToken refreshToken, CacheProperties refreshTokenCache) {
-        CACHE.put(refreshTokenCache.getName(), refreshToken);
+        String md5 = DigestUtils.md5DigestAsHex(refreshToken.getToken().getBytes());
+        CACHE.put(refreshTokenCache.getName(md5), refreshToken);
     }
 
     @Override
     public RestResult<ExpiredToken> getRefreshToken(String refreshToken, CacheProperties refreshTokenCache) {
-        return null;
+        String md5 = DigestUtils.md5DigestAsHex(refreshToken.getBytes());
+        ExpiredToken token = Casts.cast(CACHE.get(refreshTokenCache.getName(md5)));
+        if (Objects.isNull(token)) {
+            return RestResult.ofException(
+                    new ErrorCodeException("token 已失效", ErrorCodeException.CONTENT_NOT_EXIST)
+            );
+        }
+        if (token.isExpired()) {
+            return RestResult.ofException(
+                    new ErrorCodeException("token 已过期", ErrorCodeException.TIMEOUT_CODE)
+            );
+        }
+        return RestResult.ofSuccess(token);
     }
 }

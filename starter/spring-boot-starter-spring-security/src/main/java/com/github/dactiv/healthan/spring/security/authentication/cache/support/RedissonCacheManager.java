@@ -5,25 +5,19 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
-import com.github.dactiv.healthan.commons.id.IdEntity;
-import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
-import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.redisson.codec.SerializationCodec;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
