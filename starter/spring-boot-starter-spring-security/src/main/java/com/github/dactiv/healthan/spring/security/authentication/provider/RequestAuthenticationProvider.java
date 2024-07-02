@@ -2,15 +2,12 @@ package com.github.dactiv.healthan.spring.security.authentication.provider;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
+import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import org.apache.commons.collections4.CollectionUtils;
-import org.redisson.api.RBucket;
-import org.redisson.api.RSet;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
@@ -56,9 +53,9 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
     private List<TypeSecurityPrincipalService> typeSecurityPrincipalServices;
 
     /**
-     * redisson 客户端
+     * 缓存管理
      */
-    private final RedissonClient redissonClient;
+    private final CacheManager cacheManager;
 
     /**
      * 隐藏找不到用户异常，用登陆账户或密码错误异常
@@ -70,10 +67,10 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @param typeSecurityPrincipalServices 账户认证的用户明细服务集合
      */
-    public RequestAuthenticationProvider(RedissonClient redissonClient,
+    public RequestAuthenticationProvider(CacheManager cacheManager,
                                          List<TypeSecurityPrincipalService> typeSecurityPrincipalServices) {
         this.typeSecurityPrincipalServices = typeSecurityPrincipalServices;
-        this.redissonClient = redissonClient;
+        this.cacheManager = cacheManager;
     }
 
     @Override
@@ -95,7 +92,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
     protected SecurityPrincipal doPrincipalAuthenticate(RequestAuthenticationToken token) {
 
-        SecurityPrincipal userDetails = null;
+        SecurityPrincipal principal = null;
 
         Optional<TypeSecurityPrincipalService> optional = getUserDetailsService(token);
 
@@ -109,21 +106,20 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         // 如果启用认证缓存，从认证缓存里获取用户
         if (Objects.nonNull(authenticationCache)) {
-            RBucket<SecurityPrincipal> bucket = redissonClient.getBucket(authenticationCache.getName());
-            userDetails = bucket.get();
+            principal = cacheManager.getSecurityPrincipal(authenticationCache);
         }
 
         try {
 
             //如果在缓存中找不到用户，调用 UserDetailsService 的 getAuthenticationUserDetails 方法获取当前用户
-            if (Objects.isNull(userDetails)) {
-                userDetails = typeSecurityPrincipalService.getSecurityPrincipal(token);
+            if (Objects.isNull(principal)) {
+                principal = typeSecurityPrincipalService.getSecurityPrincipal(token);
             }
 
-            checkUserDetails(userDetails);
+            checkUserDetails(principal);
 
             String presentedPassword = token.getCredentials().toString();
-            if (!typeSecurityPrincipalService.matchesPassword(presentedPassword, token, userDetails)) {
+            if (!typeSecurityPrincipalService.matchesPassword(presentedPassword, token, principal)) {
                 throw new BadCredentialsException(messages.getMessage(
                         "PrincipalAuthenticationProvider.badCredentials",
                         "用户名或密码错误"));
@@ -143,21 +139,10 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         // 如果启用认证缓存，存储用户信息到缓存里
         if (Objects.nonNull(authenticationCache)) {
-            RBucket<SecurityPrincipal> authenticationCacheBucket = redissonClient.getBucket(authenticationCache.getName());
-            TimeProperties expiresTime = authenticationCache.getExpiresTime();
-            final SecurityPrincipal principal = userDetails;
-            if (Objects.isNull(expiresTime)) {
-                authenticationCacheBucket
-                        .setAsync(userDetails)
-                        .thenAccept(unused -> typeSecurityPrincipalService.onAuthenticationCache(principal, authenticationCacheBucket));
-            } else {
-                authenticationCacheBucket
-                        .setAsync(userDetails, expiresTime.getValue(), expiresTime.getUnit())
-                        .thenAccept(unused -> typeSecurityPrincipalService.onAuthenticationCache(principal, authenticationCacheBucket));
-            }
+            cacheManager.saveSecurityPrincipal(principal, authenticationCache);
         }
 
-        return userDetails;
+        return principal;
     }
 
     /**
@@ -242,24 +227,15 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
                                                                     CacheProperties authorizationCache,
                                                                     TypeSecurityPrincipalService typeSecurityPrincipalService) {
         Collection<GrantedAuthority> grantedAuthorities;
-        RSet<GrantedAuthority> authorizationCacheSet = redissonClient.getSet(authorizationCache.getName());
-        if (CollectionUtils.isEmpty(authorizationCacheSet)) {
+        Collection<GrantedAuthority> cacheGrantedAuthorities = cacheManager.getGrantedAuthorities(authorizationCache);
+        if (CollectionUtils.isEmpty(cacheGrantedAuthorities)) {
             grantedAuthorities = typeSecurityPrincipalService.getPrincipalAuthorities(token, principal);
         } else {
-            grantedAuthorities = authorizationCacheSet;
-        }
-
-        if (RSet.class.isAssignableFrom(grantedAuthorities.getClass())) {
-            return grantedAuthorities;
+            grantedAuthorities = cacheGrantedAuthorities;
         }
 
         if (CollectionUtils.isNotEmpty(grantedAuthorities)) {
-            authorizationCacheSet
-                    .addAllAsync(grantedAuthorities)
-                    .thenAccept(success -> typeSecurityPrincipalService.onAuthorizationCache(token, principal, authorizationCacheSet));
-            if (Objects.nonNull(authorizationCache.getExpiresTime())) {
-                authorizationCacheSet.expireAsync(authorizationCache.getExpiresTime().toDuration());
-            }
+            cacheManager.saveGrantedAuthorities(grantedAuthorities, authorizationCache);
         }
 
         return grantedAuthorities;

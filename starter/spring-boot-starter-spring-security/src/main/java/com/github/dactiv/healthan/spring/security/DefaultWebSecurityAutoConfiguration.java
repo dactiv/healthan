@@ -4,12 +4,12 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.spring.security.authentication.*;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
+import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RequestAuthenticationConfigurer;
 import com.github.dactiv.healthan.spring.security.plugin.PluginSourceTypeVoter;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import org.apache.commons.collections4.CollectionUtils;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -59,13 +59,13 @@ public class DefaultWebSecurityAutoConfiguration {
 
     private final SecurityContextRepository securityContextRepository;
 
-    private final RedissonClient redissonClient;
+    private final CacheManager cacheManager;
 
     public DefaultWebSecurityAutoConfiguration(AccessTokenContextRepository accessTokenContextRepository,
                                                AuthenticationProperties authenticationProperties,
                                                AuthenticationFailureHandler authenticationFailureHandler,
                                                AuthenticationSuccessHandler authenticationSuccessHandler,
-                                               RedissonClient redissonClient,
+                                               CacheManager cacheManager,
                                                SecurityContextRepository securityContextRepository,
                                                ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
                                                ObjectProvider<ErrorResultResolver> errorResultResolvers,
@@ -76,7 +76,7 @@ public class DefaultWebSecurityAutoConfiguration {
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.securityContextRepository = securityContextRepository;
-        this.redissonClient = redissonClient;
+        this.cacheManager = cacheManager;
         this.typeSecurityPrincipalServices = userDetailsServices.stream().collect(Collectors.toList());
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolvers.stream().collect(Collectors.toList());
         this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().collect(Collectors.toList());
@@ -97,7 +97,7 @@ public class DefaultWebSecurityAutoConfiguration {
                                 authenticationProperties,
                                 authenticationTypeTokenResolvers,
                                 typeSecurityPrincipalServices,
-                                redissonClient
+                                cacheManager
                         )
                 )
                 .securityContextRepository(securityContextRepository)

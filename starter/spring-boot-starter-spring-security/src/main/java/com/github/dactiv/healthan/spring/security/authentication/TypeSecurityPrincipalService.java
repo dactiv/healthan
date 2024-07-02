@@ -5,7 +5,6 @@ import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.entity.AuthenticationSuccessDetails;
-import org.redisson.api.RBucket;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -143,16 +142,6 @@ public interface TypeSecurityPrincipalService {
     }
 
     /**
-     * 当认证缓存完成时候触发此方法，前提必须要 {@link #getAuthenticationCache(RequestAuthenticationToken)} 返回非 null 值时，此方法才生效
-     *
-     * @param principal 当前用户
-     * @param bucket    缓存捅信息
-     */
-    default void onAuthenticationCache(SecurityPrincipal principal, RBucket<SecurityPrincipal> bucket) {
-
-    }
-
-    /**
      * 获取授权缓存配置
      *
      * @param token     请求认证 token
@@ -161,17 +150,6 @@ public interface TypeSecurityPrincipalService {
      */
     default CacheProperties getAuthorizationCache(RequestAuthenticationToken token, SecurityPrincipal principal) {
         return null;
-    }
-
-    /**
-     * 当授权缓存完成时候触发此方法，前提必须要 {@link #getAuthorizationCache(RequestAuthenticationToken, SecurityPrincipal)} 返回非 null 值时，此方法才生效
-     *
-     * @param token     请求 token
-     * @param principal 当前用户
-     * @param cache     授权信息
-     */
-    default void onAuthorizationCache(RequestAuthenticationToken token, SecurityPrincipal principal, Collection<GrantedAuthority> cache) {
-
     }
 
 }

@@ -3,6 +3,8 @@ package com.github.dactiv.healthan.spring.security;
 import com.github.dactiv.healthan.spring.security.audit.ControllerAuditHandlerInterceptor;
 import com.github.dactiv.healthan.spring.security.audit.RequestBodyAttributeAdviceAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
+import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
+import com.github.dactiv.healthan.spring.security.authentication.cache.support.InMemoryCacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.CaptchaVerificationProperties;
@@ -85,13 +87,19 @@ public class SpringSecurityAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(CacheManager.class)
+    public CacheManager cacheManager() {
+        return new InMemoryCacheManager();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(AccessTokenContextRepository.class)
     public AccessTokenContextRepository accessTokenContextRepository(AuthenticationProperties properties,
                                                                      AccessTokenProperties accessTokenProperties,
-                                                                     RedissonClient redissonClient) {
+                                                                     CacheManager cacheManager) {
 
         return new AccessTokenContextRepository(
-                redissonClient,
+                cacheManager,
                 accessTokenProperties,
                 properties
         );

@@ -2,16 +2,14 @@ package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.commons.TimeProperties;
-import com.github.dactiv.healthan.commons.id.IdEntity;
 import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.crypto.CipherAlgorithmService;
 import com.github.dactiv.healthan.crypto.algorithm.Base64;
 import com.github.dactiv.healthan.crypto.algorithm.ByteSource;
 import com.github.dactiv.healthan.crypto.algorithm.cipher.CipherService;
 import com.github.dactiv.healthan.crypto.algorithm.exception.CryptoException;
-import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
+import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
@@ -22,9 +20,6 @@ import com.github.dactiv.healthan.spring.security.entity.support.MobileSecurityP
 import com.github.dactiv.healthan.spring.web.device.DeviceUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
-import org.redisson.codec.SerializationCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -34,7 +29,6 @@ import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SaveContextOnUpdateOrErrorResponseWrapper;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.util.DigestUtils;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -52,7 +46,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     
     private final static Logger LOGGER = LoggerFactory.getLogger(AccessTokenContextRepository.class);
 
-    private final RedissonClient redissonClient;
+    private final CacheManager cacheManager;
 
     private final AccessTokenProperties accessTokenProperties;
 
@@ -60,10 +54,10 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
     private final CipherAlgorithmService cipherAlgorithmService = new CipherAlgorithmService();
 
-    public AccessTokenContextRepository(RedissonClient redissonClient,
+    public AccessTokenContextRepository(CacheManager cacheManager,
                                         AccessTokenProperties accessTokenProperties,
                                         AuthenticationProperties authenticationProperties) {
-        this.redissonClient = redissonClient;
+        this.cacheManager = cacheManager;
         this.accessTokenProperties = accessTokenProperties;
         this.loginRequestMatcher = new AntPathRequestMatcher(
                 authenticationProperties.getLoginProcessingUrl(),
@@ -117,11 +111,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 return null;
             }
 
-            String type = plaintextUserDetail.getOrDefault(PluginAuditEvent.TYPE_FIELD_NAME, StringUtils.EMPTY).toString();
-            Object id = plaintextUserDetail.getOrDefault(IdEntity.ID_FIELD_NAME, StringUtils.EMPTY).toString();
-
-            RBucket<SecurityContext> bucket = getSecurityContextBucket(type, id);
-            SecurityContext context = bucket.get();
+            SecurityContext context = cacheManager.getSecurityContext(plaintextUserDetail, accessTokenProperties.getAccessTokenCache());
             if (Objects.isNull(context)) {
                 return null;
             }
@@ -163,10 +153,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 return context;
             }
 
-            TimeProperties expiresTime = accessTokenProperties.getAccessTokenCache().getExpiresTime();
-            if (Objects.nonNull(expiresTime)) {
-                bucket.expireAsync(expiresTime.toDuration());
-            }
+            cacheManager.delaySecurityContext(context);
 
             return context;
         } catch (CryptoException e) {
@@ -174,11 +161,6 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         }
 
         return null;
-    }
-
-    public RBucket<SecurityContext> getSecurityContextBucket(String type, Object deviceIdentified) {
-        String key = getAccessTokenKey(type, deviceIdentified);
-        return redissonClient.getBucket(key, new SerializationCodec());
     }
 
     public String getAccessTokenKey(String type, Object deviceIdentified) {
@@ -219,28 +201,6 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         saveRedissonSecurityContext(context, request, response);
     }
 
-    /**
-     * 删除缓存
-     *
-     * @param token 认证 token
-     */
-    public void deleteContext(SimpleAuthenticationToken token) {
-        SecurityPrincipal principal = Casts.cast(token.getPrincipal());
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(token.getPrincipalType(), principal.getId());
-        bucket.deleteAsync();
-    }
-
-    /**
-     * 删除缓存
-     *
-     * @param type 用户类型
-     * @param id 设备唯一识别
-     */
-    public void deleteContext(String type, Object id) {
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(type, id);
-        bucket.deleteAsync();
-    }
-
     protected void saveRedissonSecurityContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
         if (Objects.isNull(context.getAuthentication()) || !context.getAuthentication().isAuthenticated()) {
             return;
@@ -265,52 +225,13 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         }
 
         if (RefreshToken.class.isAssignableFrom(accessTokenValue.getClass())) {
-            saveAccessToken(Casts.cast(accessTokenValue));
+            RefreshToken refreshToken = Casts.cast(accessTokenValue);
+            cacheManager.saveSecurityContextRefreshToken(refreshToken, accessTokenProperties.getRefreshTokenCache());
         }
 
-        SecurityPrincipal principal = Casts.cast(authenticationToken.getPrincipal());
-        RBucket<SecurityContext> bucket = getSecurityContextBucket(authenticationToken.getPrincipalType(), principal.getId());
-        TimeProperties timeProperties = accessTokenProperties.getAccessTokenCache().getExpiresTime();
-        if (Objects.nonNull(timeProperties)) {
-            bucket.setAsync(context, timeProperties.getValue(), timeProperties.getUnit());
-        } else {
-            bucket.setAsync(context);
+        if (Objects.nonNull(accessTokenProperties.getAccessTokenCache())) {
+            cacheManager.saveSecurityContext(context, accessTokenProperties.getAccessTokenCache());
         }
-    }
-
-    private void saveAccessToken(RefreshToken refreshToken) {
-
-        RBucket<ExpiredToken> refreshTokenBucket = getAccessTokenBucket(
-                refreshToken.getToken(),
-                accessTokenProperties.getRefreshTokenCache()
-        );
-        TimeProperties refreshExpiresTime = refreshToken.getExpiresTime();
-        if (Objects.nonNull(refreshExpiresTime)) {
-            refreshTokenBucket.setAsync(refreshToken, refreshExpiresTime.getValue(), refreshExpiresTime.getUnit());
-        } else {
-            refreshTokenBucket.setAsync(refreshToken);
-        }
-
-        RBucket<ExpiredToken> accessTokenBucket = getAccessTokenBucket(
-                refreshToken.getToken(),
-                accessTokenProperties.getAccessTokenCache()
-        );
-        TimeProperties accessTokenExpiresTime = refreshToken.getAccessToken().getExpiresTime();
-        if (Objects.nonNull(accessTokenExpiresTime)) {
-            accessTokenBucket.setAsync(
-                    refreshToken.getAccessToken(),
-                    accessTokenExpiresTime.getValue(),
-                    accessTokenExpiresTime.getUnit()
-            );
-        } else {
-            accessTokenBucket.setAsync(refreshToken.getAccessToken());
-        }
-
-    }
-
-    private RBucket<ExpiredToken> getAccessTokenBucket(String tokenValue, CacheProperties cacheProperties) {
-        String md5 = DigestUtils.md5DigestAsHex(tokenValue.getBytes());
-        return redissonClient.getBucket(cacheProperties.getName(md5));
     }
 
     @Override
