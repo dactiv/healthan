@@ -2,12 +2,14 @@ package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.commons.id.IdEntity;
 import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.crypto.CipherAlgorithmService;
 import com.github.dactiv.healthan.crypto.algorithm.Base64;
 import com.github.dactiv.healthan.crypto.algorithm.ByteSource;
 import com.github.dactiv.healthan.crypto.algorithm.cipher.CipherService;
 import com.github.dactiv.healthan.crypto.algorithm.exception.CryptoException;
+import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
@@ -111,7 +113,13 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 return null;
             }
 
-            SecurityContext context = cacheManager.getSecurityContext(plaintextUserDetail, accessTokenProperties.getAccessTokenCache());
+            String type = plaintextUserDetail.getOrDefault(PluginAuditEvent.TYPE_FIELD_NAME, StringUtils.EMPTY).toString();
+            Object id = plaintextUserDetail.getOrDefault(IdEntity.ID_FIELD_NAME, StringUtils.EMPTY).toString();
+            SecurityContext context = cacheManager.getSecurityContext(
+                    type,
+                    id,
+                    accessTokenProperties.getAccessTokenCache()
+            );
             if (Objects.isNull(context)) {
                 return null;
             }
@@ -153,7 +161,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 return context;
             }
 
-            cacheManager.delaySecurityContext(context);
+            cacheManager.delaySecurityContext(context, accessTokenProperties.getAccessTokenCache());
 
             return context;
         } catch (CryptoException e) {

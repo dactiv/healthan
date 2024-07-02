@@ -22,14 +22,19 @@ public class ErrorCodeException extends SystemException {
     public static final String DEFAULT_EXCEPTION_CODE = "500";
 
     /**
-     * 内容不存在
+     * 内容不存在代码
      */
     public static final String CONTENT_NOT_EXIST = "100404";
 
     /**
-     * 内容已存在
+     * 客户端发送的请求超过了服务器允许的时间代码
      */
-    public static final String CONTENT_EXIST = "10400";
+    public static final String TIMEOUT_CODE = "100408";
+
+    /**
+     * 校验不通过代码
+     */
+    public static final String BED_REQUEST_CODE = "100400";
 
     /**
      * 错误代码

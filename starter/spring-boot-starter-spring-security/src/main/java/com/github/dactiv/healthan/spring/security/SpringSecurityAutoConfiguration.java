@@ -73,10 +73,9 @@ public class SpringSecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "healthan.authentication.access-token", value = "enable-controller", havingValue = "true")
-    TokenController accessTokenController(AccessTokenContextRepository accessTokenContextRepository,
-                                          RedissonClient redissonClient,
+    TokenController accessTokenController(CacheManager cacheManager,
                                           AccessTokenProperties accessTokenProperties) {
-        return new TokenController(accessTokenContextRepository, redissonClient, accessTokenProperties);
+        return new TokenController(cacheManager, accessTokenProperties);
     }
 
     @Bean

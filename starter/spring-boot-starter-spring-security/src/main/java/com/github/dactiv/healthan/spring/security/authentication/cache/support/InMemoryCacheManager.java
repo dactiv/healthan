@@ -2,10 +2,12 @@ package com.github.dactiv.healthan.spring.security.authentication.cache.support;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.id.IdEntity;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
+import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,14 +47,12 @@ public class InMemoryCacheManager implements CacheManager {
     }
 
     @Override
-    public SecurityContext getSecurityContext(Map<String, Object> plaintextUserDetail, CacheProperties accessTokenCache) {
-        String type = plaintextUserDetail.getOrDefault(PluginAuditEvent.TYPE_FIELD_NAME, StringUtils.EMPTY).toString();
-        Object id = plaintextUserDetail.getOrDefault(IdEntity.ID_FIELD_NAME, StringUtils.EMPTY).toString();
+    public SecurityContext getSecurityContext(String type, Object id, CacheProperties accessTokenCache) {
         return Casts.cast(CACHE.get(type + CacheProperties.DEFAULT_SEPARATOR + id));
     }
 
     @Override
-    public void delaySecurityContext(SecurityContext context) {
+    public void delaySecurityContext(SecurityContext context, CacheProperties accessTokenCache) {
 
     }
 
@@ -64,5 +64,10 @@ public class InMemoryCacheManager implements CacheManager {
     @Override
     public void saveSecurityContextRefreshToken(RefreshToken refreshToken, CacheProperties refreshTokenCache) {
         CACHE.put(refreshTokenCache.getName(), refreshToken);
+    }
+
+    @Override
+    public RestResult<ExpiredToken> getRefreshToken(String refreshToken, CacheProperties refreshTokenCache) {
+        return null;
     }
 }

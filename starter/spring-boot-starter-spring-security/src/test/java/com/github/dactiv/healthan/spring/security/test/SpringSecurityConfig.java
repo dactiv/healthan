@@ -6,10 +6,10 @@ import com.github.dactiv.healthan.spring.security.authentication.AuthenticationT
 import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
+import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RequestAuthenticationConfigurer;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
@@ -65,7 +65,7 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
 
     private final SecurityContextRepository securityContextRepository;
 
-    private final RedissonClient redissonClient;
+    private final CacheManager cacheManager;
 
     public SpringSecurityConfig(AuthenticationProperties authenticationProperties,
                                 AuthenticationFailureHandler authenticationFailureHandler,
@@ -73,14 +73,14 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                                 SecurityContextRepository securityContextRepository,
                                 ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
                                 ObjectProvider<TypeSecurityPrincipalService> userDetailsServices,
-                                RedissonClient redissonClient) {
+                                CacheManager cacheManager) {
         this.authenticationProperties = authenticationProperties;
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolvers.stream().collect(Collectors.toList());
         this.typeSecurityPrincipalServices = userDetailsServices.stream().collect(Collectors.toList());
         this.securityContextRepository = securityContextRepository;
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
-        this.redissonClient = redissonClient;
+        this.cacheManager = cacheManager;
     }
 
     @Override
@@ -218,7 +218,7 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                                     authenticationProperties,
                                     authenticationTypeTokenResolvers,
                                     typeSecurityPrincipalServices,
-                                    redissonClient
+                                    cacheManager
                             )
                     )
                     .securityContextRepository(securityContextRepository)

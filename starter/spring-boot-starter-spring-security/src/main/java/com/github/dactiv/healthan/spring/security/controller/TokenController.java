@@ -2,21 +2,20 @@ package com.github.dactiv.healthan.spring.security.controller;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
-import com.github.dactiv.healthan.commons.TimeProperties;
+import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
-import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
+import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
+import com.github.dactiv.healthan.spring.security.authentication.token.AccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.entity.AccessTokenDetails;
 import com.github.dactiv.healthan.spring.security.entity.AuthenticationSuccessDetails;
 import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.util.Assert;
-import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,80 +33,77 @@ import java.util.Objects;
 @RestController
 public class TokenController {
 
-    private final AccessTokenContextRepository accessTokenContextRepository;
+    private final CacheManager cacheManager;
 
     private final AccessTokenProperties accessTokenProperties;
 
-    private final RedissonClient redissonClient;
-
-    public TokenController(AccessTokenContextRepository accessTokenContextRepository,
-                           RedissonClient redissonClient,
+    public TokenController(CacheManager cacheManager,
                            AccessTokenProperties accessTokenProperties) {
-        this.accessTokenContextRepository = accessTokenContextRepository;
-        this.redissonClient = redissonClient;
+        this.cacheManager = cacheManager;
         this.accessTokenProperties = accessTokenProperties;
     }
 
     @PostMapping("refreshAccessToken")
     public RestResult<Map<String, Object>> refreshAccessToken(@RequestParam String refreshToken,
-                                                              @CurrentSecurityContext SecurityContext securityContext) {
+                                                                   @CurrentSecurityContext SecurityContext securityContext) {
 
         Assert.isTrue(
                 SimpleAuthenticationToken.class.isAssignableFrom(securityContext.getAuthentication().getClass()),
                 "当前用户非安全用户明细"
         );
 
-        String refreshMd5 = DigestUtils.md5DigestAsHex(refreshToken.getBytes());
-        String refresh = accessTokenProperties.getRefreshTokenCache().getName(refreshMd5);
-
-        RBucket<RefreshToken> refreshTokenBucket = redissonClient.getBucket(refresh);
-        Assert.isTrue(refreshTokenBucket.isExists(), "[" + refreshToken + "] 刷新令牌已过期");
-
-        RefreshToken refreshTokenValue = refreshTokenBucket.get();
-        Assert.isTrue(!refreshTokenValue.isExpired(), "[" + refreshToken + "] 刷新令牌已过期");
+        RestResult<ExpiredToken> validResult = cacheManager.getRefreshToken(
+                refreshToken,
+                accessTokenProperties.getRefreshTokenCache()
+        );
+        if (!validResult.isSuccess()) {
+            return RestResult.of(validResult.getMessage(), validResult.getStatus(), validResult.getExecuteCode());
+        }
 
         SimpleAuthenticationToken authenticationToken = Casts.cast(securityContext.getAuthentication());
 
         Object details = authenticationToken.getDetails();
-        Assert.isTrue(
-                AccessTokenDetails.class.isAssignableFrom(details.getClass()),
-                "当前认证明细非访问令牌明细"
-        );
+        if (!AccessTokenDetails.class.isAssignableFrom(details.getClass())) {
+            return RestResult.ofException(
+                    new ErrorCodeException("当前认证明细非访问令牌明细",ErrorCodeException.BED_REQUEST_CODE)
+            );
+        }
 
         AccessTokenDetails accessTokenDetails = Casts.cast(details);
-        Assert.isTrue(
-                RefreshToken.class.isAssignableFrom(accessTokenDetails.getToken().getClass()),
-                "当前认证明细非刷新令牌明细"
-        );
+        if (RefreshToken.class.isAssignableFrom(accessTokenDetails.getToken().getClass())) {
+            return RestResult.ofException(
+                    new ErrorCodeException("当前认证明细非刷新令牌明细",ErrorCodeException.BED_REQUEST_CODE)
+            );
+        }
+
         RefreshToken authenticationRefreshToken = Casts.cast(accessTokenDetails.getToken());
+        RefreshToken refreshTokenValue = Casts.cast(validResult.getData());
         Assert.isTrue(
                 StringUtils.equals(refreshTokenValue.getToken(), authenticationRefreshToken.getToken()),
                 "刷新令牌匹配不正确"
         );
 
         SecurityPrincipal principal = Casts.cast(authenticationToken.getPrincipal());
-        RBucket<SecurityContext> securityContextBucket = accessTokenContextRepository.getSecurityContextBucket(
+        SecurityContext context = cacheManager.getSecurityContext(
                 authenticationToken.getPrincipalType(),
-                principal.getId()
+                principal.getId(),
+                accessTokenProperties.getAccessTokenCache()
         );
-        Assert.isTrue(securityContextBucket.isExists(), "找不到令牌对应的用户明细");
+        if (Objects.isNull(context)) {
+            return RestResult.ofException(
+                    new ErrorCodeException("找不到令牌对应的用户明细", ErrorCodeException.CONTENT_NOT_EXIST)
+            );
+        }
 
-        securityContextBucket.expireAsync(refreshTokenValue.getAccessToken().getExpiresTime().toDuration());
+        cacheManager.delaySecurityContext(context, accessTokenProperties.getAccessTokenCache());
 
         refreshTokenValue.setCreationTime(new Date());
         refreshTokenValue.getAccessToken().setCreationTime(new Date());
-
-        TimeProperties timeProperties = refreshTokenValue.getExpiresTime();
-        if (Objects.nonNull(timeProperties)) {
-            refreshTokenBucket.setAsync(refreshTokenValue, timeProperties.getValue(), timeProperties.getUnit());
-        } else {
-            refreshTokenBucket.setAsync(refreshTokenValue);
-        }
+        cacheManager.saveSecurityContextRefreshToken(refreshTokenValue, accessTokenProperties.getRefreshTokenCache());
 
         Map<String, Object> result = new LinkedHashMap<>();
-
-        result.put(accessTokenProperties.getRefreshTokenParamName(), refreshTokenValue.getToken());
-        result.put(accessTokenProperties.getAccessTokenParamName(), refreshTokenValue.getAccessToken().getToken());
+        result.put(accessTokenProperties.getRefreshTokenParamName(), Casts.of(refreshTokenValue, AccessToken.class));
+        result.put(accessTokenProperties.getAccessTokenParamName(), refreshTokenValue.getAccessToken());
 
         if (AuthenticationSuccessDetails.class.isAssignableFrom(accessTokenDetails.getClass())) {
             AuthenticationSuccessDetails successDetails = Casts.cast(accessTokenDetails);

@@ -1,7 +1,9 @@
 package com.github.dactiv.healthan.spring.security.authentication.cache;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
+import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
+import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -53,18 +55,19 @@ public interface CacheManager {
     /**
      * 获取 spring security 上下文内容
      *
-     * @param plaintextUserDetail 明文用户信息
+     * @param type 用户类型
+     * @param id 主键 id
      *
      * @return spring security 上下文内容
      */
-    SecurityContext getSecurityContext(Map<String, Object> plaintextUserDetail, CacheProperties accessTokenCache);
+    SecurityContext getSecurityContext(String type, Object id, CacheProperties accessTokenCache);
 
     /**
      * 延期 spring security 上下文内容
      *
      * @param context spring security 上下文内容
      */
-    void delaySecurityContext(SecurityContext context);
+    void delaySecurityContext(SecurityContext context, CacheProperties accessTokenCache);
 
     /**
      * 保存 spring security 上下文内容
@@ -81,4 +84,14 @@ public interface CacheManager {
      * @param refreshTokenCache spring security 上下文 的刷新 token 缓存配置
      */
     void saveSecurityContextRefreshToken(RefreshToken refreshToken, CacheProperties refreshTokenCache);
+
+    /**
+     * 验证 token 是否有效
+     *
+     * @param refreshToken 刷新 token
+     * @param refreshTokenCache 刷新 token 缓存配置
+     *
+     * @return rest 结果集
+     */
+    RestResult<ExpiredToken> getRefreshToken(String refreshToken, CacheProperties refreshTokenCache);
 }

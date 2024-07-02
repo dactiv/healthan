@@ -108,7 +108,7 @@ public abstract class AbstractRedissonStorageCaptchaService<B> extends AbstractR
         String verifyTokenExist = StringUtils.defaultString(request.getParameter(captchaProperties.getVerifyTokenExistParamName()), Boolean.TRUE.toString());
 
         if (Objects.isNull(buildToken) && BooleanUtils.toBoolean(verifyTokenExist)) {
-            return RestResult.ofException(ErrorCodeException.CONTENT_EXIST, new SystemException("找不到 token 为 [" + token + "] 的验证码 token 信息"));
+            return RestResult.ofException(ErrorCodeException.CONTENT_NOT_EXIST, new SystemException("找不到 token 为 [" + token + "] 的验证码 token 信息"));
         }
 
         // 成功后删除 绑定 token
