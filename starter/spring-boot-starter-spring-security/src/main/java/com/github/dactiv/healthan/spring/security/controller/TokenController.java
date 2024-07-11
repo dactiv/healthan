@@ -45,7 +45,7 @@ public class TokenController {
 
     @PostMapping("refreshAccessToken")
     public RestResult<Map<String, Object>> refreshAccessToken(@RequestParam String refreshToken,
-                                                                   @CurrentSecurityContext SecurityContext securityContext) {
+                                                              @CurrentSecurityContext SecurityContext securityContext) {
 
         Assert.isTrue(
                 AuthenticationSuccessToken.class.isAssignableFrom(securityContext.getAuthentication().getClass()),

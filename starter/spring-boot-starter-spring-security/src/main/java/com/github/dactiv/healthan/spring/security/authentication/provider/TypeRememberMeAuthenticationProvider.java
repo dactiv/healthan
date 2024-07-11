@@ -57,14 +57,29 @@ public class TypeRememberMeAuthenticationProvider extends RememberMeAuthenticati
         String[] split = StringUtils.splitByWholeSeparator(userDetails.getUsername(), CacheProperties.DEFAULT_SEPARATOR);
 
         if (ArrayUtils.isEmpty(split) || split.length < 2) {
-            throw new InvalidCookieException("记住我登录数据出错，格式应该为:<用户类型>:[用户id]:<用户登录信息>， 当前格式为:" + userDetails.getUsername());
+            String message = messages.getMessage(
+                    "RememberMeAuthenticationProvider.formatError",
+                    "记住我登录数据出错，格式应该为:<用户类型>:[用户id]:<用户登录信息>， 当前格式为:" + userDetails.getUsername()
+            );
+            throw new InvalidCookieException(message);
         }
 
-        TypeAuthenticationToken token = new TypeAuthenticationToken(split[0], null, split.length == 3 ? split[2] : split[1]);
+        String message = messages.getMessage(
+                "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
+                "找不到适用于 " + split[0] + " 的 UserDetailsService 实现"
+        );
+
+        TypeAuthenticationToken token = new TypeAuthenticationToken(
+                split[0],
+                null,
+                split.length == 3 ? split[2] : split[1]
+        );
+        token.setDetails(authentication.getDetails());
+
         TypeSecurityPrincipalService typeSecurityPrincipalService = typeSecurityPrincipalServices
                 .stream()
                 .filter(t -> t.getType().contains(split[0])).findFirst()
-                .orElseThrow(() -> new InternalAuthenticationServiceException("找不类型为 [" + split[0] + "] 的带类型的安全用户服务实现"));
+                .orElseThrow(() -> new InternalAuthenticationServiceException(message));
 
         String authenticationCacheName = authenticationProperties.getAuthenticationCache().getName(token.getName());
         SecurityPrincipal principal = cacheManager.getSecurityPrincipal(CacheProperties.of(authenticationCacheName));
@@ -72,7 +87,12 @@ public class TypeRememberMeAuthenticationProvider extends RememberMeAuthenticati
             principal = typeSecurityPrincipalService.getSecurityPrincipal(token);
         }
         if (Objects.isNull(principal)) {
-            throw new UsernameNotFoundException("自动登录获取用户信息失败");
+            throw new UsernameNotFoundException(
+                    messages.getMessage(
+                            "RememberMeAuthenticationProvider.badCredentials",
+                            "自动登录获取用户信息失败"
+                    )
+            );
         }
 
         String authorizationCacheName = authenticationProperties.getAuthorizationCache().getName(userDetails.getUsername());

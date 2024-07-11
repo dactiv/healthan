@@ -38,7 +38,7 @@ public class OperateController {
 
     @GetMapping("pluginTestPermsOperate")
     @Plugin(name = "perms 操作信息", sources = "test")
-    @PreAuthorize("hasAuthority('perms[operate]')")
+    @PreAuthorize("hasAuthority('perms[operate]') and isFullyAuthenticated()")
     public RestResult<?> pluginTestPermsOperate() {
         return RestResult.of("pluginTestPermsOperate");
     }

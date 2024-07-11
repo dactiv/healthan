@@ -9,10 +9,12 @@ import com.github.dactiv.healthan.spring.security.authentication.config.Authenti
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RequestAuthenticationConfigurer;
 import com.github.dactiv.healthan.spring.security.authentication.provider.TypeRememberMeAuthenticationProvider;
+import com.github.dactiv.healthan.spring.security.authentication.token.RememberMeAuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.plugin.PluginSourceTypeVoter;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -24,6 +26,10 @@ import org.springframework.security.access.intercept.aopalliance.MethodSecurityI
 import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.ConsensusBased;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationTrustResolver;
+import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -43,9 +49,10 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  */
 @Configuration
-@EnableConfigurationProperties({AuthenticationProperties.class, RememberMeProperties.class})
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-public class DefaultWebSecurityAutoConfiguration {
+@EnableConfigurationProperties({AuthenticationProperties.class, RememberMeProperties.class})
+public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityConfiguration {
 
     private final AccessTokenContextRepository accessTokenContextRepository;
 
@@ -212,6 +219,14 @@ public class DefaultWebSecurityAutoConfiguration {
         } catch (Exception ignored) {
 
         }
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuthenticationTrustResolver.class)
+    public AuthenticationTrustResolver authenticationTrustResolver() {
+        AuthenticationTrustResolverImpl authenticationTrustResolver = new AuthenticationTrustResolverImpl();
+        authenticationTrustResolver.setRememberMeClass(RememberMeAuthenticationSuccessToken.class);
+        return authenticationTrustResolver;
     }
 
     /*@Bean

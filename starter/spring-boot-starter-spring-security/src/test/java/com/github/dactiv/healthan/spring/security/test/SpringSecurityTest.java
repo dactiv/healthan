@@ -84,10 +84,44 @@ public class SpringSecurityTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:test\",\"type\":\"AUTHENTICATION_FAILURE\"}]}"));
 
+
         mockMvc
+                .perform(get("/operate/isAuthenticated"))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().json("{\"message\":\"Unauthorized\"}"));
+
+        cookie = mockMvc
                 .perform(get("/operate/isAuthenticated").cookie(cookie))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"message\":\"isAuthenticated\"}"));
+                .andExpect(content().json("{\"message\":\"isAuthenticated\"}"))
+                .andReturn()
+                .getResponse()
+                .getCookie(rememberMeProperties.getCookieName());
+
+        cookie = mockMvc
+                .perform(get("/operate/isFullyAuthenticated").cookie(cookie))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().json("{\"message\":\"Access is denied\"}"))
+                .andReturn()
+                .getResponse()
+                .getCookie(rememberMeProperties.getCookieName());
+
+        cookie = mockMvc
+                .perform(get("/operate/permsOperate").cookie(cookie))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"message\":\"permsOperate\"}"))
+                .andReturn()
+                .getResponse()
+                .getCookie(rememberMeProperties.getCookieName());
+
+        mockMvc
+                .perform(get("/operate/pluginTestPermsOperate").cookie(cookie))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().json("{\"message\":\"Access is denied\"}"))
+                .andReturn()
+                .getResponse()
+                .getCookie(rememberMeProperties.getCookieName());
+
     }
 
 }
