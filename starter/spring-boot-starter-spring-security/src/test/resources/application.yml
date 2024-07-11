@@ -6,6 +6,7 @@ healthan:
       key: healthan
     audit:
       type: memory
+      ignore-types: AUTHENTICATION_FAILURE
     captcha-verification:
       verify-urls:
         - "/login/**"

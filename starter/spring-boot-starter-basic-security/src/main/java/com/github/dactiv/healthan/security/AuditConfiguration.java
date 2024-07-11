@@ -4,18 +4,22 @@ package com.github.dactiv.healthan.security;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.audit.AuditType;
 import com.github.dactiv.healthan.security.audit.elasticsearch.ElasticsearchAuditConfiguration;
+import com.github.dactiv.healthan.security.audit.memory.CustomInMemoryAuditConfiguration;
 import com.github.dactiv.healthan.security.audit.mongo.MongoAuditConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.actuate.audit.AuditEventRepository;
-import org.springframework.boot.actuate.audit.InMemoryAuditEventRepository;
-import org.springframework.boot.autoconfigure.condition.*;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionMessage;
+import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.BindException;
 import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
@@ -41,7 +45,7 @@ public class AuditConfiguration {
     static {
         Map<AuditType, Class<?>> mappings = new LinkedHashMap<>();
 
-        mappings.put(AuditType.Memory, InMemoryAuditConfiguration.class);
+        mappings.put(AuditType.Memory, CustomInMemoryAuditConfiguration.class);
         mappings.put(AuditType.Elasticsearch, ElasticsearchAuditConfiguration.class);
         mappings.put(AuditType.Mongo, MongoAuditConfiguration.class);
 
@@ -121,24 +125,6 @@ public class AuditConfiguration {
         }
         String msg = "unknown configuration class" + configurationClassName;
         throw new IllegalStateException(msg);
-    }
-
-    /**
-     * 内存形式的审计仓库配置
-     *
-     * @author maurice.chen
-     */
-    @Conditional(AuditImportSelectorCondition.class)
-    @ConditionalOnMissingBean(AuditEventRepository.class)
-    @ConditionalOnClass(InMemoryAuditEventRepository.class)
-    @EnableConfigurationProperties(SecurityProperties.class)
-    @ConditionalOnProperty(prefix = "healthan.authentication.audit", value = "enabled", matchIfMissing = true)
-    public static class InMemoryAuditConfiguration {
-
-        @Bean
-        public AuditEventRepository auditEventRepository() {
-            return new InMemoryAuditEventRepository();
-        }
     }
 
 

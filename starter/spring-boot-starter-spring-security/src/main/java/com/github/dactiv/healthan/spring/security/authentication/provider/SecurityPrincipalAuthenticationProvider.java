@@ -3,8 +3,10 @@ package com.github.dactiv.healthan.spring.security.authentication.provider;
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
+import com.github.dactiv.healthan.spring.security.authentication.FormLoginAuthenticationDetails;
 import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
+import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,7 +32,7 @@ import java.util.Optional;
  *
  * @author maurice.chen
  */
-public class RequestAuthenticationProvider implements AuthenticationManager, AuthenticationProvider, MessageSourceAware, InitializingBean {
+public class SecurityPrincipalAuthenticationProvider implements AuthenticationManager, AuthenticationProvider, MessageSourceAware, InitializingBean {
 
     /**
      * 认证缓存块名称
@@ -50,25 +52,20 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
     /**
      * 用户明细符合集合
      */
-    private List<TypeSecurityPrincipalService> typeSecurityPrincipalServices;
+    private final List<TypeSecurityPrincipalService> typeSecurityPrincipalServices;
 
     /**
      * 缓存管理
      */
     private final CacheManager cacheManager;
 
-    /**
-     * 隐藏找不到用户异常，用登陆账户或密码错误异常
-     */
-    private boolean hideUserNotFoundExceptions = true;
+    private final AuthenticationProperties authenticationProperties;
 
-    /**
-     * 当前用户认证供应者实现
-     *
-     * @param typeSecurityPrincipalServices 账户认证的用户明细服务集合
-     */
-    public RequestAuthenticationProvider(CacheManager cacheManager,
-                                         List<TypeSecurityPrincipalService> typeSecurityPrincipalServices) {
+
+    public SecurityPrincipalAuthenticationProvider(CacheManager cacheManager,
+                                                   AuthenticationProperties authenticationProperties,
+                                                   List<TypeSecurityPrincipalService> typeSecurityPrincipalServices) {
+        this.authenticationProperties = authenticationProperties;
         this.typeSecurityPrincipalServices = typeSecurityPrincipalServices;
         this.cacheManager = cacheManager;
     }
@@ -77,13 +74,19 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
         // 获取 token
-        RequestAuthenticationToken requestAuthenticationToken = Casts.cast(authentication);
+        UsernamePasswordAuthenticationToken token = Casts.cast(authentication);
+        if (!FormLoginAuthenticationDetails.class.isAssignableFrom(token.getDetails().getClass())) {
+            return null;
+        }
+
+        FormLoginAuthenticationDetails details = Casts.cast(token.getDetails());
+        RequestAuthenticationToken authenticationToken = new RequestAuthenticationToken(details, token);
 
         try {
-            SecurityPrincipal userDetails = doPrincipalAuthenticate(requestAuthenticationToken);
-            return createSuccessAuthentication(userDetails, requestAuthenticationToken);
+            SecurityPrincipal userDetails = doPrincipalAuthenticate(authenticationToken);
+            return createSuccessAuthentication(userDetails, authenticationToken);
         } catch (Exception e) {
-            if (e instanceof AuthenticationServiceException) {
+            if (e instanceof AuthenticationException) {
                 throw e;
             }
             throw new AuthenticationServiceException(e.getMessage());
@@ -97,7 +100,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         Optional<TypeSecurityPrincipalService> optional = getUserDetailsService(token);
 
         String message = messages.getMessage(
-                "PrincipalAuthenticationProvider.userDetailsServiceNotFound",
+                "SecurityPrincipalAuthenticationProvider.userDetailsServiceNotFound",
                 "找不到适用于 " + token.getType() + " 的 UserDetailsService 实现"
         );
 
@@ -121,14 +124,14 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
             String presentedPassword = token.getCredentials().toString();
             if (!typeSecurityPrincipalService.matchesPassword(presentedPassword, token, principal)) {
                 throw new BadCredentialsException(messages.getMessage(
-                        "PrincipalAuthenticationProvider.badCredentials",
+                        "SecurityPrincipalAuthenticationProvider.badCredentials",
                         "用户名或密码错误"));
             }
         } catch (Exception e) {
             // 如果 hideUserNotFoundExceptions true 并且是 UsernameNotFoundException 异常，抛出 用户名密码错误异常
-            if (UsernameNotFoundException.class.isAssignableFrom(e.getClass()) && hideUserNotFoundExceptions) {
+            if (UsernameNotFoundException.class.isAssignableFrom(e.getClass()) && authenticationProperties.isHideUserNotFoundExceptions()) {
                 throw new BadCredentialsException(messages.getMessage(
-                        "PrincipalAuthenticationProvider.badCredentials",
+                        "SecurityPrincipalAuthenticationProvider.badCredentials",
                         "用户名或密码错误"));
             } else if (e instanceof AuthenticationException) {
                 throw e;
@@ -154,13 +157,13 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
         // 如果获取不到用户，并且 hideUserNotFoundExceptions 等于 true 时，抛次用户名或密码错误异常，否则抛出找不到用户异常
         if (Objects.isNull(userDetails)) {
-            if (hideUserNotFoundExceptions) {
+            if (authenticationProperties.isHideUserNotFoundExceptions()) {
                 throw new BadCredentialsException(messages.getMessage(
-                        "PrincipalAuthenticationProvider.badCredentials",
+                        "SecurityPrincipalAuthenticationProvider.badCredentials",
                         "用户名或密码错误"));
             } else {
                 throw new UsernameNotFoundException(messages.getMessage(
-                        "PrincipalAuthenticationProvider.usernameNotFound",
+                        "SecurityPrincipalAuthenticationProvider.usernameNotFound",
                         "找不到用户信息"));
             }
         }
@@ -169,7 +172,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         if (!userDetails.isNonLocked()) {
 
             throw new LockedException(messages.getMessage(
-                    "PrincipalAuthenticationProvider.locked",
+                    "SecurityPrincipalAuthenticationProvider.locked",
                     "用户已经被锁定"));
         }
 
@@ -177,7 +180,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         if (userDetails.isDisabled()) {
 
             throw new DisabledException(messages.getMessage(
-                    "PrincipalAuthenticationProvider.disabled",
+                    "SecurityPrincipalAuthenticationProvider.disabled",
                     "用户已被禁用"));
         }
 
@@ -185,7 +188,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
         if (!userDetails.isNonExpired()) {
 
             throw new AccountExpiredException(messages.getMessage(
-                    "PrincipalAuthenticationProvider.expired",
+                    "SecurityPrincipalAuthenticationProvider.expired",
                     "用户账户已过期"));
         }
     }
@@ -256,7 +259,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return RequestAuthenticationToken.class.isAssignableFrom(authentication);
+        return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
 
@@ -268,42 +271,6 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
     @Override
     public void afterPropertiesSet() {
         Assert.notNull(typeSecurityPrincipalServices, "至少要一个" + TypeSecurityPrincipalService.class.getName() + "接口的实现");
-    }
-
-    /**
-     * 获取账户认证的用户明细服务集合
-     *
-     * @return 账户认证的用户明细服务集合
-     */
-    public List<TypeSecurityPrincipalService> getTypeSecurityPrincipalServices() {
-        return typeSecurityPrincipalServices;
-    }
-
-    /**
-     * 设置账户认证的用户明细服务集合
-     *
-     * @param typeSecurityPrincipalServices 账户认证的用户明细服务集合
-     */
-    public void setUserDetailsServices(List<TypeSecurityPrincipalService> typeSecurityPrincipalServices) {
-        this.typeSecurityPrincipalServices = typeSecurityPrincipalServices;
-    }
-
-    /**
-     * 是否隐藏找不到用户异常
-     *
-     * @return true 是，否则 false
-     */
-    public boolean isHideUserNotFoundExceptions() {
-        return hideUserNotFoundExceptions;
-    }
-
-    /**
-     * 设置是否隐藏找不到用户异常
-     *
-     * @param hideUserNotFoundExceptions true 是，否则 false
-     */
-    public void setHideUserNotFoundExceptions(boolean hideUserNotFoundExceptions) {
-        this.hideUserNotFoundExceptions = hideUserNotFoundExceptions;
     }
 
 }

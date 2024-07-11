@@ -6,7 +6,6 @@ import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.token.RememberMeAuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.TypeAuthenticationToken;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 重写记住我供应者，将 cookie 中带有类型用户的信息解析成{@link RememberMeAuthenticationSuccessToken} 响应给 spring security，
+ * 重写记住我供应者，将 cookie 中带有类型用户的信息解析成 {@link com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken} 响应给 spring security，
  * 其目的是兼容所有认证流程都支持带类型的用户信息。
  *
  * @author maurice.hen

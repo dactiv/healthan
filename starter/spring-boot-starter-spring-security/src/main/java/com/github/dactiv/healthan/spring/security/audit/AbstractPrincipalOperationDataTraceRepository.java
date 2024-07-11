@@ -4,12 +4,14 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.id.IdEntity;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
+import com.github.dactiv.healthan.security.AuditProperties;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.entity.support.SimpleTypePrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.entity.UserDetailsOperationDataTraceRecord;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import net.sf.jsqlparser.statement.Statement;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -25,14 +27,14 @@ import java.util.*;
  *
  * @author maurice.chen
  */
-public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlusOperationDataTraceRepository implements ShardingOperationDataTraceRepository {
+public abstract class AbstractPrincipalOperationDataTraceRepository extends MybatisPlusOperationDataTraceRepository implements ShardingOperationDataTraceRepository {
 
     public static final String OPERATION_DATA_TRACE_ID_ATTR_NAME = "operationDataTraceId";
 
-    private final List<String> ignorePrincipals;
+    private final AuditProperties auditProperties;
 
-    public UserDetailsOperationDataTraceRepository(List<String> ignorePrincipals) {
-        this.ignorePrincipals = ignorePrincipals;
+    public AbstractPrincipalOperationDataTraceRepository(AuditProperties auditProperties) {
+        this.auditProperties = auditProperties;
     }
 
     @Override
@@ -64,7 +66,7 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
             AuthenticationSuccessToken authenticationToken = Casts.cast(context.getAuthentication());
             SecurityPrincipal userDetails = Casts.cast(authenticationToken.getPrincipal());
             String username = userDetails.getUsername();
-            if (ignorePrincipals.contains(username)) {
+            if (CollectionUtils.isNotEmpty(auditProperties.getIgnorePrincipals()) && auditProperties.getIgnorePrincipals().contains(username)) {
                 return null;
             }
 
@@ -91,15 +93,22 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
             List<OperationDataTraceRecord> result = new LinkedList<>();
 
             for (OperationDataTraceRecord record : records) {
+
                 UserDetailsOperationDataTraceRecord userDetailsRecord = Casts.of(record, UserDetailsOperationDataTraceRecord.class);
+                if (Objects.isNull(userDetailsRecord)) {
+                    continue;
+                }
+
                 Object auditType = httpServletRequest.getAttribute(ControllerAuditHandlerInterceptor.AUDIT_TYPE_ATTR_NAME);
                 if (Objects.nonNull(auditType)) {
                     userDetailsRecord.setAuditType(auditType.toString());
                 }
+
                 userDetailsRecord.setPrincipalMeta(meta);
                 userDetailsRecord.setPrincipal(username);
                 userDetailsRecord.setTraceId(traceId.toString());
                 userDetailsRecord.setRemark(username + StringUtils.SPACE + getDateFormat().format(record.getCreationTime()) + StringUtils.SPACE + record.getType().getName());
+
                 result.add(userDetailsRecord);
             }
 

@@ -195,7 +195,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             Object trace = request.getAttribute(OPERATION_DATA_TRACE_ATT_NAME);
 
             if (Objects.nonNull(trace) && Boolean.TRUE.equals(trace)) {
-                Object traceId = request.getAttribute(UserDetailsOperationDataTraceRepository.OPERATION_DATA_TRACE_ID_ATTR_NAME);
+                Object traceId = request.getAttribute(AbstractPrincipalOperationDataTraceRepository.OPERATION_DATA_TRACE_ID_ATTR_NAME);
                 if (Objects.nonNull(traceId)) {
                     auditEvent.setTraceId(traceId.toString());
                 }

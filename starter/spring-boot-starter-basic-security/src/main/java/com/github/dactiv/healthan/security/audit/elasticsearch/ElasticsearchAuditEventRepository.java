@@ -7,8 +7,9 @@ import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.commons.page.Page;
 import com.github.dactiv.healthan.commons.page.PageRequest;
+import com.github.dactiv.healthan.security.AuditProperties;
+import com.github.dactiv.healthan.security.audit.AbstractPluginAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
-import com.github.dactiv.healthan.security.audit.PluginAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.elasticsearch.index.IndexGenerator;
 import com.github.dactiv.healthan.security.audit.elasticsearch.index.support.DateIndexGenerator;
 import org.apache.commons.collections4.MapUtils;
@@ -42,7 +43,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class ElasticsearchAuditEventRepository implements PluginAuditEventRepository {
+public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventRepository {
 
     public static final String MAPPING_FILE_PATH = "elasticsearch/plugin-audit-mapping.json";
 
@@ -52,16 +53,13 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
     private final ElasticsearchOperations elasticsearchOperations;
 
-    private final List<String> ignorePrincipals;
-
     private final IndexGenerator indexGenerator;
 
-    public ElasticsearchAuditEventRepository(ElasticsearchOperations elasticsearchOperations,
-                                             String indexName,
-                                             List<String> ignorePrincipals) {
-
+    public ElasticsearchAuditEventRepository(AuditProperties auditProperties,
+                                             ElasticsearchOperations elasticsearchOperations,
+                                             String indexName) {
+        super(auditProperties);
         this.elasticsearchOperations = elasticsearchOperations;
-        this.ignorePrincipals = ignorePrincipals;
 
         this.indexGenerator = new DateIndexGenerator(
                 indexName,
@@ -71,17 +69,13 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
     }
 
     @Override
-    public void add(AuditEvent event) {
+    public void doAdd(AuditEvent event) {
 
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(
                 event.getPrincipal(),
                 event.getType(),
                 event.getData()
         );
-
-        if (ignorePrincipals.contains(pluginAuditEvent.getPrincipal())) {
-            return ;
-        }
 
         if (PluginAuditEvent.class.isAssignableFrom(event.getClass())) {
             pluginAuditEvent = Casts.cast(event);
@@ -178,7 +172,7 @@ public class ElasticsearchAuditEventRepository implements PluginAuditEventReposi
 
     @Override
     public AuditEvent createAuditEvent(Map<String, Object> map) {
-        PluginAuditEvent pluginAuditEvent = Casts.cast(PluginAuditEventRepository.super.createAuditEvent(map));
+        PluginAuditEvent pluginAuditEvent = Casts.cast(super.createAuditEvent(map));
         pluginAuditEvent.setId(map.get(IdEntity.ID_FIELD_NAME).toString());
         return pluginAuditEvent;
     }

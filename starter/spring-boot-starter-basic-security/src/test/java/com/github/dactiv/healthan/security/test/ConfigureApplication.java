@@ -1,5 +1,6 @@
 package com.github.dactiv.healthan.security.test;
 
+import com.github.dactiv.healthan.security.AuditProperties;
 import com.github.dactiv.healthan.security.audit.PluginAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.elasticsearch.ElasticsearchAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.mongo.MongoAuditEventRepository;
@@ -12,9 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @EnableConfigurationProperties(SecurityProperties.class)
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 public class ConfigureApplication {
@@ -25,27 +23,23 @@ public class ConfigureApplication {
 
     @Bean
     public ElasticsearchAuditEventRepository elasticsearchAuditEventRepository(ElasticsearchOperations elasticsearchOperations,
-                                                                               SecurityProperties securityProperties) {
-        List<String> ignorePrincipals = new ArrayList<>(PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS);
-        ignorePrincipals.add(securityProperties.getUser().getName());
+                                                                               AuditProperties auditProperties) {
+
         return new ElasticsearchAuditEventRepository(
+                auditProperties,
                 elasticsearchOperations,
-                "ix_test_audit_event",
-                ignorePrincipals
+                "ix_test_audit_event"
         );
     }
 
     @Bean
     public PluginAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
-                                                           SecurityProperties securityProperties) {
-
-        List<String> ignorePrincipals = new ArrayList<>(PluginAuditEventRepository.DEFAULT_IGNORE_PRINCIPALS);
-        ignorePrincipals.add(securityProperties.getUser().getName());
+                                                           AuditProperties auditProperties) {
 
         return new MongoAuditEventRepository(
+                auditProperties,
                 mongoTemplate,
-                "col_test_audit_event",
-                ignorePrincipals
+                "col_test_audit_event"
         );
 
     }

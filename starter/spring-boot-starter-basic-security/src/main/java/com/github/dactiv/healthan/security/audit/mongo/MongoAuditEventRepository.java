@@ -6,8 +6,9 @@ import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.commons.page.Page;
 import com.github.dactiv.healthan.commons.page.PageRequest;
+import com.github.dactiv.healthan.security.AuditProperties;
+import com.github.dactiv.healthan.security.audit.AbstractPluginAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
-import com.github.dactiv.healthan.security.audit.PluginAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.elasticsearch.index.IndexGenerator;
 import com.github.dactiv.healthan.security.audit.elasticsearch.index.support.DateIndexGenerator;
 import org.apache.commons.collections4.MapUtils;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class MongoAuditEventRepository implements PluginAuditEventRepository {
+public class MongoAuditEventRepository extends AbstractPluginAuditEventRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoAuditEventRepository.class);
 
@@ -41,16 +42,13 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     private final MongoTemplate mongoTemplate;
 
-    private final List<String> ignorePrincipals;
-
     private final IndexGenerator indexGenerator;
 
-    public MongoAuditEventRepository(MongoTemplate mongoTemplate,
-                                     String indexName,
-                                     List<String> ignorePrincipals) {
-
+    public MongoAuditEventRepository(AuditProperties auditProperties,
+                                     MongoTemplate mongoTemplate,
+                                     String indexName) {
+        super(auditProperties);
         this.mongoTemplate = mongoTemplate;
-        this.ignorePrincipals = ignorePrincipals;
 
         this.indexGenerator = new DateIndexGenerator(
                 indexName,
@@ -60,13 +58,9 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
     }
 
     @Override
-    public void add(AuditEvent event) {
+    public void doAdd(AuditEvent event) {
 
         PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(event);
-
-        if (ignorePrincipals.contains(pluginAuditEvent.getPrincipal())) {
-            return ;
-        }
 
         if (PluginAuditEvent.class.isAssignableFrom(event.getClass())) {
             pluginAuditEvent = Casts.cast(event);
@@ -138,7 +132,7 @@ public class MongoAuditEventRepository implements PluginAuditEventRepository {
 
     @Override
     public AuditEvent createAuditEvent(Map<String, Object> map) {
-        PluginAuditEvent pluginAuditEvent = Casts.cast(PluginAuditEventRepository.super.createAuditEvent(map));
+        PluginAuditEvent pluginAuditEvent = Casts.cast(super.createAuditEvent(map));
         pluginAuditEvent.setId(map.get(DEFAULT_ID_FIELD).toString());
 
         return pluginAuditEvent;

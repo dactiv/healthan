@@ -3,12 +3,13 @@ package com.github.dactiv.healthan.spring.security.test;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.spring.security.SpringSecurityAutoConfiguration;
 import com.github.dactiv.healthan.spring.security.authentication.AuthenticationTypeTokenResolver;
+import com.github.dactiv.healthan.spring.security.authentication.FormLoginAuthenticationDetailsSource;
 import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.config.RequestAuthenticationConfigurer;
+import com.github.dactiv.healthan.spring.security.authentication.provider.SecurityPrincipalAuthenticationProvider;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -44,8 +45,6 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  */
 @Configuration
-//@EnableWebSecurity
-//@EnableMethodSecurity(securedEnabled = true)
 @AutoConfigureAfter({SpringSecurityAutoConfiguration.class})
 public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, OAuth2AuthorizationConfigurerAdapter {
 
@@ -211,15 +210,11 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
         try {
 
             httpSecurity
-                    .apply(
-                            new RequestAuthenticationConfigurer<>(
-                                    authenticationProperties,
-                                    authenticationTypeTokenResolvers,
-                                    typeSecurityPrincipalServices,
-                                    cacheManager
-                            )
-                    )
-                    .securityContextRepository(securityContextRepository)
+                    .formLogin()
+                    .passwordParameter(authenticationProperties.getPasswordParamName())
+                    .usernameParameter(authenticationProperties.getUsernameParamName())
+                    .loginProcessingUrl(authenticationProperties.getLoginProcessingUrl())
+                    .authenticationDetailsSource(new FormLoginAuthenticationDetailsSource(authenticationProperties))
                     .failureHandler(authenticationFailureHandler)
                     .successHandler(authenticationSuccessHandler)
                     .and()
@@ -227,6 +222,14 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                     .and()
                     .sessionManagement()
                     .maximumSessions(Integer.MAX_VALUE);
+
+                    httpSecurity.authenticationProvider(
+                            new SecurityPrincipalAuthenticationProvider(
+                                    cacheManager,
+                                    authenticationProperties,
+                                    typeSecurityPrincipalServices
+                            )
+                    );
 
         } catch (Exception e) {
             throw new RuntimeException(e);

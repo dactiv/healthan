@@ -7,9 +7,7 @@ import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecu
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
-import com.github.dactiv.healthan.spring.security.authentication.config.RequestAuthenticationConfigurer;
 import com.github.dactiv.healthan.spring.security.authentication.provider.TypeRememberMeAuthenticationProvider;
-import com.github.dactiv.healthan.spring.security.authentication.token.RememberMeAuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.plugin.PluginSourceTypeVoter;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,17 +25,14 @@ import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.ConsensusBased;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
-import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -64,38 +59,22 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
 
     private final List<ErrorResultResolver> resultResolvers;
 
-    private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
-
     private final List<TypeSecurityPrincipalService> typeSecurityPrincipalServices;
-
-    private final AuthenticationFailureHandler authenticationFailureHandler;
-
-    private final AuthenticationSuccessHandler authenticationSuccessHandler;
-
-    private final SecurityContextRepository securityContextRepository;
 
     private final CacheManager cacheManager;
 
     public DefaultWebSecurityAutoConfiguration(AccessTokenContextRepository accessTokenContextRepository,
                                                AuthenticationProperties authenticationProperties,
                                                RememberMeProperties rememberMeProperties,
-                                               AuthenticationFailureHandler authenticationFailureHandler,
-                                               AuthenticationSuccessHandler authenticationSuccessHandler,
                                                CacheManager cacheManager,
-                                               SecurityContextRepository securityContextRepository,
-                                               ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
                                                ObjectProvider<ErrorResultResolver> errorResultResolvers,
                                                ObjectProvider<TypeSecurityPrincipalService> userDetailsServices,
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
         this.accessTokenContextRepository = accessTokenContextRepository;
         this.authenticationProperties = authenticationProperties;
         this.rememberMeProperties = rememberMeProperties;
-        this.authenticationFailureHandler = authenticationFailureHandler;
-        this.authenticationSuccessHandler = authenticationSuccessHandler;
-        this.securityContextRepository = securityContextRepository;
         this.cacheManager = cacheManager;
         this.typeSecurityPrincipalServices = userDetailsServices.stream().collect(Collectors.toList());
-        this.authenticationTypeTokenResolvers = authenticationTypeTokenResolvers.stream().collect(Collectors.toList());
         this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().collect(Collectors.toList());
         this.resultResolvers = errorResultResolvers.stream().collect(Collectors.toList());
     }
@@ -108,18 +87,6 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
                 .permitAll()
                 .anyRequest()
                 .authenticated()
-                .and()
-                .apply(
-                        new RequestAuthenticationConfigurer<>(
-                                authenticationProperties,
-                                authenticationTypeTokenResolvers,
-                                typeSecurityPrincipalServices,
-                                cacheManager
-                        )
-                )
-                .securityContextRepository(securityContextRepository)
-                .failureHandler(authenticationFailureHandler)
-                .successHandler(authenticationSuccessHandler)
                 .and()
                 .httpBasic()
                 .disable()
@@ -175,7 +142,7 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
             }
         }
 
-        httpSecurity.addFilterBefore(new IpAuthenticationFilter(this.authenticationProperties), RequestAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(new IpAuthenticationFilter(this.authenticationProperties), UsernamePasswordAuthenticationFilter.class);
 
         addConsensusBasedToMethodSecurityInterceptor(httpSecurity, authenticationProperties);
         return httpSecurity.build();
@@ -224,9 +191,7 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
     @Bean
     @ConditionalOnMissingBean(AuthenticationTrustResolver.class)
     public AuthenticationTrustResolver authenticationTrustResolver() {
-        AuthenticationTrustResolverImpl authenticationTrustResolver = new AuthenticationTrustResolverImpl();
-        authenticationTrustResolver.setRememberMeClass(RememberMeAuthenticationSuccessToken.class);
-        return authenticationTrustResolver;
+        return new SimpleAuthenticationTrustResolver();
     }
 
     /*@Bean

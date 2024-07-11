@@ -9,6 +9,7 @@ import com.github.dactiv.healthan.commons.page.PageRequest;
 import com.github.dactiv.healthan.commons.page.TotalPage;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.healthan.mybatis.plus.audit.EntityIdOperationDataTraceRecord;
+import com.github.dactiv.healthan.security.AuditProperties;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.audit.elasticsearch.ElasticsearchAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.elasticsearch.index.IndexGenerator;
@@ -42,9 +43,10 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperationDataTraceRepository {
+public class ElasticsearchOperationDataTraceRepository extends AbstractPrincipalOperationDataTraceRepository {
 
     public static final String DEFAULT_INDEX_NAME = "ix_user_operation_data_trace";
+
     public static final String MAPPING_FILE_PATH = "elasticsearch/operation-data-trace-record-mapping.json";
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
@@ -53,10 +55,10 @@ public class ElasticsearchOperationDataTraceRepository extends UserDetailsOperat
 
     private final IndexGenerator indexGenerator;
 
-    public ElasticsearchOperationDataTraceRepository(List<String> ignorePrincipals,
+    public ElasticsearchOperationDataTraceRepository(AuditProperties auditProperties,
                                                      String indexName,
                                                      ElasticsearchOperations elasticsearchOperations) {
-        super(ignorePrincipals);
+        super(auditProperties);
         this.elasticsearchOperations = elasticsearchOperations;
         this.indexGenerator = new DateIndexGenerator(
                 indexName,

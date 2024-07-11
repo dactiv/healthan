@@ -12,7 +12,9 @@ import org.springframework.boot.actuate.audit.AuditEventRepository;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 插件审计事件的仓库实现
@@ -20,8 +22,6 @@ import java.util.*;
  * @author maurice.chen
  */
 public interface PluginAuditEventRepository extends AuditEventRepository {
-
-    List<String> DEFAULT_IGNORE_PRINCIPALS = Collections.singletonList("anonymousUser");
 
     /**
      * 获取分页信息

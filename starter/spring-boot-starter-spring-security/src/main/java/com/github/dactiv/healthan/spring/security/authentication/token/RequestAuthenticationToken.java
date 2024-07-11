@@ -1,5 +1,8 @@
 package com.github.dactiv.healthan.spring.security.authentication.token;
 
+import com.github.dactiv.healthan.spring.security.authentication.FormLoginAuthenticationDetails;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.util.MultiValueMap;
 
 
@@ -20,6 +23,12 @@ public class RequestAuthenticationToken extends TypeAuthenticationToken {
                                       String type) {
         super(principal, credentials, type);
         this.parameterMap = parameterMap;
+    }
+
+    public RequestAuthenticationToken(FormLoginAuthenticationDetails details, UsernamePasswordAuthenticationToken token) {
+        super(token.getPrincipal(), token.getCredentials(), details.getType());
+        setDetails(new WebAuthenticationDetails(details.getRemoteAddress(), details.getSessionId()));
+        parameterMap = details.getParameterMap();
     }
 
     public MultiValueMap<String, String> getParameterMap() {

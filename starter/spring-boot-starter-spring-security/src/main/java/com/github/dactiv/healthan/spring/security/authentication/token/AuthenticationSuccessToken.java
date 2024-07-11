@@ -43,6 +43,11 @@ public class AuthenticationSuccessToken extends AbstractAuthenticationToken {
     private final String principalType;
 
     /**
+     * 是否记住我认证
+     */
+    private boolean isRememberMe = false;
+
+    /**
      * 当前用户认证 token
      *
      * @param principal   当前用户
@@ -110,6 +115,24 @@ public class AuthenticationSuccessToken extends AbstractAuthenticationToken {
      */
     public Date getLastAuthenticationTime() {
         return lastAuthenticationTime;
+    }
+
+    /**
+     * 是否记住我认证
+     *
+     * @return true 是，否则 false
+     */
+    public boolean isRememberMe() {
+        return isRememberMe;
+    }
+
+    /**
+     * 设置是否记住我认证
+     *
+     * @param rememberMe true 是，否则 false
+     */
+    public void setRememberMe(boolean rememberMe) {
+        isRememberMe = rememberMe;
     }
 
     /**
