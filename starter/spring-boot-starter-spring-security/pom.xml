@@ -28,10 +28,10 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>com.github.dactiv.healthan</groupId>
             <artifactId>spring-boot-starter-idempotent</artifactId>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>com.github.dactiv.healthan</groupId>

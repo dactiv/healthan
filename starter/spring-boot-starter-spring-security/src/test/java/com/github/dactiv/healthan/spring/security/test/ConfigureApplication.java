@@ -21,7 +21,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
                 ElasticsearchDataAutoConfiguration.class,
                 ElasticsearchRepositoriesAutoConfiguration.class,
                 ElasticsearchRestClientAutoConfiguration.class
-        }
+        },
+        scanBasePackages = "com.github.dactiv.healthan.spring.security.test"
 )
 public class ConfigureApplication {
 

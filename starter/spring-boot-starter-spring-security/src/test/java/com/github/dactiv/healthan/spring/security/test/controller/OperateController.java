@@ -27,7 +27,7 @@ public class OperateController {
     @GetMapping("isFullyAuthenticated")
     @PreAuthorize("isFullyAuthenticated()")
     public RestResult<?> isFullyAuthenticated() {
-        return RestResult.of("isAuthenticated");
+        return RestResult.of("isFullyAuthenticated");
     }
 
     @GetMapping("permsOperate")

@@ -3,15 +3,11 @@ package com.github.dactiv.healthan.spring.security.authentication;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -25,10 +21,6 @@ import java.util.List;
  * @author maurice.chen
  */
 public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RequestAuthenticationFilter.class);
-
-    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
 
     private final AuthenticationProperties authenticationProperties;
 
@@ -51,29 +43,6 @@ public class RequestAuthenticationFilter extends UsernamePasswordAuthenticationF
         this.authenticationTypeTokenResolvers = authenticationTypeTokenResolver;
         this.typeSecurityPrincipalServices = typeSecurityPrincipalServices;
     }
-
-    /*@Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (this.securityContextHolderStrategy.getContext().getAuthentication() != null) {
-            super.doFilter(request, response, chain);
-            return;
-        }
-
-        Authentication token = getRememberMeServices().autoLogin(Casts.cast(request), Casts.cast(response));
-        if (Objects.isNull(token)) {
-            super.doFilter(request, response, chain);
-            return;
-        }
-
-        try {
-            Authentication authentication = getAuthenticationManager().authenticate(token);
-            successfulAuthentication(Casts.cast(request), Casts.cast(response), chain, authentication);
-            chain.doFilter(request, response);
-        } catch (AuthenticationException ex) {
-            LOGGER.error("记住我认证出现异常", ex);
-            unsuccessfulAuthentication(Casts.cast(request), Casts.cast(response), ex);
-        }
-    }*/
 
     @Override
     protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {

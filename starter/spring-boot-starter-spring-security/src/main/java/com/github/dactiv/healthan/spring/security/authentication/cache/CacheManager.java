@@ -9,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * 缓存管理器,用于多 spring security 所扩展的缓存内容进行管理。

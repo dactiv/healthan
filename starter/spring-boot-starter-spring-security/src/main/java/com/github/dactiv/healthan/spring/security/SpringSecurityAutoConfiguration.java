@@ -17,7 +17,6 @@ import com.github.dactiv.healthan.spring.security.authentication.service.Default
 import com.github.dactiv.healthan.spring.security.authentication.service.DefaultTypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.controller.TokenController;
 import com.github.dactiv.healthan.spring.security.plugin.PluginEndpoint;
-import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.info.InfoContributor;
@@ -151,4 +150,5 @@ public class SpringSecurityAutoConfiguration {
     public RequestBodyAttributeAdviceAdapter requestBodyAttributeAdviceAdapter() {
         return new RequestBodyAttributeAdviceAdapter();
     }
+
 }

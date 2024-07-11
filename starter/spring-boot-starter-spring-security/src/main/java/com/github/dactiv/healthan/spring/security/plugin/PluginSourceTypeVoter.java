@@ -2,7 +2,7 @@ package com.github.dactiv.healthan.spring.security.plugin;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.plugin.Plugin;
-import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -47,7 +47,7 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
             return AccessDecisionVoter.ACCESS_ABSTAIN;
         }
 
-        if (!SimpleAuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
+        if (!AuthenticationSuccessToken.class.isAssignableFrom(authentication.getClass())) {
             return AccessDecisionVoter.ACCESS_ABSTAIN;
         }
 
@@ -66,7 +66,7 @@ public class PluginSourceTypeVoter implements AccessDecisionVoter<MethodInvocati
             return AccessDecisionVoter.ACCESS_GRANTED;
         }
 
-        SimpleAuthenticationToken authenticationToken = Casts.cast(authentication);
+        AuthenticationSuccessToken authenticationToken = Casts.cast(authentication);
 
         if (!resourceTypes.contains(authenticationToken.getPrincipalType())) {
             return AccessDecisionVoter.ACCESS_DENIED;

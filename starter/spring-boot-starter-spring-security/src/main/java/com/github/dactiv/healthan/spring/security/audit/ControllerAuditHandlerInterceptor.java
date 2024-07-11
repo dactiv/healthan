@@ -5,7 +5,7 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.audit.Auditable;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.plugin.Plugin;
-import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -176,8 +176,8 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             }
         }
 
-        if (SimpleAuthenticationToken.class.isAssignableFrom(principal.getClass())) {
-            SimpleAuthenticationToken authenticationToken = Casts.cast(principal);
+        if (AuthenticationSuccessToken.class.isAssignableFrom(principal.getClass())) {
+            AuthenticationSuccessToken authenticationToken = Casts.cast(principal);
 
             PluginAuditEvent auditEvent = new PluginAuditEvent(
                     Instant.now(),

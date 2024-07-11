@@ -14,9 +14,9 @@ import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
-import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.entity.AccessTokenDetails;
 import com.github.dactiv.healthan.spring.security.entity.support.MobileSecurityPrincipal;
 import com.github.dactiv.healthan.spring.web.device.DeviceUtils;
@@ -124,11 +124,11 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 return null;
             }
 
-            if (!SimpleAuthenticationToken.class.isAssignableFrom(context.getAuthentication().getClass())) {
+            if (!AuthenticationSuccessToken.class.isAssignableFrom(context.getAuthentication().getClass())) {
                 return null;
             }
 
-            SimpleAuthenticationToken authenticationToken = Casts.cast(context.getAuthentication());
+            AuthenticationSuccessToken authenticationToken = Casts.cast(context.getAuthentication());
             if (!AccessTokenDetails.class.isAssignableFrom(authenticationToken.getDetails().getClass())) {
                 return null;
             }
@@ -175,11 +175,11 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
         return accessTokenProperties.getAccessTokenCache().getName(type + CacheProperties.DEFAULT_SEPARATOR + deviceIdentified);
     }
 
-    public String generateCiphertext(SimpleAuthenticationToken token) {
+    public String generateCiphertext(AuthenticationSuccessToken token) {
         return generateCiphertext(token, accessTokenProperties.getCryptoKey());
     }
 
-    public String generateCiphertext(SimpleAuthenticationToken token, String aesKey) {
+    public String generateCiphertext(AuthenticationSuccessToken token, String aesKey) {
         Map<String, Object> json = Casts.convertValue(token.toTypeUserDetails(), Casts.MAP_TYPE_REFERENCE);
 
         json.put(NumberIdEntity.CREATION_TIME_FIELD_NAME, System.currentTimeMillis());
@@ -216,11 +216,11 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
         Authentication authentication = context.getAuthentication();
 
-        if (!SimpleAuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
+        if (!AuthenticationSuccessToken.class.isAssignableFrom(authentication.getClass())) {
             return;
         }
 
-        SimpleAuthenticationToken authenticationToken = Casts.cast(authentication);
+        AuthenticationSuccessToken authenticationToken = Casts.cast(authentication);
         Object details = authenticationToken.getDetails();
         if (!AccessTokenDetails.class.isAssignableFrom(details.getClass())) {
             return ;

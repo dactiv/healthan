@@ -6,7 +6,7 @@ import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRe
 import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.entity.support.SimpleTypePrincipal;
-import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.entity.UserDetailsOperationDataTraceRecord;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import net.sf.jsqlparser.statement.Statement;
@@ -60,8 +60,8 @@ public abstract class UserDetailsOperationDataTraceRepository extends MybatisPlu
             return null;
         }
 
-        if (context.getAuthentication() instanceof SimpleAuthenticationToken) {
-            SimpleAuthenticationToken authenticationToken = Casts.cast(context.getAuthentication());
+        if (context.getAuthentication() instanceof AuthenticationSuccessToken) {
+            AuthenticationSuccessToken authenticationToken = Casts.cast(context.getAuthentication());
             SecurityPrincipal userDetails = Casts.cast(authenticationToken.getPrincipal());
             String username = userDetails.getUsername();
             if (ignorePrincipals.contains(username)) {

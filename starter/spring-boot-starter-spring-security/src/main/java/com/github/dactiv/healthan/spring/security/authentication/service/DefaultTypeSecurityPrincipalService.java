@@ -4,7 +4,7 @@ import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.entity.support.SimpleSecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.AbstractTypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.TypeAuthenticationToken;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -38,12 +38,12 @@ public class DefaultTypeSecurityPrincipalService extends AbstractTypeSecurityPri
     }
 
     @Override
-    public SecurityPrincipal getSecurityPrincipal(RequestAuthenticationToken token) throws AuthenticationException {
+    public SecurityPrincipal getSecurityPrincipal(TypeAuthenticationToken token) throws AuthenticationException {
         return getSecurityPrincipal(token.getPrincipal().toString());
     }
 
     @Override
-    public Collection<GrantedAuthority> getPrincipalAuthorities(RequestAuthenticationToken token, SecurityPrincipal principal) {
+    public Collection<GrantedAuthority> getPrincipalAuthorities(TypeAuthenticationToken token, SecurityPrincipal principal) {
         SecurityProperties.User user = getSpringSecurityUserConfig(principal.getUsername());
         return user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }

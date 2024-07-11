@@ -4,7 +4,6 @@ package com.github.dactiv.healthan.spring.security;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.crypto.algorithm.Base64;
 import com.github.dactiv.healthan.crypto.algorithm.cipher.RsaCipherService;
-import com.github.dactiv.healthan.spring.security.authentication.RedissonOAuth2AuthorizationService;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
@@ -18,7 +17,6 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -28,6 +26,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
@@ -130,11 +130,17 @@ public class OAuth2WebSecurityAutoConfiguration {
         return new OidcUserInfoAuthenticationMapper(oidcUserInfoAuthenticationResolvers.orderedStream().collect(Collectors.toList()));
     }
 
-    @Bean
+    /*@Bean
     @ConditionalOnMissingBean(RedissonOAuth2AuthorizationService.class)
     public RedissonOAuth2AuthorizationService redissonOAuth2AuthorizationService(RedissonClient redissonClient,
                                                                                  OAuth2Properties oAuth2Properties) {
         return new RedissonOAuth2AuthorizationService(redissonClient, oAuth2Properties);
+    }*/
+
+    @Bean
+    @ConditionalOnMissingBean(OAuth2AuthorizationService.class)
+    public InMemoryOAuth2AuthorizationService inMemoryOAuth2AuthorizationService() {
+        return new InMemoryOAuth2AuthorizationService();
     }
 
     @Bean

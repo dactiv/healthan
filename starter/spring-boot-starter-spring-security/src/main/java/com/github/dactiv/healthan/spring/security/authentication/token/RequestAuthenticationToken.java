@@ -1,10 +1,6 @@
 package com.github.dactiv.healthan.spring.security.authentication.token;
 
-import com.github.dactiv.healthan.commons.CacheProperties;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.util.MultiValueMap;
-
-import java.util.LinkedHashSet;
 
 
 /**
@@ -12,49 +8,21 @@ import java.util.LinkedHashSet;
  *
  * @author maurice
  */
-public class RequestAuthenticationToken extends AbstractAuthenticationToken {
+public class RequestAuthenticationToken extends TypeAuthenticationToken {
 
     private static final long serialVersionUID = 8070060147431763553L;
 
     private final MultiValueMap<String, String> parameterMap;
 
-    private final Object principal;
-
-    private final Object credentials;
-
-    private final String type;
-
     public RequestAuthenticationToken(MultiValueMap<String, String> parameterMap,
                                       Object principal,
                                       Object credentials,
                                       String type) {
-        super(new LinkedHashSet<>());
+        super(principal, credentials, type);
         this.parameterMap = parameterMap;
-        this.principal = principal;
-        this.credentials = credentials;
-        this.type = type;
-    }
-
-    @Override
-    public Object getCredentials() {
-        return credentials;
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return principal;
     }
 
     public MultiValueMap<String, String> getParameterMap() {
         return parameterMap;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    @Override
-    public String getName() {
-        return getType() + CacheProperties.DEFAULT_SEPARATOR + getPrincipal();
     }
 }

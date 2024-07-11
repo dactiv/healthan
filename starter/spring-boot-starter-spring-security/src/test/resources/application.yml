@@ -2,17 +2,23 @@ healthan:
   authentication:
     remember-me:
       always: true
+      enabled: true
+      key: healthan
     audit:
       type: memory
     captcha-verification:
       verify-urls:
         - "/login/**"
     permit-uri-ant-matchers:
-      - "/prepare/**"
       - "/login/**"
       - "/logout/**"
       - "/actuator/**"
 
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
 
 management:
   info:

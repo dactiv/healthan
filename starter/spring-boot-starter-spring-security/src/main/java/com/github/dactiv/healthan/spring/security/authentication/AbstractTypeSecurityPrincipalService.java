@@ -5,6 +5,7 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.TypeAuthenticationToken;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -74,7 +75,7 @@ public abstract class AbstractTypeSecurityPrincipalService implements TypeSecuri
     }
 
     @Override
-    public CacheProperties getAuthorizationCache(RequestAuthenticationToken token, SecurityPrincipal principal) {
+    public CacheProperties getAuthorizationCache(TypeAuthenticationToken token, SecurityPrincipal principal) {
         String suffix = token.getType() + CacheProperties.DEFAULT_SEPARATOR + principal.getName();
         return CacheProperties.of(
                 authenticationProperties.getAuthorizationCache().getName(suffix),
@@ -83,7 +84,7 @@ public abstract class AbstractTypeSecurityPrincipalService implements TypeSecuri
     }
 
     @Override
-    public CacheProperties getAuthenticationCache(RequestAuthenticationToken token) {
+    public CacheProperties getAuthenticationCache(TypeAuthenticationToken token) {
         return CacheProperties.of(
                 authenticationProperties.getAuthenticationCache().getName(token.getName()),
                 authenticationProperties.getAuthenticationCache().getExpiresTime()

@@ -6,7 +6,9 @@ import com.github.dactiv.healthan.spring.security.authentication.*;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RequestAuthenticationConfigurer;
+import com.github.dactiv.healthan.spring.security.authentication.provider.TypeRememberMeAuthenticationProvider;
 import com.github.dactiv.healthan.spring.security.plugin.PluginSourceTypeVoter;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,14 +23,18 @@ import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor;
 import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.ConsensusBased;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -37,13 +43,15 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  */
 @Configuration
-@EnableConfigurationProperties(AuthenticationProperties.class)
+@EnableConfigurationProperties({AuthenticationProperties.class, RememberMeProperties.class})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class DefaultWebSecurityAutoConfiguration {
 
     private final AccessTokenContextRepository accessTokenContextRepository;
 
     private final AuthenticationProperties authenticationProperties;
+
+    private final RememberMeProperties rememberMeProperties;
 
     private final List<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapters;
 
@@ -63,6 +71,7 @@ public class DefaultWebSecurityAutoConfiguration {
 
     public DefaultWebSecurityAutoConfiguration(AccessTokenContextRepository accessTokenContextRepository,
                                                AuthenticationProperties authenticationProperties,
+                                               RememberMeProperties rememberMeProperties,
                                                AuthenticationFailureHandler authenticationFailureHandler,
                                                AuthenticationSuccessHandler authenticationSuccessHandler,
                                                CacheManager cacheManager,
@@ -73,6 +82,7 @@ public class DefaultWebSecurityAutoConfiguration {
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
         this.accessTokenContextRepository = accessTokenContextRepository;
         this.authenticationProperties = authenticationProperties;
+        this.rememberMeProperties = rememberMeProperties;
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.securityContextRepository = securityContextRepository;
@@ -128,6 +138,29 @@ public class DefaultWebSecurityAutoConfiguration {
                 .disable()
                 .securityContext()
                 .securityContextRepository(accessTokenContextRepository);
+
+        if (rememberMeProperties.isEnabled()) {
+            PersistentTokenRepository tokenRepository = httpSecurity.getSharedObject(PersistentTokenRepository.class);
+            httpSecurity
+                    .rememberMe()
+                    .userDetailsService(new RememberMeUserDetailsService())
+                    .alwaysRemember(rememberMeProperties.isAlways())
+                    .rememberMeCookieName(rememberMeProperties.getCookieName())
+                    .tokenRepository(Objects.isNull(tokenRepository) ? new InMemoryTokenRepositoryImpl() : tokenRepository)
+                    .tokenValiditySeconds(rememberMeProperties.getTokenValiditySeconds())
+                    .rememberMeCookieDomain(rememberMeProperties.getDomain())
+                    .rememberMeParameter(rememberMeProperties.getParamName())
+                    .useSecureCookie(rememberMeProperties.isUseSecureCookie())
+                    .key(rememberMeProperties.getKey());
+
+            AuthenticationProvider authenticationProvider = new TypeRememberMeAuthenticationProvider(
+                    rememberMeProperties.getKey(),
+                    authenticationProperties,
+                    cacheManager,
+                    typeSecurityPrincipalServices
+            );
+            httpSecurity.authenticationProvider(authenticationProvider);
+        }
 
         if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
             for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {

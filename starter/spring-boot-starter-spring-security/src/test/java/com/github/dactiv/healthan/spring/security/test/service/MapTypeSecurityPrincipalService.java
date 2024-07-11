@@ -4,7 +4,7 @@ import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.entity.support.SimpleSecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.AbstractTypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.TypeAuthenticationToken;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
@@ -37,12 +37,12 @@ public class MapTypeSecurityPrincipalService extends AbstractTypeSecurityPrincip
     }
 
     @Override
-    public SecurityPrincipal getSecurityPrincipal(RequestAuthenticationToken token) throws AuthenticationException {
+    public SecurityPrincipal getSecurityPrincipal(TypeAuthenticationToken token) throws AuthenticationException {
         return USER_DETAILS.get(token.getPrincipal().toString());
     }
 
     @Override
-    public Collection<GrantedAuthority> getPrincipalAuthorities(RequestAuthenticationToken token, SecurityPrincipal principal) {
+    public Collection<GrantedAuthority> getPrincipalAuthorities(TypeAuthenticationToken token, SecurityPrincipal principal) {
         Collection<GrantedAuthority> result = new LinkedHashSet<>();
         result.add(new SimpleGrantedAuthority("perms[operate]"));
         return result;

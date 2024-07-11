@@ -7,9 +7,9 @@ import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.AccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
-import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.entity.AccessTokenDetails;
 import com.github.dactiv.healthan.spring.security.entity.AuthenticationSuccessDetails;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +48,7 @@ public class TokenController {
                                                                    @CurrentSecurityContext SecurityContext securityContext) {
 
         Assert.isTrue(
-                SimpleAuthenticationToken.class.isAssignableFrom(securityContext.getAuthentication().getClass()),
+                AuthenticationSuccessToken.class.isAssignableFrom(securityContext.getAuthentication().getClass()),
                 "当前用户非安全用户明细"
         );
 
@@ -60,7 +60,7 @@ public class TokenController {
             return RestResult.of(validResult.getMessage(), validResult.getStatus(), validResult.getExecuteCode());
         }
 
-        SimpleAuthenticationToken authenticationToken = Casts.cast(securityContext.getAuthentication());
+        AuthenticationSuccessToken authenticationToken = Casts.cast(securityContext.getAuthentication());
 
         Object details = authenticationToken.getDetails();
         if (!AccessTokenDetails.class.isAssignableFrom(details.getClass())) {

@@ -5,8 +5,8 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
-import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
@@ -197,14 +197,14 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      * @param token     当前认真 token
      * @return spring security 认证信息
      */
-    public SimpleAuthenticationToken createSuccessAuthentication(SecurityPrincipal principal,
-                                                                 RequestAuthenticationToken token) {
+    public AuthenticationSuccessToken createSuccessAuthentication(SecurityPrincipal principal,
+                                                                  RequestAuthenticationToken token) {
 
         // 通过 token 获取对应 type 实现的 UserDetailsService
         Optional<TypeSecurityPrincipalService> optional = getUserDetailsService(token);
 
         if (!optional.isPresent()) {
-            return new SimpleAuthenticationToken(principal, token);
+            return new AuthenticationSuccessToken(principal, token);
         }
 
         TypeSecurityPrincipalService typeSecurityPrincipalService = optional.get();
@@ -248,7 +248,6 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      * @return 用户明细服务
      */
     public Optional<TypeSecurityPrincipalService> getUserDetailsService(RequestAuthenticationToken token) {
-
         return typeSecurityPrincipalServices
                 .stream()
                 .filter(uds -> uds.getType().contains(token.getType()))
@@ -276,7 +275,7 @@ public class RequestAuthenticationProvider implements AuthenticationManager, Aut
      *
      * @return 账户认证的用户明细服务集合
      */
-    public List<TypeSecurityPrincipalService> getUserDetailsServices() {
+    public List<TypeSecurityPrincipalService> getTypeSecurityPrincipalServices() {
         return typeSecurityPrincipalServices;
     }
 

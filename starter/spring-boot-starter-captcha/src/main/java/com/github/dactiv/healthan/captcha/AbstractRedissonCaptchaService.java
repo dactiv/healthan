@@ -12,6 +12,7 @@ import java.util.Objects;
  *
  * @author maurice
  */
+// FIXME 这个抽象类换成存储类，由具体实现去执行存储流程
 public abstract class AbstractRedissonCaptchaService<B> extends AbstractCaptchaService<B> {
 
     protected RedissonClient redissonClient;

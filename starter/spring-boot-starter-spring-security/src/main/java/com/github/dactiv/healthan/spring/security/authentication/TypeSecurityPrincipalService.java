@@ -2,8 +2,10 @@ package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.RememberMeAuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
-import com.github.dactiv.healthan.spring.security.authentication.token.SimpleAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.TypeAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.entity.AuthenticationSuccessDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -18,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
- * 账户认证的用户明细服务
+ * 带类型的安全用户服务，用于根据不同类型构造出不同 {@link SecurityPrincipal} 内容使用
  *
  * @author maurice.chen
  */
@@ -31,7 +33,7 @@ public interface TypeSecurityPrincipalService {
      * @return 安全用户接口
      * @throws AuthenticationException 认证错误抛出的异常
      */
-    SecurityPrincipal getSecurityPrincipal(RequestAuthenticationToken token) throws AuthenticationException;
+    SecurityPrincipal getSecurityPrincipal(TypeAuthenticationToken token) throws AuthenticationException;
 
     /**
      * 获取用户授权集合
@@ -40,7 +42,7 @@ public interface TypeSecurityPrincipalService {
      * @param principal 安全用户接口
      * @return 用户授权集合
      */
-    Collection<GrantedAuthority> getPrincipalAuthorities(RequestAuthenticationToken token, SecurityPrincipal principal);
+    Collection<GrantedAuthority> getPrincipalAuthorities(TypeAuthenticationToken token, SecurityPrincipal principal);
 
     /**
      * 获取支持的用户类型
@@ -108,16 +110,16 @@ public interface TypeSecurityPrincipalService {
     /**
      * 创建认证成功 token
      *
-     * @param principal          当前啊用户
+     * @param principal          当前用户
      * @param token              token 信息
      * @param grantedAuthorities 权限信息
      * @return 新的认证 token
      */
-    default SimpleAuthenticationToken createSuccessAuthentication(SecurityPrincipal principal,
-                                                                  RequestAuthenticationToken token,
-                                                                  Collection<? extends GrantedAuthority> grantedAuthorities) {
+    default AuthenticationSuccessToken createSuccessAuthentication(SecurityPrincipal principal,
+                                                                   RequestAuthenticationToken token,
+                                                                   Collection<? extends GrantedAuthority> grantedAuthorities) {
 
-        SimpleAuthenticationToken result = new SimpleAuthenticationToken(principal, token, grantedAuthorities);
+        AuthenticationSuccessToken result = new AuthenticationSuccessToken(principal, token, grantedAuthorities);
         result.setAuthenticated(true);
 
         result.setDetails(getPrincipalDetails(principal, token, grantedAuthorities));
@@ -125,8 +127,29 @@ public interface TypeSecurityPrincipalService {
         return result;
     }
 
+    default RememberMeAuthenticationSuccessToken createRememberMeAuthenticationSuccessToken(SecurityPrincipal principal,
+                                                                                            TypeAuthenticationToken token,
+                                                                                            Collection<? extends GrantedAuthority> grantedAuthorities) {
+
+        RememberMeAuthenticationSuccessToken result = new RememberMeAuthenticationSuccessToken(principal, token, grantedAuthorities);
+        result.setAuthenticated(true);
+
+        result.setDetails(getPrincipalDetails(principal, token, grantedAuthorities));
+
+        return result;
+    }
+
+    /**
+     * 获取当前用户明细信息
+     *
+     * @param principal 当前用户
+     * @param token token 信息
+     * @param grantedAuthorities 权限信息
+     *
+     * @return 用户明细信息
+     */
     default Object getPrincipalDetails(SecurityPrincipal principal,
-                                       RequestAuthenticationToken token,
+                                       TypeAuthenticationToken token,
                                        Collection<? extends GrantedAuthority> grantedAuthorities) {
         return new AuthenticationSuccessDetails(token.getDetails(), new LinkedHashMap<>());
     }
@@ -137,7 +160,7 @@ public interface TypeSecurityPrincipalService {
      * @param token 请求认证 token
      * @return 缓存配置
      */
-    default CacheProperties getAuthenticationCache(RequestAuthenticationToken token) {
+    default CacheProperties getAuthenticationCache(TypeAuthenticationToken token) {
         return null;
     }
 
@@ -148,8 +171,7 @@ public interface TypeSecurityPrincipalService {
      * @param principal 当前用户
      * @return 缓存配置
      */
-    default CacheProperties getAuthorizationCache(RequestAuthenticationToken token, SecurityPrincipal principal) {
+    default CacheProperties getAuthorizationCache(TypeAuthenticationToken token, SecurityPrincipal principal) {
         return null;
     }
-
 }
