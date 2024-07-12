@@ -5,8 +5,11 @@ import com.github.dactiv.healthan.spring.security.authentication.config.Authenti
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 
 public class FormLoginAuthenticationDetailsSource extends WebAuthenticationDetailsSource {
 
@@ -23,10 +26,29 @@ public class FormLoginAuthenticationDetailsSource extends WebAuthenticationDetai
         if (StringUtils.isEmpty(type)) {
             type = context.getHeader(authenticationProperties.getTypeHeaderName());
         }
+        context.getHeaderNames();
         return new FormLoginAuthenticationDetails(
                 webAuthenticationDetails,
                 type,
-                Casts.castMapToMultiValueMap(context.getParameterMap())
+                Casts.castMapToMultiValueMap(context.getParameterMap()),
+                convertHeaders(context)
         );
+    }
+
+    private MultiValueMap<String, String> convertHeaders(HttpServletRequest request) {
+        MultiValueMap<String, String> headersMap = new LinkedMultiValueMap<>();
+
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            Enumeration<String> headerValues = request.getHeaders(headerName);
+
+            while (headerValues.hasMoreElements()) {
+                String headerValue = headerValues.nextElement();
+                headersMap.add(headerName, headerValue);
+            }
+        }
+
+        return headersMap;
     }
 }

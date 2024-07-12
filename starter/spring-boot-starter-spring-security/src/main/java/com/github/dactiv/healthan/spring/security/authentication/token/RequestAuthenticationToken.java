@@ -27,8 +27,12 @@ public class RequestAuthenticationToken extends TypeAuthenticationToken {
 
     public RequestAuthenticationToken(FormLoginAuthenticationDetails details, UsernamePasswordAuthenticationToken token) {
         super(token.getPrincipal(), token.getCredentials(), details.getType());
-        setDetails(new WebAuthenticationDetails(details.getRemoteAddress(), details.getSessionId()));
-        parameterMap = details.getParameterMap();
+        WebAuthenticationDetails requestAuthenticationDetails = new WebAuthenticationDetails(
+                details.getRemoteAddress(),
+                details.getSessionId()
+        );
+        setDetails(requestAuthenticationDetails);
+        parameterMap = details.getRequestParameters();
     }
 
     public MultiValueMap<String, String> getParameterMap() {

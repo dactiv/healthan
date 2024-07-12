@@ -4,6 +4,7 @@ healthan:
       always: true
       enabled: true
       key: healthan
+      login-processing-url: /operate/isAuthenticated
     audit:
       type: memory
     captcha-verification:

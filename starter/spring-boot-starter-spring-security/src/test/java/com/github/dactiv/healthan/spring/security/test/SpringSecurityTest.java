@@ -102,6 +102,11 @@ public class SpringSecurityTest {
                 .getResponse()
                 .getCookie(rememberMeProperties.getCookieName());
 
+        mockMvc
+                .perform(get("/actuator/auditevents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+
         cookie = mockMvc
                 .perform(get("/operate/permsOperate").cookie(cookie))
                 .andExpect(status().isOk())
@@ -110,6 +115,10 @@ public class SpringSecurityTest {
                 .getResponse()
                 .getCookie(rememberMeProperties.getCookieName());
 
+        mockMvc
+                .perform(get("/actuator/auditevents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
 
         cookie = mockMvc
                 .perform(get("/operate/isFullyAuthenticated").cookie(cookie))
@@ -120,6 +129,11 @@ public class SpringSecurityTest {
                 .getCookie(rememberMeProperties.getCookieName());
 
         mockMvc
+                .perform(get("/actuator/auditevents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+
+        mockMvc
                 .perform(get("/operate/pluginTestPermsOperate").cookie(cookie))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().json("{\"message\":\"Access is denied\"}"))
@@ -128,14 +142,29 @@ public class SpringSecurityTest {
                 .getCookie(rememberMeProperties.getCookieName());
 
         mockMvc
+                .perform(get("/actuator/auditevents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+
+        mockMvc
                 .perform(get("/operate/isFullyAuthenticated").session(session))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"message\":\"isFullyAuthenticated\"}"));
 
         mockMvc
+                .perform(get("/actuator/auditevents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+
+        mockMvc
                 .perform(get("/operate/pluginTestPermsOperate").session(session))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"message\":\"pluginTestPermsOperate\"}"));
+
+        mockMvc
+                .perform(get("/actuator/auditevents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
 
         mockMvc
                 .perform(
@@ -148,18 +177,20 @@ public class SpringSecurityTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"message\":\"pluginTestPermsGetAuditOperate\"}"));
 
-        String content = mockMvc
+        mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        System.out.println(content);
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
 
         mockMvc
                 .perform(get("/operate/pluginAnyPermsOperate").session(session))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().json("{\"message\":\"Access is denied\"}"));
+
+        mockMvc
+                .perform(get("/actuator/auditevents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
     }
 
 }

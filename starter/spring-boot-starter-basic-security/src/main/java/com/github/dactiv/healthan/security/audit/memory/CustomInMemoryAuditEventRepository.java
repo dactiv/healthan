@@ -18,7 +18,7 @@ public class CustomInMemoryAuditEventRepository extends InMemoryAuditEventReposi
     @Override
     public void add(AuditEvent event) {
         for (AuditEventRepositoryInterceptor interceptor : interceptors) {
-            if (interceptor.preAddHandle(event)) {
+            if (!interceptor.preAddHandle(event)) {
                 return ;
             }
         }

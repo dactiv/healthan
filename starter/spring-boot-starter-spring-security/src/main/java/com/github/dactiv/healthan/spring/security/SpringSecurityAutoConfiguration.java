@@ -6,10 +6,7 @@ import com.github.dactiv.healthan.spring.security.audit.SecurityAuditEventReposi
 import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.cache.support.InMemoryCacheManager;
-import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
-import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.config.CaptchaVerificationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.config.OAuth2Properties;
+import com.github.dactiv.healthan.spring.security.authentication.config.*;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureHandler;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureResponse;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
@@ -153,7 +150,9 @@ public class SpringSecurityAutoConfiguration {
     }
 
     @Bean
-    public SecurityAuditEventRepositoryInterceptor securityAuditEventRepositoryInterceptor(AuthenticationProperties authenticationProperties) {
-        return new SecurityAuditEventRepositoryInterceptor(authenticationProperties);
+    @ConditionalOnMissingBean(SecurityAuditEventRepositoryInterceptor.class)
+    public SecurityAuditEventRepositoryInterceptor securityAuditEventRepositoryInterceptor(AuthenticationProperties authenticationProperties,
+                                                                                           RememberMeProperties rememberMeProperties) {
+        return new SecurityAuditEventRepositoryInterceptor(authenticationProperties, rememberMeProperties);
     }
 }

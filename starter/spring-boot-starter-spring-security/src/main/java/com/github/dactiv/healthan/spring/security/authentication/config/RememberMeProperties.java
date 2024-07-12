@@ -46,6 +46,11 @@ public class RememberMeProperties {
     private String key;
 
     /**
+     * 记住我登录处理 url，用于记录说在记住我认证的请求时，调用到了哪个登录记录审计事件使用。
+     */
+    private String loginProcessingUrl;
+
+    /**
      * 获取记住我 cookie 参数名称
      *
      * @return 记住我 cookie 参数名称
@@ -187,6 +192,24 @@ public class RememberMeProperties {
      */
     public void setKey(String key) {
         this.key = key;
+    }
+
+    /**
+     * 获取记住我登录处理 url
+     *
+     * @return 记住我登录处理 url
+     */
+    public String getLoginProcessingUrl() {
+        return loginProcessingUrl;
+    }
+
+    /**
+     * 设置记住我登录处理 url
+     *
+     * @param loginProcessingUrl 记住我登录处理 url
+     */
+    public void setLoginProcessingUrl(String loginProcessingUrl) {
+        this.loginProcessingUrl = loginProcessingUrl;
     }
 }
 

@@ -30,8 +30,9 @@ import org.springframework.security.config.annotation.method.configuration.Globa
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.AbstractRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 import java.util.List;
@@ -114,14 +115,17 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
                 .securityContextRepository(accessTokenContextRepository);
 
         if (rememberMeProperties.isEnabled()) {
-            PersistentTokenRepository tokenRepository = httpSecurity.getSharedObject(PersistentTokenRepository.class);
+            PersistentTokenRepository tokenRepository = httpSecurity
+                    .getSharedObject(ApplicationContext.class)
+                    .getBean(PersistentTokenRepository.class);
+
             httpSecurity
                     .rememberMe()
                     .userDetailsService(new RememberMeUserDetailsService())
                     .alwaysRemember(rememberMeProperties.isAlways())
                     .rememberMeCookieName(rememberMeProperties.getCookieName())
-                    .tokenRepository(Objects.isNull(tokenRepository) ? new InMemoryTokenRepositoryImpl() : tokenRepository)
                     .tokenValiditySeconds(rememberMeProperties.getTokenValiditySeconds())
+                    .tokenRepository(tokenRepository)
                     .rememberMeCookieDomain(rememberMeProperties.getDomain())
                     .rememberMeParameter(rememberMeProperties.getParamName())
                     .useSecureCookie(rememberMeProperties.isUseSecureCookie())
@@ -134,6 +138,7 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
                     typeSecurityPrincipalServices
             );
             httpSecurity.authenticationProvider(authenticationProvider);
+
         }
 
         if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
@@ -145,7 +150,15 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
         httpSecurity.addFilterBefore(new IpAuthenticationFilter(this.authenticationProperties), UsernamePasswordAuthenticationFilter.class);
 
         addConsensusBasedToMethodSecurityInterceptor(httpSecurity, authenticationProperties);
-        return httpSecurity.build();
+        SecurityFilterChain securityFilterChain = httpSecurity.build();
+
+        RememberMeServices rememberMeServices = httpSecurity.getSharedObject(RememberMeServices.class);
+        if (Objects.nonNull(rememberMeServices) && AbstractRememberMeServices.class.isAssignableFrom(rememberMeServices.getClass())) {
+            AbstractRememberMeServices abstractRememberMeServices = Casts.cast(rememberMeServices);
+            abstractRememberMeServices.setAuthenticationDetailsSource(new RememberMeAuthenticationDetailsSource());
+        }
+
+        return securityFilterChain;
     }
 
     @Bean

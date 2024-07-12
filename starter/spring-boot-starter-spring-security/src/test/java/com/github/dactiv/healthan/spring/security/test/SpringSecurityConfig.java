@@ -2,7 +2,6 @@ package com.github.dactiv.healthan.spring.security.test;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.spring.security.SpringSecurityAutoConfiguration;
-import com.github.dactiv.healthan.spring.security.authentication.AuthenticationTypeTokenResolver;
 import com.github.dactiv.healthan.spring.security.authentication.FormLoginAuthenticationDetailsSource;
 import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
@@ -30,7 +29,8 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationEndpointConfigurer;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -45,14 +45,12 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  */
 @Configuration
-@AutoConfigureAfter({SpringSecurityAutoConfiguration.class})
+@AutoConfigureAfter(SpringSecurityAutoConfiguration.class)
 public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, OAuth2AuthorizationConfigurerAdapter {
 
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1";
 
     private final AuthenticationProperties authenticationProperties;
-
-    private final List<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers;
 
     private final List<TypeSecurityPrincipalService> typeSecurityPrincipalServices;
 
@@ -60,21 +58,15 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
 
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
 
-    private final SecurityContextRepository securityContextRepository;
-
     private final CacheManager cacheManager;
 
     public SpringSecurityConfig(AuthenticationProperties authenticationProperties,
                                 AuthenticationFailureHandler authenticationFailureHandler,
                                 AuthenticationSuccessHandler authenticationSuccessHandler,
-                                SecurityContextRepository securityContextRepository,
-                                ObjectProvider<AuthenticationTypeTokenResolver> authenticationTypeTokenResolvers,
                                 ObjectProvider<TypeSecurityPrincipalService> userDetailsServices,
                                 CacheManager cacheManager) {
         this.authenticationProperties = authenticationProperties;
-        this.authenticationTypeTokenResolvers = authenticationTypeTokenResolvers.stream().collect(Collectors.toList());
         this.typeSecurityPrincipalServices = userDetailsServices.stream().collect(Collectors.toList());
-        this.securityContextRepository = securityContextRepository;
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.cacheManager = cacheManager;
@@ -97,6 +89,11 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                         .redirectUri("www.domain.com")
                         .build()
         );
+    }
+
+    @Bean
+    public PersistentTokenRepository rememberMeTokenRepository() {
+        return new InMemoryTokenRepositoryImpl();
     }
 
     private void settingAuthenticationProviders(List<AuthenticationProvider> authenticationProviders) {
