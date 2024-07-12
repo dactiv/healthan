@@ -1,9 +1,10 @@
 package com.github.dactiv.healthan.security.test;
 
-import com.github.dactiv.healthan.security.AuditProperties;
+import com.github.dactiv.healthan.security.audit.AuditEventRepositoryInterceptor;
 import com.github.dactiv.healthan.security.audit.PluginAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.elasticsearch.ElasticsearchAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.mongo.MongoAuditEventRepository;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -12,6 +13,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
+
+import java.util.stream.Collectors;
 
 @EnableConfigurationProperties(SecurityProperties.class)
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
@@ -23,10 +26,10 @@ public class ConfigureApplication {
 
     @Bean
     public ElasticsearchAuditEventRepository elasticsearchAuditEventRepository(ElasticsearchOperations elasticsearchOperations,
-                                                                               AuditProperties auditProperties) {
+                                                                               ObjectProvider<AuditEventRepositoryInterceptor> interceptors) {
 
         return new ElasticsearchAuditEventRepository(
-                auditProperties,
+                interceptors.stream().collect(Collectors.toList()),
                 elasticsearchOperations,
                 "ix_test_audit_event"
         );
@@ -34,10 +37,10 @@ public class ConfigureApplication {
 
     @Bean
     public PluginAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
-                                                           AuditProperties auditProperties) {
+                                                           ObjectProvider<AuditEventRepositoryInterceptor> interceptors) {
 
         return new MongoAuditEventRepository(
-                auditProperties,
+                interceptors.stream().collect(Collectors.toList()),
                 mongoTemplate,
                 "col_test_audit_event"
         );

@@ -9,7 +9,6 @@ import com.github.dactiv.healthan.commons.page.PageRequest;
 import com.github.dactiv.healthan.commons.page.TotalPage;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.healthan.mybatis.plus.audit.EntityIdOperationDataTraceRecord;
-import com.github.dactiv.healthan.security.AuditProperties;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.audit.elasticsearch.ElasticsearchAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.elasticsearch.index.IndexGenerator;
@@ -26,7 +25,6 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
@@ -55,10 +53,10 @@ public class ElasticsearchOperationDataTraceRepository extends AbstractPrincipal
 
     private final IndexGenerator indexGenerator;
 
-    public ElasticsearchOperationDataTraceRepository(AuditProperties auditProperties,
-                                                     String indexName,
+    public ElasticsearchOperationDataTraceRepository(String indexName,
+                                                     SecurityAuditEventRepositoryInterceptor interceptor,
                                                      ElasticsearchOperations elasticsearchOperations) {
-        super(auditProperties);
+        super(interceptor);
         this.elasticsearchOperations = elasticsearchOperations;
         this.indexGenerator = new DateIndexGenerator(
                 indexName,
@@ -68,30 +66,24 @@ public class ElasticsearchOperationDataTraceRepository extends AbstractPrincipal
     }
 
     @Override
-    public void saveOperationDataTraceRecord(List<OperationDataTraceRecord> records) {
+    protected void doSaveOperationDataTraceRecord(OperationDataTraceRecord record) {
         try {
-            for (OperationDataTraceRecord record : records) {
-                String index = indexGenerator.generateIndex(record).toLowerCase();
+            String index = indexGenerator.generateIndex(record).toLowerCase();
 
-                IndexCoordinates indexCoordinates = IndexCoordinates.of(index);
-                IndexOperations indexOperations = elasticsearchOperations.indexOps(indexCoordinates);
+            IndexCoordinates indexCoordinates = IndexCoordinates.of(index);
+            IndexOperations indexOperations = elasticsearchOperations.indexOps(indexCoordinates);
 
-                ElasticsearchAuditEventRepository.createIndexIfNotExists(indexOperations, ElasticsearchAuditEventRepository.MAPPING_FILE_PATH);
+            ElasticsearchAuditEventRepository.createIndexIfNotExists(indexOperations, ElasticsearchAuditEventRepository.MAPPING_FILE_PATH);
 
-                IndexQuery indexQuery = new IndexQueryBuilder()
-                        .withId(record.getId())
-                        .withObject(record)
-                        .build();
+            IndexQuery indexQuery = new IndexQueryBuilder()
+                    .withId(record.getId())
+                    .withObject(record)
+                    .build();
 
-                elasticsearchOperations.index(indexQuery, indexCoordinates);
-            }
+            elasticsearchOperations.index(indexQuery, indexCoordinates);
         } catch (Exception e) {
             LOGGER.warn("新增 elasticsearch 操作数据留痕出现异常", e);
         }
-    }
-
-    private void createOperationDataTraceRecordDocument(Document document) {
-
     }
 
     @Override
@@ -198,7 +190,7 @@ public class ElasticsearchOperationDataTraceRepository extends AbstractPrincipal
         try {
             return elasticsearchOperations.get(idEntity.getId(), OperationDataTraceRecord.class, IndexCoordinates.of(index));
         } catch (Exception e) {
-            LOGGER.warn("通过 ID 查询索引 [" + index + "] 出现错误", e);
+            LOGGER.warn("通过 ID 查询索引 [{}] 出现错误", index, e);
         }
 
         return null;

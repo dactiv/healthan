@@ -1,28 +1,30 @@
 package com.github.dactiv.healthan.security.audit.memory;
 
-import com.github.dactiv.healthan.security.AuditProperties;
-import org.apache.commons.collections4.CollectionUtils;
+import com.github.dactiv.healthan.security.audit.AuditEventRepositoryInterceptor;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.InMemoryAuditEventRepository;
 
-public class CustomInMemoryAuditEventRepository extends InMemoryAuditEventRepository {
-    private final AuditProperties auditProperties;
+import java.util.List;
 
-    public CustomInMemoryAuditEventRepository(int capacity, AuditProperties auditProperties) {
+public class CustomInMemoryAuditEventRepository extends InMemoryAuditEventRepository {
+
+    private final List<AuditEventRepositoryInterceptor> interceptors;
+
+    public CustomInMemoryAuditEventRepository(int capacity, List<AuditEventRepositoryInterceptor> interceptors) {
         super(capacity);
-        this.auditProperties = auditProperties;
+        this.interceptors = interceptors;
     }
 
     @Override
     public void add(AuditEvent event) {
-        if (CollectionUtils.isNotEmpty(auditProperties.getIgnoreTypes()) && auditProperties.getIgnoreTypes().contains(event.getType())) {
-            return ;
-        }
-
-        if (CollectionUtils.isNotEmpty(auditProperties.getIgnorePrincipals()) && auditProperties.getIgnorePrincipals().contains(event.getPrincipal())) {
-            return ;
+        for (AuditEventRepositoryInterceptor interceptor : interceptors) {
+            if (interceptor.preAddHandle(event)) {
+                return ;
+            }
         }
 
         super.add(event);
+
+        interceptors.forEach(i -> i.postAddHandle(event));
     }
 }

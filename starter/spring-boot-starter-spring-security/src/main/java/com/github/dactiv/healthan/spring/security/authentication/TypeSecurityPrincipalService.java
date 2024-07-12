@@ -83,7 +83,9 @@ public interface TypeSecurityPrincipalService {
         result.setAuthenticated(true);
         result.setRememberMe(false);
 
-        result.setDetails(getPrincipalDetails(principal, token, grantedAuthorities));
+        AuthenticationSuccessDetails successDetails = getPrincipalDetails(principal, token, grantedAuthorities);
+        successDetails.setRemember(result.isRememberMe());
+        result.setDetails(successDetails);
 
         return result;
     }
@@ -97,14 +99,16 @@ public interface TypeSecurityPrincipalService {
      * @return 新的认证 token
      */
     default AuthenticationSuccessToken createRememberMeAuthenticationSuccessToken(SecurityPrincipal principal,
-                                                                                            TypeAuthenticationToken token,
-                                                                                            Collection<? extends GrantedAuthority> grantedAuthorities) {
+                                                                                  TypeAuthenticationToken token,
+                                                                                  Collection<? extends GrantedAuthority> grantedAuthorities) {
 
         AuthenticationSuccessToken result = new AuthenticationSuccessToken(principal, token, grantedAuthorities);
         result.setAuthenticated(true);
         result.setRememberMe(true);
 
-        result.setDetails(getPrincipalDetails(principal, token, grantedAuthorities));
+        AuthenticationSuccessDetails successDetails = getPrincipalDetails(principal, token, grantedAuthorities);
+        successDetails.setRemember(result.isRememberMe());
+        result.setDetails(successDetails);
 
         return result;
     }
@@ -112,15 +116,14 @@ public interface TypeSecurityPrincipalService {
     /**
      * 获取当前用户明细信息
      *
-     * @param principal 当前用户
-     * @param token token 信息
+     * @param principal          当前用户
+     * @param token              token 信息
      * @param grantedAuthorities 权限信息
-     *
      * @return 用户明细信息
      */
-    default Object getPrincipalDetails(SecurityPrincipal principal,
-                                       TypeAuthenticationToken token,
-                                       Collection<? extends GrantedAuthority> grantedAuthorities) {
+    default AuthenticationSuccessDetails getPrincipalDetails(SecurityPrincipal principal,
+                                                             TypeAuthenticationToken token,
+                                                             Collection<? extends GrantedAuthority> grantedAuthorities) {
         return new AuthenticationSuccessDetails(token.getDetails(), new LinkedHashMap<>());
     }
 

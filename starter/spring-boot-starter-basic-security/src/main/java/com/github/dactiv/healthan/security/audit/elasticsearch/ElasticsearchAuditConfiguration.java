@@ -2,7 +2,9 @@ package com.github.dactiv.healthan.security.audit.elasticsearch;
 
 import com.github.dactiv.healthan.security.AuditConfiguration;
 import com.github.dactiv.healthan.security.AuditProperties;
+import com.github.dactiv.healthan.security.audit.AuditEventRepositoryInterceptor;
 import com.github.dactiv.healthan.security.audit.PluginAuditEventRepository;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -11,6 +13,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+
+import java.util.stream.Collectors;
 
 /**
  * Elasticsearch 审计仓库配置
@@ -26,10 +30,10 @@ public class ElasticsearchAuditConfiguration {
 
     @Bean
     public PluginAuditEventRepository auditEventRepository(ElasticsearchOperations elasticsearchOperations,
-                                                           AuditProperties auditProperties) {
+                                                           ObjectProvider<AuditEventRepositoryInterceptor> interceptors) {
 
         return new ElasticsearchAuditEventRepository(
-                auditProperties,
+                interceptors.stream().collect(Collectors.toList()),
                 elasticsearchOperations,
                 ElasticsearchAuditEventRepository.DEFAULT_INDEX_NAME
         );

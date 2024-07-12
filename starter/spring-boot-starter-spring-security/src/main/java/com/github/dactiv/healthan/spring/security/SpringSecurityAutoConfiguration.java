@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.spring.security;
 
 import com.github.dactiv.healthan.spring.security.audit.ControllerAuditHandlerInterceptor;
 import com.github.dactiv.healthan.spring.security.audit.RequestBodyAttributeAdviceAdapter;
+import com.github.dactiv.healthan.spring.security.audit.SecurityAuditEventRepositoryInterceptor;
 import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.cache.support.InMemoryCacheManager;
@@ -151,4 +152,8 @@ public class SpringSecurityAutoConfiguration {
         return new RequestBodyAttributeAdviceAdapter();
     }
 
+    @Bean
+    public SecurityAuditEventRepositoryInterceptor securityAuditEventRepositoryInterceptor(AuthenticationProperties authenticationProperties) {
+        return new SecurityAuditEventRepositoryInterceptor(authenticationProperties);
+    }
 }

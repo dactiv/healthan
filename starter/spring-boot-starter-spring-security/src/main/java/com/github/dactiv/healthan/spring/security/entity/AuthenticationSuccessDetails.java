@@ -9,6 +9,8 @@ public class AuthenticationSuccessDetails implements Serializable {
 
     private final Map<String, Object> metadata;
 
+    private boolean isRemember;
+
     public AuthenticationSuccessDetails(Object requestDetails, Map<String, Object> metadata) {
         this.requestDetails = requestDetails;
         this.metadata = metadata;
@@ -20,5 +22,13 @@ public class AuthenticationSuccessDetails implements Serializable {
 
     public Map<String, Object> getMetadata() {
         return metadata;
+    }
+
+    public boolean isRemember() {
+        return isRemember;
+    }
+
+    public void setRemember(boolean remember) {
+        isRemember = remember;
     }
 }

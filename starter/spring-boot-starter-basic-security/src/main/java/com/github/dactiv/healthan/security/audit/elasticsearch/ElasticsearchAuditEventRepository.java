@@ -7,8 +7,8 @@ import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.commons.page.Page;
 import com.github.dactiv.healthan.commons.page.PageRequest;
-import com.github.dactiv.healthan.security.AuditProperties;
 import com.github.dactiv.healthan.security.audit.AbstractPluginAuditEventRepository;
+import com.github.dactiv.healthan.security.audit.AuditEventRepositoryInterceptor;
 import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.audit.elasticsearch.index.IndexGenerator;
 import com.github.dactiv.healthan.security.audit.elasticsearch.index.support.DateIndexGenerator;
@@ -55,10 +55,10 @@ public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventR
 
     private final IndexGenerator indexGenerator;
 
-    public ElasticsearchAuditEventRepository(AuditProperties auditProperties,
+    public ElasticsearchAuditEventRepository(List<AuditEventRepositoryInterceptor> interceptors,
                                              ElasticsearchOperations elasticsearchOperations,
                                              String indexName) {
-        super(auditProperties);
+        super(interceptors);
         this.elasticsearchOperations = elasticsearchOperations;
 
         this.indexGenerator = new DateIndexGenerator(

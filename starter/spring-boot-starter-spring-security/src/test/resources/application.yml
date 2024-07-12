@@ -6,7 +6,6 @@ healthan:
       key: healthan
     audit:
       type: memory
-      ignore-types: AUTHENTICATION_FAILURE
     captcha-verification:
       verify-urls:
         - "/login/**"
@@ -14,6 +13,7 @@ healthan:
       - "/login/**"
       - "/logout/**"
       - "/actuator/**"
+    ignore-audit-types: AUTHENTICATION_FAILURE,AUTHORIZATION_FAILURE
 
 logging:
   level:

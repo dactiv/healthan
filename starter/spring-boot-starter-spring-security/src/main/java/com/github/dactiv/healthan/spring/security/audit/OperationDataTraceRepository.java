@@ -10,11 +10,11 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 分库存储的操作数据留痕仓库
+ * 操作数据留痕仓库
  *
  * @author maurice.chen
  */
-public interface ShardingOperationDataTraceRepository extends EntityIdOperationDataTraceRepository {
+public interface OperationDataTraceRepository extends EntityIdOperationDataTraceRepository {
 
     /**
      * 根据目标值和实体 id 查询操作数据留痕集合

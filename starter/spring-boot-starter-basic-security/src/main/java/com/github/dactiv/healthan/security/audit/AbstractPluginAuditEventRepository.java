@@ -1,29 +1,29 @@
 package com.github.dactiv.healthan.security.audit;
 
-import com.github.dactiv.healthan.security.AuditProperties;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.boot.actuate.audit.AuditEvent;
+
+import java.util.List;
 
 public abstract class AbstractPluginAuditEventRepository implements PluginAuditEventRepository{
 
-    protected final AuditProperties auditProperties;
+    private final List<AuditEventRepositoryInterceptor> interceptors;
 
-    public AbstractPluginAuditEventRepository(AuditProperties auditProperties) {
-        this.auditProperties = auditProperties;
+    public AbstractPluginAuditEventRepository(List<AuditEventRepositoryInterceptor> interceptors) {
+        this.interceptors = interceptors;
     }
 
     @Override
     public void add(AuditEvent event) {
 
-        if (CollectionUtils.isNotEmpty(auditProperties.getIgnoreTypes()) && auditProperties.getIgnoreTypes().contains(event.getType())) {
-            return ;
-        }
-
-        if (CollectionUtils.isNotEmpty(auditProperties.getIgnorePrincipals()) && auditProperties.getIgnorePrincipals().contains(event.getPrincipal())) {
-            return ;
+        for (AuditEventRepositoryInterceptor interceptor : interceptors) {
+            if (interceptor.preAddHandle(event)) {
+                return ;
+            }
         }
 
         doAdd(event);
+
+        interceptors.forEach(i -> i.postAddHandle(event));
     }
 
     protected abstract void doAdd(AuditEvent event);

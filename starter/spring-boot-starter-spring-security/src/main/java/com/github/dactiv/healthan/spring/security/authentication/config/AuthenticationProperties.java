@@ -115,6 +115,21 @@ public class AuthenticationProperties {
     private boolean hideUserNotFoundExceptions = true;
 
     /**
+     * 要忽略的审计类型
+     */
+    private List<String> ignoreAuditTypes;
+
+    /**
+     * 要忽略的审计用户名称
+     */
+    private List<String> ignoreAuditPrincipals;
+
+    /**
+     * 要忽略的审计操作数据最终用户名称
+     */
+    private List<String> ignoreOperationDataTracePrincipals;
+
+    /**
      * 是否隐藏找不到用户异常
      *
      * @return true 是，否则 false
@@ -366,4 +381,57 @@ public class AuthenticationProperties {
         this.allowIfEqualGrantedDeniedDecisions = allowIfEqualGrantedDeniedDecisions;
     }
 
+    /**
+     * 获取要忽略的审计用户名称
+     *
+     * @return 要忽略的审计用户名称集合
+     */
+    public List<String> getIgnoreAuditPrincipals() {
+        return ignoreAuditPrincipals;
+    }
+
+    /**
+     * 设置要忽略的审计用户名称
+     *
+     * @param ignoreAuditPrincipals 要忽略的审计用户名称集合
+     */
+    public void setIgnoreAuditPrincipals(List<String> ignoreAuditPrincipals) {
+        this.ignoreAuditPrincipals = ignoreAuditPrincipals;
+    }
+
+    /**
+     * 获取要忽略的审计类型
+     *
+     * @return 要忽略的审计类型集合
+     */
+    public List<String> getIgnoreAuditTypes() {
+        return ignoreAuditTypes;
+    }
+
+    /**
+     * 设置要忽略的审计类型
+     *
+     * @param ignoreAuditTypes 要忽略的审计类型
+     */
+    public void setIgnoreAuditTypes(List<String> ignoreAuditTypes) {
+        this.ignoreAuditTypes = ignoreAuditTypes;
+    }
+
+    /**
+     * 获取要忽略的审计操作数据最终用户名称
+     *
+     * @return 要忽略的审计操作数据最终用户名称
+     */
+    public List<String> getIgnoreOperationDataTracePrincipals() {
+        return ignoreOperationDataTracePrincipals;
+    }
+
+    /**
+     * 设置要忽略的审计操作数据最终用户名称
+     *
+     * @param ignoreOperationDataTracePrincipals 要忽略的审计操作数据最终用户名称
+     */
+    public void setIgnoreOperationDataTracePrincipals(List<String> ignoreOperationDataTracePrincipals) {
+        this.ignoreOperationDataTracePrincipals = ignoreOperationDataTracePrincipals;
+    }
 }

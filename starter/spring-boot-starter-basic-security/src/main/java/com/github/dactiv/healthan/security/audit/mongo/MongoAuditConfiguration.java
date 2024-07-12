@@ -2,7 +2,9 @@ package com.github.dactiv.healthan.security.audit.mongo;
 
 import com.github.dactiv.healthan.security.AuditConfiguration;
 import com.github.dactiv.healthan.security.AuditProperties;
+import com.github.dactiv.healthan.security.audit.AuditEventRepositoryInterceptor;
 import com.github.dactiv.healthan.security.audit.PluginAuditEventRepository;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -11,6 +13,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.data.mongodb.core.MongoTemplate;
+
+import java.util.stream.Collectors;
 
 /**
  * Mongo 审计仓库配置
@@ -26,10 +30,10 @@ public class MongoAuditConfiguration {
 
     @Bean
     public PluginAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
-                                                           AuditProperties auditProperties) {
+                                                           ObjectProvider<AuditEventRepositoryInterceptor> interceptors) {
 
         return new MongoAuditEventRepository(
-                auditProperties,
+                interceptors.stream().collect(Collectors.toList()),
                 mongoTemplate,
                 MongoAuditEventRepository.DEFAULT_COLLECTION_NAME
         );
