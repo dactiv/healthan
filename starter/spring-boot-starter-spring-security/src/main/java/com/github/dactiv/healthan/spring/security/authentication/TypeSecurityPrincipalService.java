@@ -37,7 +37,7 @@ public interface TypeSecurityPrincipalService {
      * @param principal 安全用户接口
      * @return 用户授权集合
      */
-    Collection<GrantedAuthority> getPrincipalAuthorities(TypeAuthenticationToken token, SecurityPrincipal principal);
+    Collection<GrantedAuthority> getPrincipalGrantedAuthorities(TypeAuthenticationToken token, SecurityPrincipal principal);
 
     /**
      * 获取支持的用户类型

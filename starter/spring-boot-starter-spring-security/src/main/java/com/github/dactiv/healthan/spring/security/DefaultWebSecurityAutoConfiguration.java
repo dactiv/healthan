@@ -4,10 +4,13 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.spring.security.authentication.*;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
-import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
 import com.github.dactiv.healthan.spring.security.authentication.provider.TypeRememberMeAuthenticationProvider;
+import com.github.dactiv.healthan.spring.security.authentication.service.PersistentTokenRememberMeUserDetailsService;
+import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
+import com.github.dactiv.healthan.spring.security.authentication.service.TypeTokenBasedRememberMeServices;
+import com.github.dactiv.healthan.spring.security.authentication.service.TypeTokenBasedRememberMeUserDetailsService;
 import com.github.dactiv.healthan.spring.security.plugin.PluginSourceTypeVoter;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,6 +32,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -60,22 +64,18 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
 
     private final List<ErrorResultResolver> resultResolvers;
 
-    private final List<TypeSecurityPrincipalService> typeSecurityPrincipalServices;
-
-    private final CacheManager cacheManager;
+    private final TypeSecurityPrincipalManager typeSecurityPrincipalManager;
 
     public DefaultWebSecurityAutoConfiguration(AccessTokenContextRepository accessTokenContextRepository,
                                                AuthenticationProperties authenticationProperties,
                                                RememberMeProperties rememberMeProperties,
-                                               CacheManager cacheManager,
+                                               TypeSecurityPrincipalManager typeSecurityPrincipalManager,
                                                ObjectProvider<ErrorResultResolver> errorResultResolvers,
-                                               ObjectProvider<TypeSecurityPrincipalService> userDetailsServices,
                                                ObjectProvider<WebSecurityConfigurerAfterAdapter> webSecurityConfigurerAfterAdapter) {
         this.accessTokenContextRepository = accessTokenContextRepository;
         this.authenticationProperties = authenticationProperties;
         this.rememberMeProperties = rememberMeProperties;
-        this.cacheManager = cacheManager;
-        this.typeSecurityPrincipalServices = userDetailsServices.stream().collect(Collectors.toList());
+        this.typeSecurityPrincipalManager = typeSecurityPrincipalManager;
         this.webSecurityConfigurerAfterAdapters = webSecurityConfigurerAfterAdapter.stream().collect(Collectors.toList());
         this.resultResolvers = errorResultResolvers.stream().collect(Collectors.toList());
     }
@@ -115,29 +115,33 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
                 .securityContextRepository(accessTokenContextRepository);
 
         if (rememberMeProperties.isEnabled()) {
-            PersistentTokenRepository tokenRepository = httpSecurity
-                    .getSharedObject(ApplicationContext.class)
-                    .getBean(PersistentTokenRepository.class);
-
-            httpSecurity
-                    .rememberMe()
-                    .userDetailsService(new RememberMeUserDetailsService())
-                    .alwaysRemember(rememberMeProperties.isAlways())
-                    .rememberMeCookieName(rememberMeProperties.getCookieName())
-                    .tokenValiditySeconds(rememberMeProperties.getTokenValiditySeconds())
-                    .tokenRepository(tokenRepository)
-                    .rememberMeCookieDomain(rememberMeProperties.getDomain())
-                    .rememberMeParameter(rememberMeProperties.getParamName())
-                    .useSecureCookie(rememberMeProperties.isUseSecureCookie())
-                    .key(rememberMeProperties.getKey());
-
             AuthenticationProvider authenticationProvider = new TypeRememberMeAuthenticationProvider(
                     rememberMeProperties.getKey(),
-                    authenticationProperties,
-                    cacheManager,
-                    typeSecurityPrincipalServices
+                    typeSecurityPrincipalManager
             );
             httpSecurity.authenticationProvider(authenticationProvider);
+
+            try {
+                PersistentTokenRepository tokenRepository = httpSecurity
+                        .getSharedObject(ApplicationContext.class)
+                        .getBean(PersistentTokenRepository.class);
+                httpSecurity
+                        .rememberMe()
+                        .userDetailsService(new PersistentTokenRememberMeUserDetailsService())
+                        .alwaysRemember(rememberMeProperties.isAlways())
+                        .rememberMeCookieName(rememberMeProperties.getCookieName())
+                        .tokenValiditySeconds(rememberMeProperties.getTokenValiditySeconds())
+                        .tokenRepository(tokenRepository)
+                        .rememberMeCookieDomain(rememberMeProperties.getDomain())
+                        .rememberMeParameter(rememberMeProperties.getParamName())
+                        .useSecureCookie(rememberMeProperties.isUseSecureCookie())
+                        .key(rememberMeProperties.getKey());
+
+            } catch (Exception ignored) {
+                httpSecurity
+                        .rememberMe()
+                        .rememberMeServices(getRememberMeServices());
+            }
 
         }
 
@@ -159,6 +163,17 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
         }
 
         return securityFilterChain;
+    }
+
+    private RememberMeServices getRememberMeServices() {
+        TypeTokenBasedRememberMeUserDetailsService userDetailsService = new TypeTokenBasedRememberMeUserDetailsService(
+                typeSecurityPrincipalManager,
+                SpringSecurityMessageSource.getAccessor()
+        );
+        return new TypeTokenBasedRememberMeServices(
+                rememberMeProperties,
+                userDetailsService
+        );
     }
 
     @Bean

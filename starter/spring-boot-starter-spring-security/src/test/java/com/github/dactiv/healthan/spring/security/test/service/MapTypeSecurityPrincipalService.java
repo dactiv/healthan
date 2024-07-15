@@ -42,7 +42,7 @@ public class MapTypeSecurityPrincipalService extends AbstractTypeSecurityPrincip
     }
 
     @Override
-    public Collection<GrantedAuthority> getPrincipalAuthorities(TypeAuthenticationToken token, SecurityPrincipal principal) {
+    public Collection<GrantedAuthority> getPrincipalGrantedAuthorities(TypeAuthenticationToken token, SecurityPrincipal principal) {
         Collection<GrantedAuthority> result = new LinkedHashSet<>();
         result.add(new SimpleGrantedAuthority("perms[operate]"));
         return result;

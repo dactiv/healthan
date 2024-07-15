@@ -3,14 +3,12 @@ package com.github.dactiv.healthan.spring.security.test;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.spring.security.SpringSecurityAutoConfiguration;
 import com.github.dactiv.healthan.spring.security.authentication.FormLoginAuthenticationDetailsSource;
-import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
-import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.provider.SecurityPrincipalAuthenticationProvider;
+import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,15 +27,12 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationEndpointConfigurer;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
-import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * 自定义 spring security 的配置
@@ -52,24 +47,20 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
 
     private final AuthenticationProperties authenticationProperties;
 
-    private final List<TypeSecurityPrincipalService> typeSecurityPrincipalServices;
-
     private final AuthenticationFailureHandler authenticationFailureHandler;
 
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
 
-    private final CacheManager cacheManager;
+    private final TypeSecurityPrincipalManager typeSecurityPrincipalManager;
 
     public SpringSecurityConfig(AuthenticationProperties authenticationProperties,
                                 AuthenticationFailureHandler authenticationFailureHandler,
                                 AuthenticationSuccessHandler authenticationSuccessHandler,
-                                ObjectProvider<TypeSecurityPrincipalService> userDetailsServices,
-                                CacheManager cacheManager) {
+                                TypeSecurityPrincipalManager typeSecurityPrincipalManager) {
         this.authenticationProperties = authenticationProperties;
-        this.typeSecurityPrincipalServices = userDetailsServices.stream().collect(Collectors.toList());
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
-        this.cacheManager = cacheManager;
+        this.typeSecurityPrincipalManager = typeSecurityPrincipalManager;
     }
 
     @Override
@@ -91,10 +82,10 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
         );
     }
 
-    @Bean
+    /*@Bean
     public PersistentTokenRepository rememberMeTokenRepository() {
         return new InMemoryTokenRepositoryImpl();
-    }
+    }*/
 
     private void settingAuthenticationProviders(List<AuthenticationProvider> authenticationProviders) {
         Optional<OAuth2AuthorizationCodeRequestAuthenticationProvider> optional = authenticationProviders
@@ -222,9 +213,8 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
 
                     httpSecurity.authenticationProvider(
                             new SecurityPrincipalAuthenticationProvider(
-                                    cacheManager,
                                     authenticationProperties,
-                                    typeSecurityPrincipalServices
+                                    typeSecurityPrincipalManager
                             )
                     );
 

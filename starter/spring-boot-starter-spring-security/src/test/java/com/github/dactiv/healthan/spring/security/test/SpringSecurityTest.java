@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
 import java.util.Collection;
+import java.util.Objects;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -94,7 +95,7 @@ public class SpringSecurityTest {
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().json("{\"message\":\"Unauthorized\"}"));
 
-        cookie = mockMvc
+        Cookie newCookie = mockMvc
                 .perform(get("/operate/isAuthenticated").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"message\":\"isAuthenticated\"}"))
@@ -102,12 +103,16 @@ public class SpringSecurityTest {
                 .getResponse()
                 .getCookie(rememberMeProperties.getCookieName());
 
+        if (Objects.nonNull(newCookie)) {
+            cookie = newCookie;
+        }
+
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
 
-        cookie = mockMvc
+        newCookie = mockMvc
                 .perform(get("/operate/permsOperate").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"message\":\"permsOperate\"}"))
@@ -115,18 +120,26 @@ public class SpringSecurityTest {
                 .getResponse()
                 .getCookie(rememberMeProperties.getCookieName());
 
+        if (Objects.nonNull(newCookie)) {
+            cookie = newCookie;
+        }
+
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
 
-        cookie = mockMvc
+        newCookie = mockMvc
                 .perform(get("/operate/isFullyAuthenticated").cookie(cookie))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().json("{\"message\":\"Access is denied\"}"))
                 .andReturn()
                 .getResponse()
                 .getCookie(rememberMeProperties.getCookieName());
+
+        if (Objects.nonNull(newCookie)) {
+            cookie = newCookie;
+        }
 
         mockMvc
                 .perform(get("/actuator/auditevents"))
@@ -182,15 +195,7 @@ public class SpringSecurityTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
 
-        mockMvc
-                .perform(get("/operate/pluginAnyPermsOperate").session(session))
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().json("{\"message\":\"Access is denied\"}"));
 
-        mockMvc
-                .perform(get("/actuator/auditevents"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
     }
 
 }

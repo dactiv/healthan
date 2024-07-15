@@ -3,7 +3,7 @@ package com.github.dactiv.healthan.spring.security.authentication.config;
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.security.entity.support.SimpleTypePrincipal;
-import com.github.dactiv.healthan.spring.security.authentication.provider.SecurityPrincipalAuthenticationProvider;
+import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
@@ -97,12 +97,12 @@ public class AuthenticationProperties {
     /**
      * 认证缓存配置信息
      */
-    private CacheProperties authenticationCache = CacheProperties.of(SecurityPrincipalAuthenticationProvider.DEFAULT_AUTHENTICATION_KEY_NAME, TimeProperties.ofDay(7));
+    private CacheProperties authenticationCache = CacheProperties.of(TypeSecurityPrincipalManager.DEFAULT_AUTHENTICATION_KEY_NAME, TimeProperties.ofDay(7));
 
     /**
      * 授权缓存配置信息
      */
-    private CacheProperties authorizationCache = CacheProperties.of(SecurityPrincipalAuthenticationProvider.DEFAULT_AUTHORIZATION_KEY_NAME, TimeProperties.ofDay(7));
+    private CacheProperties authorizationCache = CacheProperties.of(TypeSecurityPrincipalManager.DEFAULT_AUTHORIZATION_KEY_NAME, TimeProperties.ofDay(7));
 
     /**
      * 是否允许访问投票器的拒绝和同意相等时允许访问

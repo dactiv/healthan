@@ -4,6 +4,7 @@ import com.github.dactiv.healthan.spring.security.audit.ControllerAuditHandlerIn
 import com.github.dactiv.healthan.spring.security.audit.RequestBodyAttributeAdviceAdapter;
 import com.github.dactiv.healthan.spring.security.audit.SecurityAuditEventRepositoryInterceptor;
 import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
+import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.cache.support.InMemoryCacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.*;
@@ -13,6 +14,7 @@ import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAut
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessResponse;
 import com.github.dactiv.healthan.spring.security.authentication.service.DefaultAuthenticationFailureResponse;
 import com.github.dactiv.healthan.spring.security.authentication.service.DefaultTypeSecurityPrincipalService;
+import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
 import com.github.dactiv.healthan.spring.security.controller.TokenController;
 import com.github.dactiv.healthan.spring.security.plugin.PluginEndpoint;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
@@ -154,5 +156,17 @@ public class SpringSecurityAutoConfiguration {
     public SecurityAuditEventRepositoryInterceptor securityAuditEventRepositoryInterceptor(AuthenticationProperties authenticationProperties,
                                                                                            RememberMeProperties rememberMeProperties) {
         return new SecurityAuditEventRepositoryInterceptor(authenticationProperties, rememberMeProperties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(TypeSecurityPrincipalManager.class)
+    public TypeSecurityPrincipalManager typeSecurityPrincipalManager(CacheManager cacheManager,
+                                                                     ObjectProvider<TypeSecurityPrincipalService> typeSecurityPrincipalServices) {
+
+        return new TypeSecurityPrincipalManager(
+                typeSecurityPrincipalServices.stream().collect(Collectors.toList()),
+                cacheManager
+        );
+
     }
 }

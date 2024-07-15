@@ -43,7 +43,7 @@ public class DefaultTypeSecurityPrincipalService extends AbstractTypeSecurityPri
     }
 
     @Override
-    public Collection<GrantedAuthority> getPrincipalAuthorities(TypeAuthenticationToken token, SecurityPrincipal principal) {
+    public Collection<GrantedAuthority> getPrincipalGrantedAuthorities(TypeAuthenticationToken token, SecurityPrincipal principal) {
         SecurityProperties.User user = getSpringSecurityUserConfig(principal.getUsername());
         return user.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
