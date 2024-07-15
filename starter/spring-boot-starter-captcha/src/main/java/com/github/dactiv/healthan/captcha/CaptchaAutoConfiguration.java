@@ -10,14 +10,12 @@ import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.captcha.intercept.support.DelegateCaptchaInterceptor;
 import com.github.dactiv.healthan.captcha.tianai.TianaiCaptchaService;
 import com.github.dactiv.healthan.captcha.tianai.config.TianaiCaptchaProperties;
-import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -34,7 +32,7 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableConfigurationProperties({CaptchaProperties.class, TianaiCaptchaProperties.class})
 @ConditionalOnProperty(prefix = "healthan.captcha", value = "enabled", matchIfMissing = true)
-public class CaptchaConfiguration {
+public class CaptchaAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(Interceptor.class)
@@ -75,18 +73,15 @@ public class CaptchaConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<CaptchaVerificationFilter> filterRegistrationBean(CaptchaProperties captchaProperties,
-                                                                                    ObjectProvider<CaptchaVerificationService> captchaVerificationServices,
-                                                                                    ObjectProvider<CaptchaVerificationInterceptor> captchaVerificationInterceptors) {
+    public CaptchaVerificationFilter captchaVerificationFilter(CaptchaProperties captchaProperties,
+                                                               ObjectProvider<CaptchaVerificationService> captchaVerificationServices,
+                                                               ObjectProvider<CaptchaVerificationInterceptor> captchaVerificationInterceptors) {
 
-        FilterRegistrationBean<CaptchaVerificationFilter> bean = new FilterRegistrationBean<>();
-
-        bean.setFilter(new CaptchaVerificationFilter(captchaProperties, captchaVerificationServices.stream().collect(Collectors.toList()), captchaVerificationInterceptors.stream().collect(Collectors.toList())));
-        bean.addUrlPatterns(SpringMvcUtils.ANT_PATH_MATCH_ALL);
-        bean.setName(CaptchaVerificationFilter.class.getSimpleName());
-        bean.setOrder(Integer.MIN_VALUE);	// 值越小，优先级越高
-
-        return bean;
+        return new CaptchaVerificationFilter(
+                captchaProperties,
+                captchaVerificationServices.stream().collect(Collectors.toList()),
+                captchaVerificationInterceptors.stream().collect(Collectors.toList())
+        );
     }
 
 }
