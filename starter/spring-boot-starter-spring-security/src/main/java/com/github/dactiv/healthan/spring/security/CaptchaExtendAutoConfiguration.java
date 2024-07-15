@@ -1,6 +1,6 @@
 package com.github.dactiv.healthan.spring.security;
 
-import com.github.dactiv.healthan.captcha.CaptchaConfiguration;
+import com.github.dactiv.healthan.captcha.CaptchaAutoConfiguration;
 import com.github.dactiv.healthan.captcha.CaptchaProperties;
 import com.github.dactiv.healthan.captcha.DelegateCaptchaService;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Lazy;
  * @author maurice.chen
  */
 @Configuration
-@AutoConfigureAfter(CaptchaConfiguration.class)
+@AutoConfigureAfter(CaptchaAutoConfiguration.class)
 @EnableConfigurationProperties(CaptchaProperties.class)
 @ConditionalOnProperty(prefix = "healthan.captcha", value = "enabled", matchIfMissing = true)
 public class CaptchaExtendAutoConfiguration {

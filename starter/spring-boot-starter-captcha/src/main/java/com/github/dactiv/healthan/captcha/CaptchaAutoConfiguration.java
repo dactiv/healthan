@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableConfigurationProperties({CaptchaProperties.class, TianaiCaptchaProperties.class})
 @ConditionalOnProperty(prefix = "healthan.captcha", value = "enabled", matchIfMissing = true)
-public class CaptchaConfiguration {
+public class CaptchaAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(Interceptor.class)
@@ -75,18 +75,15 @@ public class CaptchaConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<CaptchaVerificationFilter> filterRegistrationBean(CaptchaProperties captchaProperties,
+    public CaptchaVerificationFilter captchaVerificationFilter(CaptchaProperties captchaProperties,
                                                                                     ObjectProvider<CaptchaVerificationService> captchaVerificationServices,
                                                                                     ObjectProvider<CaptchaVerificationInterceptor> captchaVerificationInterceptors) {
 
-        FilterRegistrationBean<CaptchaVerificationFilter> bean = new FilterRegistrationBean<>();
-
-        bean.setFilter(new CaptchaVerificationFilter(captchaProperties, captchaVerificationServices.stream().collect(Collectors.toList()), captchaVerificationInterceptors.stream().collect(Collectors.toList())));
-        bean.addUrlPatterns(SpringMvcUtils.ANT_PATH_MATCH_ALL);
-        bean.setName(CaptchaVerificationFilter.class.getSimpleName());
-        bean.setOrder(Integer.MIN_VALUE);	// 值越小，优先级越高
-
-        return bean;
+        return new CaptchaVerificationFilter(
+                captchaProperties,
+                captchaVerificationServices.stream().collect(Collectors.toList()),
+                captchaVerificationInterceptors.stream().collect(Collectors.toList())
+        );
     }
 
 }
