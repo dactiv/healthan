@@ -76,10 +76,12 @@ public class CaptchaVerificationFilter extends OncePerRequestFilter {
                     .filter(c -> c.getType().contains(type))
                     .findFirst()
                     .orElseThrow(() -> new SystemException("找不到类型为 [" + type + "] 的验证码校验实现"));
-
             captchaVerificationService.verify(request);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("对 {} 请求校验验证码成功，请求参数为:{}", url, request.getParameterMap());
+            }
             captchaVerificationInterceptors.forEach(a -> a.postVerify(request));
-            success = true;
+            filterChain.doFilter(request,response);
         } catch (Exception e) {
             LOGGER.error("验证码校验失败", e);
             RestResult<Map<String, Object>> result = RestResult.ofException(e);
@@ -88,10 +90,6 @@ public class CaptchaVerificationFilter extends OncePerRequestFilter {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(Casts.writeValueAsString(result));
-        }
-
-        if (success) {
-            filterChain.doFilter(request,response);
         }
     }
 
