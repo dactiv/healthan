@@ -10,7 +10,6 @@ import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.captcha.intercept.support.DelegateCaptchaInterceptor;
 import com.github.dactiv.healthan.captcha.tianai.TianaiCaptchaService;
 import com.github.dactiv.healthan.captcha.tianai.config.TianaiCaptchaProperties;
-import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,6 +20,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.validation.Validator;
 
@@ -75,15 +75,21 @@ public class CaptchaAutoConfiguration {
     }
 
     @Bean
-    public CaptchaVerificationFilter captchaVerificationFilter(CaptchaProperties captchaProperties,
-                                                                                    ObjectProvider<CaptchaVerificationService> captchaVerificationServices,
-                                                                                    ObjectProvider<CaptchaVerificationInterceptor> captchaVerificationInterceptors) {
-
-        return new CaptchaVerificationFilter(
+    public FilterRegistrationBean<CaptchaVerificationFilter> captchaVerificationFilter(CaptchaProperties captchaProperties,
+                                                                                       ObjectProvider<CaptchaVerificationService> captchaVerificationServices,
+                                                                                       ObjectProvider<CaptchaVerificationInterceptor> captchaVerificationInterceptors) {
+        CaptchaVerificationFilter captchaVerificationFilter = new CaptchaVerificationFilter(
                 captchaProperties,
                 captchaVerificationServices.stream().collect(Collectors.toList()),
                 captchaVerificationInterceptors.stream().collect(Collectors.toList())
         );
+
+        FilterRegistrationBean<CaptchaVerificationFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(captchaVerificationFilter);
+        registrationBean.addUrlPatterns("/*");
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+
+        return registrationBean;
     }
 
 }
