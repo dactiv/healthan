@@ -42,8 +42,10 @@ import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConf
 import org.springframework.boot.autoconfigure.websocket.servlet.UndertowWebSocketServletWebServerCustomizer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -100,8 +102,12 @@ public class SpringWebMvcAutoConfiguration {
     }
 
     @Bean
-    public DeviceResolverRequestFilter deviceResolverRequestFilter() {
-        return new DeviceResolverRequestFilter();
+    public FilterRegistrationBean<DeviceResolverRequestFilter> deviceResolverRequestFilter() {
+        FilterRegistrationBean<DeviceResolverRequestFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(new DeviceResolverRequestFilter());
+        filterRegistrationBean.addUrlPatterns("/*");
+        filterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        return filterRegistrationBean;
     }
 
     @Bean
