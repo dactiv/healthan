@@ -2,7 +2,9 @@ package com.github.dactiv.healthan.captcha;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.Ordered;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,11 +37,20 @@ public class CaptchaProperties {
      */
     private CacheProperties interceptorTokenCache;
 
+    /**
+     * 获取拦截器参数名称，用于在生成 token 时判断一些逻辑执行操作,参考:{@link AbstractCaptchaService#generateToken(String, HttpServletRequest)}
+     */
     private String ignoreInterceptorParamName = DEFAULT_IGNORE_INTERCEPTOR_PARAM_NAME;
 
+    /**
+     * 校验验证码成功是否删除参数名称，当提交改名称参数为 true 时，校验成功后会删除缓存的内容
+     */
     private String verifySuccessDeleteParamName = DEFAULT_VERIFY_SUCCESS_DELETE_PARAM_NAME;
 
-    private String verifyTokenExistParamName = DEFAULT_VERIFY_TOKEN_EXIST_PARAM_NAME;;
+    /**
+     * 校验 token 是否存在参数名称
+     */
+    private String verifyTokenExistParamName = DEFAULT_VERIFY_TOKEN_EXIST_PARAM_NAME;
 
     /**
      * 验证绑定 token 的参数后缀名
@@ -51,13 +62,30 @@ public class CaptchaProperties {
      */
     private String defaultCaptchaType = "tianai";
 
+    /**
+     * 验证码类型请求头名称
+     */
     private String captchaTypeHeaderName = DEFAULT_CAPTCHA_TYPE_HEADER_NAME;
 
+    /**
+     * 验证码类型请求参数名称
+     */
     private String captchaTypeParamName = DEFAULT_CAPTCHA_TYPE_PARAM_NAME;
 
+    /**
+     * 必须要校验验证码通过后在执行的 url 集合
+     */
     private List<String> verifyUrls = new LinkedList<>();
 
+    /**
+     * 匹配 url 时使用 {@link  org.springframework.util.AntPathMatcher} 作为匹配标准，改值会写入 {@link  org.springframework.util.AntPathMatcher#setCaseSensitive(boolean)} 中
+     */
     private boolean filterAntPathMatcherCaseSensitive = true;
+
+    /**
+     * {@link com.github.dactiv.healthan.captcha.filter.CaptchaVerificationFilter} 的排序值
+     */
+    private int filterOrderValue = Ordered.LOWEST_PRECEDENCE + 50;
 
     public CaptchaProperties() {
     }
@@ -148,5 +176,13 @@ public class CaptchaProperties {
 
     public void setFilterAntPathMatcherCaseSensitive(boolean filterAntPathMatcherCaseSensitive) {
         this.filterAntPathMatcherCaseSensitive = filterAntPathMatcherCaseSensitive;
+    }
+
+    public int getFilterOrderValue() {
+        return filterOrderValue;
+    }
+
+    public void setFilterOrderValue(int filterOrderValue) {
+        this.filterOrderValue = filterOrderValue;
     }
 }

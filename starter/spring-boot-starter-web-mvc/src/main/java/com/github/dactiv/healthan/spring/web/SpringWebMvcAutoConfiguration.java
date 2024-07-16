@@ -45,7 +45,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -102,11 +101,12 @@ public class SpringWebMvcAutoConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<DeviceResolverRequestFilter> deviceResolverRequestFilter() {
+    @ConditionalOnProperty(prefix = "healthan.spring.web.mvc.enabled-device-filter", value = "enabled", matchIfMissing = true)
+    public FilterRegistrationBean<DeviceResolverRequestFilter> deviceResolverRequestFilter(SpringWebMvcProperties properties) {
         FilterRegistrationBean<DeviceResolverRequestFilter> filterRegistrationBean = new FilterRegistrationBean<>();
         filterRegistrationBean.setFilter(new DeviceResolverRequestFilter());
         filterRegistrationBean.addUrlPatterns("/*");
-        filterRegistrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        filterRegistrationBean.setOrder(properties.getDeviceFilterOrderValue());
         return filterRegistrationBean;
     }
 

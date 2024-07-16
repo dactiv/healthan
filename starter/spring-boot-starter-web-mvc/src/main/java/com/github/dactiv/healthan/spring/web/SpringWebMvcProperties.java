@@ -4,6 +4,7 @@ package com.github.dactiv.healthan.spring.web;
 import com.github.dactiv.healthan.spring.web.result.RestResponseBodyAdvice;
 import com.github.dactiv.healthan.spring.web.result.RestResultErrorAttributes;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
@@ -37,6 +38,9 @@ public class SpringWebMvcProperties {
      */
     private List<String> restResultFormatSupportClients = RestResponseBodyAdvice.DEFAULT_SUPPORT_CLIENT;
 
+    /**
+     * 是否所有请求都响应 {@link com.github.dactiv.healthan.commons.RestResult} 结果集
+     */
     private boolean allRestResultFormat = false;
 
     /**
@@ -58,6 +62,16 @@ public class SpringWebMvcProperties {
      * Undertow 的 webSocketDeploymentBuffers 默认值
      */
     private int webSocketDeploymentBuffers = 2048;
+
+    /**
+     * {@link com.github.dactiv.healthan.spring.web.device.DeviceResolverRequestFilter} 的排序值
+     */
+    private int deviceFilterOrderValue = Ordered.LOWEST_PRECEDENCE + 50;
+
+    /**
+     * 是否启用 {@link com.github.dactiv.healthan.spring.web.device.DeviceResolverRequestFilter}
+     */
+    private boolean enabledDeviceFilter = true;
 
     public SpringWebMvcProperties() {
     }
@@ -217,11 +231,57 @@ public class SpringWebMvcProperties {
         this.supportHttpStatus = supportHttpStatus;
     }
 
+    /**
+     * 是否所有请求都响应 {@link com.github.dactiv.healthan.commons.RestResult} 结果集
+     *
+     * @return true 是，否则 false
+     */
     public boolean isAllRestResultFormat() {
         return allRestResultFormat;
     }
 
+    /**
+     * 设置是否所有请求都响应 {@link com.github.dactiv.healthan.commons.RestResult} 结果集
+     *
+     * @param allRestResultFormat true 是，否则 false
+     */
     public void setAllRestResultFormat(boolean allRestResultFormat) {
         this.allRestResultFormat = allRestResultFormat;
+    }
+
+    /**
+     * 获取 {@link com.github.dactiv.healthan.spring.web.device.DeviceResolverRequestFilter} 的排序值
+     *
+     * @return 排序值
+     */
+    public int getDeviceFilterOrderValue() {
+        return deviceFilterOrderValue;
+    }
+
+    /**
+     * 设置 {@link com.github.dactiv.healthan.spring.web.device.DeviceResolverRequestFilter} 的排序值
+     *
+     * @param deviceFilterOrderValue 排序值
+     */
+    public void setDeviceFilterOrderValue(int deviceFilterOrderValue) {
+        this.deviceFilterOrderValue = deviceFilterOrderValue;
+    }
+
+    /**
+     * 是否启用 {@link com.github.dactiv.healthan.spring.web.device.DeviceResolverRequestFilter}
+     *
+     * @return true 是，否则 false
+     */
+    public boolean isEnabledDeviceFilter() {
+        return enabledDeviceFilter;
+    }
+
+    /**
+     * 设置是否启用 {@link com.github.dactiv.healthan.spring.web.device.DeviceResolverRequestFilter}
+     *
+     * @param enabledDeviceFilter true 是，否则 false
+     */
+    public void setEnabledDeviceFilter(boolean enabledDeviceFilter) {
+        this.enabledDeviceFilter = enabledDeviceFilter;
     }
 }
