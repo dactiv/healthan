@@ -85,7 +85,7 @@ public class CaptchaProperties {
     /**
      * {@link com.github.dactiv.healthan.captcha.filter.CaptchaVerificationFilter} 的排序值
      */
-    private int filterOrderValue = Ordered.HIGHEST_PRECEDENCE + 50;
+    private int filterOrderValue = Ordered.HIGHEST_PRECEDENCE + 60;
 
     public CaptchaProperties() {
     }

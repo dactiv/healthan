@@ -66,7 +66,7 @@ public class SpringWebMvcProperties {
     /**
      * {@link com.github.dactiv.healthan.spring.web.device.DeviceResolverRequestFilter} 的排序值
      */
-    private int deviceFilterOrderValue = Ordered.HIGHEST_PRECEDENCE + 50;
+    private int deviceFilterOrderValue = Ordered.HIGHEST_PRECEDENCE + 60;
 
     /**
      * 是否启用 {@link com.github.dactiv.healthan.spring.web.device.DeviceResolverRequestFilter}
