@@ -72,7 +72,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}}]}"));
 
         mockMvc
                 .perform(
@@ -88,7 +88,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}}]}"));
 
         mockMvc
                 .perform(get("/operate/isAuthenticated"))
@@ -110,7 +110,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}}]}"));
 
         newCookie = mockMvc
                 .perform(get("/operate/permsOperate").cookie(cookie))
@@ -127,7 +127,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}}]}"));
 
         newCookie = mockMvc
                 .perform(get("/operate/isFullyAuthenticated").cookie(cookie))
@@ -144,7 +144,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}}]}"));
 
         mockMvc
                 .perform(get("/operate/pluginTestPermsOperate").cookie(cookie))
@@ -157,7 +157,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}}]}"));
 
         mockMvc
                 .perform(get("/operate/isFullyAuthenticated").session(session))
@@ -167,7 +167,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}}]}"));
 
         mockMvc
                 .perform(get("/operate/pluginTestPermsOperate").session(session))
@@ -177,7 +177,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}}]}"));
 
         mockMvc
                 .perform(
@@ -193,8 +193,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\"}]}"));
-
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}}]}"));
 
     }
 
