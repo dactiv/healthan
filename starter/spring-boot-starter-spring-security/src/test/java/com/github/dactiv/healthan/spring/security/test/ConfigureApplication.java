@@ -8,8 +8,11 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfigurat
 import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true)
@@ -30,4 +33,8 @@ public class ConfigureApplication {
         SpringApplication.run(ConfigureApplication.class, args);
     }
 
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository() {
+        return new InMemoryTokenRepositoryImpl();
+    }
 }

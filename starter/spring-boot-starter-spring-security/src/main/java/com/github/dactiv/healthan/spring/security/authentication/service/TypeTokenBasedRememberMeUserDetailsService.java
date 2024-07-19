@@ -1,9 +1,9 @@
 package com.github.dactiv.healthan.spring.security.authentication.service;
 
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
-import com.github.dactiv.healthan.spring.security.authentication.provider.TypeRememberMeAuthenticationProvider;
 import com.github.dactiv.healthan.spring.security.authentication.token.TypeAuthenticationToken;
 import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,23 +21,25 @@ public class TypeTokenBasedRememberMeUserDetailsService implements UserDetailsSe
 
     private final TypeSecurityPrincipalManager typeSecurityPrincipalManager;
 
-    private final MessageSourceAccessor messages;
+    private MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
-    public TypeTokenBasedRememberMeUserDetailsService(TypeSecurityPrincipalManager typeSecurityPrincipalManager,
-                                                      MessageSourceAccessor messages) {
+    public TypeTokenBasedRememberMeUserDetailsService(TypeSecurityPrincipalManager typeSecurityPrincipalManager) {
         this.typeSecurityPrincipalManager = typeSecurityPrincipalManager;
-        this.messages = messages;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        TypeAuthenticationToken token = TypeRememberMeAuthenticationProvider.createTypeAuthenticationToken(username, this.messages, null);
+        TypeAuthenticationToken token = typeSecurityPrincipalManager.createTypeAuthenticationToken(
+                username,
+                null,
+                null
+        );
 
         SecurityPrincipal principal = typeSecurityPrincipalManager.getSecurityPrincipal(token);
         if (Objects.isNull(principal)) {
             throw new UsernameNotFoundException(
                     messages.getMessage(
-                            "RememberMeAuthenticationProvider.badCredentials",
+                            "TypeTokenBasedRememberMeUserDetailsService.badCredentials",
                             "自动登录获取用户信息失败"
                     )
             );
@@ -46,4 +48,7 @@ public class TypeTokenBasedRememberMeUserDetailsService implements UserDetailsSe
         return new User(username, principal.getCredentials().toString(), new LinkedHashSet<>());
     }
 
+    public void setMessages(MessageSourceAccessor messages) {
+        this.messages = messages;
+    }
 }

@@ -7,12 +7,15 @@ import com.github.dactiv.healthan.spring.security.authentication.cache.CacheMana
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.TypeAuthenticationToken;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.rememberme.InvalidCookieException;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
@@ -164,6 +167,40 @@ public class TypeSecurityPrincipalManager implements InitializingBean {
                                                     RequestAuthenticationToken token,
                                                     SecurityPrincipal principal) {
         return getTypeSecurityPrincipalService(token.getType()).matchesPassword(presentedPassword, token, principal);
+    }
+
+    /**
+     * 创建带类型的认证 token
+     *
+     * @param splitString 分割字符串，内容为 <类型>:[id]:<登录账户>
+     * @param details 明细信息
+     *
+     * @return 带类型的认证 token
+     */
+    public TypeAuthenticationToken createTypeAuthenticationToken(String splitString,
+                                                                 Object details,
+                                                                 Object credentials) {
+        String[] split = StringUtils.splitByWholeSeparator(splitString, CacheProperties.DEFAULT_SEPARATOR);
+
+        if (ArrayUtils.isEmpty(split) || split.length < 2) {
+            String message = messages.getMessage(
+                    "TypeRememberMeAuthenticationProvider.formatError",
+                    "记住我登录数据出错，格式应该为:<用户类型>:[用户id]:<用户登录信息>， 当前格式为:" + splitString
+            );
+            throw new InvalidCookieException(message);
+        }
+
+        TypeAuthenticationToken token = new TypeAuthenticationToken(
+                split.length == 3 ? split[2] : split[1],
+                credentials,
+                split[0]
+        );
+
+        if (Objects.nonNull(details)) {
+            token.setDetails(details);
+        }
+
+        return token;
     }
 
     @Override

@@ -1,8 +1,11 @@
 package com.github.dactiv.healthan.security.entity.support;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.enumerate.UserStatus;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.Assert;
 
 /**
  * 简单的安全用户实现
@@ -22,6 +25,15 @@ public class SimpleSecurityPrincipal implements SecurityPrincipal {
     private UserStatus status;
 
     public SimpleSecurityPrincipal() {
+    }
+
+    public SimpleSecurityPrincipal(String splitString, Object credentials, UserStatus status) {
+        String[] split = StringUtils.splitByWholeSeparator(splitString, CacheProperties.DEFAULT_SEPARATOR);
+        Assert.isTrue(split.length == 2, "分割字符串错误，格式应该为: <用户 id>:<用户登录信息>");
+        this.id = split[0];
+        this.username = split[1];
+        this.credentials = credentials;
+        this.status = status;
     }
 
     public SimpleSecurityPrincipal(Object id,

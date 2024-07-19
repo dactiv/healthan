@@ -1,20 +1,15 @@
 package com.github.dactiv.healthan.spring.security.authentication.provider;
 
-import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
 import com.github.dactiv.healthan.spring.security.authentication.token.TypeAuthenticationToken;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.authentication.RememberMeAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.web.authentication.rememberme.InvalidCookieException;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -35,32 +30,6 @@ public class TypeRememberMeAuthenticationProvider extends RememberMeAuthenticati
         this.typeSecurityPrincipalManager = typeSecurityPrincipalManager;
     }
 
-    public static TypeAuthenticationToken createTypeAuthenticationToken(String splitString,
-                                                                        MessageSourceAccessor messages,
-                                                                        Object details) {
-        String[] split = StringUtils.splitByWholeSeparator(splitString, CacheProperties.DEFAULT_SEPARATOR);
-
-        if (ArrayUtils.isEmpty(split) || split.length < 2) {
-            String message = messages.getMessage(
-                    "RememberMeAuthenticationProvider.formatError",
-                    "记住我登录数据出错，格式应该为:<用户类型>:[用户id]:<用户登录信息>， 当前格式为:" + splitString
-            );
-            throw new InvalidCookieException(message);
-        }
-
-        TypeAuthenticationToken token = new TypeAuthenticationToken(
-                split[0],
-                null,
-                split.length == 3 ? split[2] : split[1]
-        );
-
-        if (Objects.nonNull(details)) {
-            token.setDetails(details);
-        }
-
-        return token;
-    }
-
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         if (!UserDetails.class.isAssignableFrom(authentication.getPrincipal().getClass())) {
@@ -69,12 +38,16 @@ public class TypeRememberMeAuthenticationProvider extends RememberMeAuthenticati
 
         UserDetails userDetails = Casts.cast(authentication.getPrincipal());
 
-        TypeAuthenticationToken token = createTypeAuthenticationToken(userDetails.getUsername(), messages, authentication.getDetails());
+        TypeAuthenticationToken token = typeSecurityPrincipalManager.createTypeAuthenticationToken(
+                userDetails.getUsername(),
+                authentication.getDetails(),
+                userDetails.getPassword()
+        );
         SecurityPrincipal principal = typeSecurityPrincipalManager.getSecurityPrincipal(token);
         if (Objects.isNull(principal)) {
             throw new UsernameNotFoundException(
                     messages.getMessage(
-                            "RememberMeAuthenticationProvider.badCredentials",
+                            "TypeRememberMeAuthenticationProvider.badCredentials",
                             "自动登录获取用户信息失败"
                     )
             );
