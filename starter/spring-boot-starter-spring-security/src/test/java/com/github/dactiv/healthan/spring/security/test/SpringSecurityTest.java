@@ -193,7 +193,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}},{\"principal\":\"test:1:test\",\"type\":\"OperateController:pluginTestPermsGetAuditOperate:SUCCESS\",\"data\":{\"header\":{\"X-AUTHENTICATION-TYPE\":\"audit\"},\"parameter\":{\"name\":[\"test\"],\"password\":[\"test\"]}}}]}"));
 
     }
 

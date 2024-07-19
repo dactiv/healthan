@@ -5,8 +5,6 @@ import java.util.Map;
 
 public class AuthenticationSuccessDetails implements Serializable {
 
-    public static final String REQUEST_DETAILS_FIELD = "requestDetails";
-
     private final Object requestDetails;
 
     private final Map<String, Object> metadata;

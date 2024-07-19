@@ -3,11 +3,9 @@ package com.github.dactiv.healthan.spring.security.audit;
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.audit.Auditable;
-import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.plugin.Plugin;
 import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.boot.actuate.audit.listener.AuditApplicationEvent;
@@ -178,29 +176,14 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
         if (AuthenticationSuccessToken.class.isAssignableFrom(principal.getClass())) {
             AuthenticationSuccessToken authenticationToken = Casts.cast(principal);
+            data.put(AuthenticationSuccessToken.DETAILS_KEY, authenticationToken.getDetails());
 
-            PluginAuditEvent auditEvent = new PluginAuditEvent(
+            return new AuditEvent(
                     Instant.now(),
                     authenticationToken.getName(),
                     type,
                     data
             );
-
-            Map<String, Object> principalMetadata = authenticationToken.toMap(false);
-
-            if (MapUtils.isNotEmpty(principalMetadata)) {
-                auditEvent.setMetadata(principalMetadata);
-            }
-
-            Object trace = request.getAttribute(OPERATION_DATA_TRACE_ATT_NAME);
-
-            if (Objects.nonNull(trace) && Boolean.TRUE.equals(trace)) {
-                Object traceId = request.getAttribute(AbstractPrincipalOperationDataTraceRepository.OPERATION_DATA_TRACE_ID_ATTR_NAME);
-                if (Objects.nonNull(traceId)) {
-                    auditEvent.setTraceId(traceId.toString());
-                }
-            }
-            return auditEvent;
         } else {
             return new AuditEvent(Instant.now(), principal.toString(), type, data);
         }

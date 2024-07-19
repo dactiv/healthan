@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @Plugin(
-        name = "操作管理",
+        name = "OperateController",
         id = "operate",
         type = ResourceType.Menu,
         sources = "test"
@@ -47,14 +47,14 @@ public class OperateController {
     }
 
     @PostMapping("pluginTestPermsPostAuditOperate")
-    @Plugin(name = "test perms post 请求审计操作信息", sources = "test", audit = true)
+    @Plugin(name = "pluginTestPermsGetAuditOperate", sources = "test", audit = true)
     @PreAuthorize("hasAuthority('perms[operate]') and isFullyAuthenticated()")
     public RestResult<?> pluginTestPermsGetAuditOperate(HttpServletRequest request) {
         return RestResult.ofSuccess("pluginTestPermsGetAuditOperate", request.getParameterMap());
     }
 
     @GetMapping("pluginAnyPermsOperate")
-    @Plugin(name = "any perms 操作信息", sources = "any")
+    @Plugin(name = "pluginAnyPermsOperate", sources = "any")
     @PreAuthorize("hasAuthority('perms[operate]') and isFullyAuthenticated()")
     public RestResult<?> pluginAnyPermsOperate() {
         return RestResult.of("pluginAnyPermsOperate");

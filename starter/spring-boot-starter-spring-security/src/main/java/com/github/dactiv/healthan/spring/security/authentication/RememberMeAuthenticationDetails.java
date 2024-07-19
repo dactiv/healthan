@@ -7,8 +7,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
  */
 public class RememberMeAuthenticationDetails extends WebAuthenticationDetails {
 
-    public static final String DETAILS_FIELD = "details";
-
     /**
      * 请求地址
      */

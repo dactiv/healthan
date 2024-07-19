@@ -6,6 +6,7 @@ import com.github.dactiv.healthan.security.audit.AuditEventRepositoryInterceptor
 import com.github.dactiv.healthan.spring.security.authentication.RememberMeAuthenticationDetails;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.entity.AuthenticationSuccessDetails;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.boot.actuate.audit.AuditEvent;
@@ -42,7 +43,7 @@ public class SecurityAuditEventRepositoryInterceptor implements AuditEventReposi
         }
 
         if (auditEvent.getType().equals(AuthenticationAuditListener.AUTHENTICATION_SUCCESS)) {
-            Object details = auditEvent.getData().get(RememberMeAuthenticationDetails.DETAILS_FIELD);
+            Object details = auditEvent.getData().get(AuthenticationSuccessToken.DETAILS_KEY);
             if (!AuthenticationSuccessDetails.class.isAssignableFrom(details.getClass())) {
                 return AuditEventRepositoryInterceptor.super.preAddHandle(auditEvent);
             }
