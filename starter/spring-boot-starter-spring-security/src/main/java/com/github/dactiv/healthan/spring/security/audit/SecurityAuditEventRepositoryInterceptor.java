@@ -1,7 +1,6 @@
 package com.github.dactiv.healthan.spring.security.audit;
 
 import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.healthan.security.audit.AuditEventRepositoryInterceptor;
 import com.github.dactiv.healthan.spring.security.authentication.RememberMeAuthenticationDetails;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
@@ -64,15 +63,4 @@ public class SecurityAuditEventRepositoryInterceptor implements AuditEventReposi
         return AuditEventRepositoryInterceptor.super.preAddHandle(auditEvent);
     }
 
-    public boolean preAddOperationDataTraceRecordHandle(OperationDataTraceRecord record) {
-        if (CollectionUtils.isEmpty(authenticationProperties.getIgnoreOperationDataTracePrincipals())) {
-            return true;
-        }
-
-        return !authenticationProperties.getIgnoreOperationDataTracePrincipals().contains(record.getPrincipal().toString());
-    }
-
-    public void postAddOperationDataTraceRecordHandle(OperationDataTraceRecord record) {
-
-    }
 }

@@ -1,7 +1,6 @@
 package com.github.dactiv.healthan.mybatis.interceptor.audit.support;
 
 import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import com.github.dactiv.healthan.commons.page.Page;
 import com.github.dactiv.healthan.commons.page.PageRequest;
 import com.github.dactiv.healthan.commons.page.TotalPage;
@@ -115,7 +114,7 @@ public class InMemoryOperationDataTraceRepository implements OperationDataTraceR
     @Override
     public List<OperationDataTraceRecord> find(String target) {
         List<OperationDataTraceRecord> result = MEMORY.get(target);
-        result.sort(Comparator.comparing(StringIdEntity::getCreationTime).reversed());
+        result.sort(Comparator.comparing(OperationDataTraceRecord::getCreationTime).reversed());
         return result;
     }
 

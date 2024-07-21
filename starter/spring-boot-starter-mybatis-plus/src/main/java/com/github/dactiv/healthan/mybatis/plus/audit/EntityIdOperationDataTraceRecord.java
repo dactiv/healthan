@@ -21,10 +21,11 @@ public class EntityIdOperationDataTraceRecord extends OperationDataTraceRecord {
     private Object entityId;
 
     public EntityIdOperationDataTraceRecord() {
+        super();
     }
 
-    public EntityIdOperationDataTraceRecord(String id, Date creationTime) {
-        super(id, creationTime);
+    public EntityIdOperationDataTraceRecord(Date creationTime) {
+        super(creationTime);
     }
 
     /**

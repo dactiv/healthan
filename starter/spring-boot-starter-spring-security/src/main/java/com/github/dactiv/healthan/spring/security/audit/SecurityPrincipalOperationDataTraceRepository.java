@@ -3,9 +3,10 @@ package com.github.dactiv.healthan.spring.security.audit;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
+import com.github.dactiv.healthan.mybatis.plus.config.OperationDataTraceProperties;
 import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
-import com.github.dactiv.healthan.spring.security.entity.UserDetailsOperationDataTraceRecord;
+import com.github.dactiv.healthan.spring.security.entity.SecurityPrincipalOperationDataTraceRecord;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import net.sf.jsqlparser.statement.Statement;
 import org.apache.commons.lang3.StringUtils;
@@ -23,32 +24,17 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public abstract class AbstractPrincipalOperationDataTraceRepository extends MybatisPlusOperationDataTraceRepository implements OperationDataTraceRepository {
+public class SecurityPrincipalOperationDataTraceRepository extends MybatisPlusOperationDataTraceRepository {
 
     public static final String OPERATION_DATA_TRACE_ID_ATTR_NAME = "operationDataTraceId";
 
-    private final SecurityAuditEventRepositoryInterceptor securityAuditEventRepositoryInterceptor;
-
     private final ControllerAuditProperties controllerAuditProperties;
 
-    public AbstractPrincipalOperationDataTraceRepository(SecurityAuditEventRepositoryInterceptor securityAuditEventRepositoryInterceptor,
+    public SecurityPrincipalOperationDataTraceRepository(OperationDataTraceProperties operationDataTraceProperties,
                                                          ControllerAuditProperties controllerAuditProperties) {
-        this.securityAuditEventRepositoryInterceptor = securityAuditEventRepositoryInterceptor;
+        super(operationDataTraceProperties);
         this.controllerAuditProperties = controllerAuditProperties;
     }
-
-    @Override
-    public void saveOperationDataTraceRecord(List<OperationDataTraceRecord> records) {
-        for (OperationDataTraceRecord record: records) {
-            if (securityAuditEventRepositoryInterceptor.preAddOperationDataTraceRecordHandle(record)) {
-                continue;
-            }
-            doSaveOperationDataTraceRecord(record);
-            securityAuditEventRepositoryInterceptor.postAddOperationDataTraceRecordHandle(record);
-        }
-    }
-
-    protected abstract void doSaveOperationDataTraceRecord(OperationDataTraceRecord record);
 
     @Override
     public List<OperationDataTraceRecord> createOperationDataTraceRecord(MappedStatement mappedStatement, Statement statement, Object parameter) throws Exception {
@@ -97,7 +83,7 @@ public abstract class AbstractPrincipalOperationDataTraceRepository extends Myba
 
         for (OperationDataTraceRecord record : records.stream().filter(Objects::nonNull).collect(Collectors.toList())) {
 
-            UserDetailsOperationDataTraceRecord userDetailsRecord = Casts.of(record, UserDetailsOperationDataTraceRecord.class);
+            SecurityPrincipalOperationDataTraceRecord userDetailsRecord = Casts.of(record, SecurityPrincipalOperationDataTraceRecord.class);
             if (Objects.isNull(userDetailsRecord)) {
                 continue;
             }

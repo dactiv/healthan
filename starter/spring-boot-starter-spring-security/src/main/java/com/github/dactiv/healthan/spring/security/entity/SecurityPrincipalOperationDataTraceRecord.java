@@ -9,7 +9,7 @@ import java.util.Date;
  *
  * @author maurice.chen
  */
-public class UserDetailsOperationDataTraceRecord extends EntityIdOperationDataTraceRecord {
+public class SecurityPrincipalOperationDataTraceRecord extends EntityIdOperationDataTraceRecord {
 
     
     private static final long serialVersionUID = 3211452737634539720L;
@@ -26,11 +26,12 @@ public class UserDetailsOperationDataTraceRecord extends EntityIdOperationDataTr
      */
     private String controllerAuditType;
 
-    public UserDetailsOperationDataTraceRecord() {
+    public SecurityPrincipalOperationDataTraceRecord() {
+        super();
     }
 
-    public UserDetailsOperationDataTraceRecord(String id, Date creationTime) {
-        super(id, creationTime);
+    public SecurityPrincipalOperationDataTraceRecord(String id, Date creationTime) {
+        super(creationTime);
     }
 
 

@@ -1,22 +1,26 @@
 package com.github.dactiv.healthan.mybatis.interceptor.audit;
 
-import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import com.github.dactiv.healthan.mybatis.enumerate.OperationDataType;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * 操作数据留记录
  *
  * @author maurice.chen
  */
-public class OperationDataTraceRecord extends StringIdEntity {
+public class OperationDataTraceRecord implements Serializable {
 
     
     private static final long serialVersionUID = 1987280604707609834L;
+
+    /**
+     * 创建时间
+     */
+    private Date creationTime;
 
     /**
      * 操作人信息
@@ -44,11 +48,19 @@ public class OperationDataTraceRecord extends StringIdEntity {
     private String remark;
 
     public OperationDataTraceRecord() {
-        setId(UUID.randomUUID().toString());
+        creationTime = new Date();
     }
 
-    public OperationDataTraceRecord(String id, Date creationTime) {
-        super(id, creationTime);
+    public OperationDataTraceRecord(Date creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public Date getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
     }
 
     /**

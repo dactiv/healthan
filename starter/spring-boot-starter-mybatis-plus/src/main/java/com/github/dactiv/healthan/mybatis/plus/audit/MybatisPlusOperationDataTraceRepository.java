@@ -12,15 +12,21 @@ import com.github.dactiv.healthan.commons.page.TotalPage;
 import com.github.dactiv.healthan.mybatis.enumerate.OperationDataType;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.support.InMemoryOperationDataTraceRepository;
+import com.github.dactiv.healthan.mybatis.plus.config.OperationDataTraceProperties;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.update.Update;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.ognl.Ognl;
 import org.apache.ibatis.ognl.OgnlException;
+import org.springframework.boot.actuate.audit.AuditEvent;
+import org.springframework.boot.actuate.audit.listener.AuditApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 
 import java.net.UnknownHostException;
 import java.util.*;
@@ -31,9 +37,43 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDataTraceRepository implements EntityIdOperationDataTraceRepository {
+public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDataTraceRepository implements EntityIdOperationDataTraceRepository, ApplicationEventPublisherAware {
 
     public static final String WHERE_SEPARATE = "\\s+(?i:and|or)\\s+";
+
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    private OperationDataTraceProperties operationDataTraceProperties;
+
+    public MybatisPlusOperationDataTraceRepository(OperationDataTraceProperties operationDataTraceProperties) {
+        this.operationDataTraceProperties = operationDataTraceProperties;
+    }
+
+    public MybatisPlusOperationDataTraceRepository(OperationDataTraceProperties operationDataTraceProperties,
+                                                   ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
+
+    @Override
+    public void saveOperationDataTraceRecord(List<OperationDataTraceRecord> records) {
+        if (Objects.isNull(applicationEventPublisher)) {
+            super.saveOperationDataTraceRecord(records);
+        } else if (CollectionUtils.isNotEmpty(records)){
+            for (OperationDataTraceRecord record : records) {
+                AuditEvent auditEvent = createAuditEvent(record);
+                applicationEventPublisher.publishEvent(new AuditApplicationEvent(auditEvent));
+            }
+        }
+    }
+
+    public AuditEvent createAuditEvent(OperationDataTraceRecord record) {
+        return new AuditEvent(
+                record.getCreationTime().toInstant(),
+                record.getPrincipal().toString(),
+                operationDataTraceProperties.getAuditPrefixName() + Casts.UNDERSCORE + record.getTarget() + Casts.UNDERSCORE + record.getType(),
+                record.getSubmitData()
+        );
+    }
 
     @Override
     protected List<OperationDataTraceRecord> createInsertRecord(Insert insert, MappedStatement mappedStatement, Statement statement, Object parameter) throws Exception {
@@ -216,7 +256,6 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
 
     }
 
-
     @Override
     public List<OperationDataTraceRecord> find(String target, Object entityId) {
         List<OperationDataTraceRecord> records = find(target);
@@ -233,5 +272,22 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
         int toIndex = Math.min(pageRequest.getNumber() * pageRequest.getSize(), elements.size());
 
         return new TotalPage<>(pageRequest, elements.subList(fromIndex, toIndex), elements.size());
+    }
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
+
+    public ApplicationEventPublisher getApplicationEventPublisher() {
+        return applicationEventPublisher;
+    }
+
+    public OperationDataTraceProperties getOperationDataTraceProperties() {
+        return operationDataTraceProperties;
+    }
+
+    public void setOperationDataTraceProperties(OperationDataTraceProperties operationDataTraceProperties) {
+        this.operationDataTraceProperties = operationDataTraceProperties;
     }
 }

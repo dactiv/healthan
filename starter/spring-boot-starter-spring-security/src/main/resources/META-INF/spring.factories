@@ -3,5 +3,5 @@ com.github.dactiv.healthan.spring.security.FeignSpringSecurityAutoConfiguration,
 com.github.dactiv.healthan.spring.security.SpringSecurityAutoConfiguration,\
 com.github.dactiv.healthan.spring.security.OAuth2WebSecurityAutoConfiguration,\
 com.github.dactiv.healthan.spring.security.DefaultWebSecurityAutoConfiguration,\
-com.github.dactiv.healthan.spring.security.OperationDataTraceAuditAutoConfiguration, \
+com.github.dactiv.healthan.spring.security.SecurityOperationDataTraceRepositoryAutoConfiguration,\
 com.github.dactiv.healthan.spring.security.CaptchaExtendAutoConfiguration

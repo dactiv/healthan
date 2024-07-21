@@ -38,6 +38,7 @@ public class SpringSecurityTest {
     @Autowired
     private RememberMeProperties rememberMeProperties;
 
+    @Autowired
     private ControllerAuditProperties controllerAuditProperties;
 
     @Autowired

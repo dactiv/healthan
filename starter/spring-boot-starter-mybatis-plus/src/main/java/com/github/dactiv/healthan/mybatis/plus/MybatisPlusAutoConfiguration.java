@@ -9,6 +9,7 @@ import com.github.dactiv.healthan.mybatis.MybatisAutoConfiguration;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRepository;
 import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
 import com.github.dactiv.healthan.mybatis.plus.config.CryptoProperties;
+import com.github.dactiv.healthan.mybatis.plus.config.OperationDataTraceProperties;
 import com.github.dactiv.healthan.mybatis.plus.crypto.DataAesCryptoService;
 import com.github.dactiv.healthan.mybatis.plus.crypto.DataRsaCryptoService;
 import com.github.dactiv.healthan.mybatis.plus.interceptor.DecryptInterceptor;
@@ -30,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @AutoConfigureBefore(MybatisAutoConfiguration.class)
-@EnableConfigurationProperties(CryptoProperties.class)
+@EnableConfigurationProperties({CryptoProperties.class, OperationDataTraceProperties.class})
 @ConditionalOnProperty(prefix = "healthan.mybatis.plus", value = "enabled", matchIfMissing = true)
 public class MybatisPlusAutoConfiguration {
 
@@ -43,8 +44,8 @@ public class MybatisPlusAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(OperationDataTraceRepository.class)
     @ConditionalOnProperty(prefix = "healthan.mybatis.operation-data-trace", value = "enabled", matchIfMissing = true)
-    public MybatisPlusOperationDataTraceRepository mybatisPlusOperationDataTraceRepository() {
-        return new MybatisPlusOperationDataTraceRepository();
+    public MybatisPlusOperationDataTraceRepository mybatisPlusOperationDataTraceRepository(OperationDataTraceProperties operationDataTraceProperties) {
+        return new MybatisPlusOperationDataTraceRepository(operationDataTraceProperties);
     }
 
     @Bean

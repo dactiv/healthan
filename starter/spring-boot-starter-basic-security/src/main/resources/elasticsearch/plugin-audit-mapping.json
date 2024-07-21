@@ -3,13 +3,6 @@
     "id": {
       "type": "keyword"
     },
-    "principalMeta": {
-      "type": "object",
-      "dynamic": true
-    },
-    "traceId": {
-      "type": "keyword"
-    },
     "principal": {
       "type": "keyword"
     },

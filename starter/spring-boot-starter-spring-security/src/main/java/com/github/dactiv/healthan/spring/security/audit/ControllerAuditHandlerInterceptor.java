@@ -75,7 +75,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         if (StringUtils.isNotEmpty(type)) {
             request.setAttribute(
                     controllerAuditProperties.getAuditTypeAttrName(),
-                    controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type
+                    Casts.UNDERSCORE + type
             );
             request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
         }
@@ -98,7 +98,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         Auditable auditable = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Auditable.class);
         if (Objects.nonNull(auditable)) {
             principal = getPrincipal(auditable.principal(), request);
-            type = controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + auditable.type();
+            type =auditable.type();
         } else {
             Plugin plugin = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Plugin.class);
             // 如果控制器方法带有 plugin 注解并且 audit 为 true 是，记录审计内容
@@ -107,10 +107,10 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             }
 
             principal = getPrincipal(null, request);
-            type = controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + plugin.name();
+            type = plugin.name();
             Plugin root = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Plugin.class);
             if (root != null) {
-                type = controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + root.name() + Casts.UNDERSCORE + type;
+                type = root.name() + Casts.UNDERSCORE + type;
             }
         }
 
@@ -152,11 +152,16 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             return new AuditEvent(
                     Instant.now(),
                     authenticationToken.getName(),
-                    type,
+                    controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type,
                     data
             );
         } else {
-            return new AuditEvent(Instant.now(), principal.toString(), type, data);
+            return new AuditEvent(
+                    Instant.now(),
+                    principal.toString(),
+                    controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type,
+                    data
+            );
         }
     }
 
