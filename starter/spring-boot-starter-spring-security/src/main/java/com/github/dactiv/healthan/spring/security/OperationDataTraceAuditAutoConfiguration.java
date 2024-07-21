@@ -4,6 +4,7 @@ package com.github.dactiv.healthan.spring.security;
 import com.github.dactiv.healthan.mybatis.plus.MybatisPlusAutoConfiguration;
 import com.github.dactiv.healthan.spring.security.audit.ElasticsearchOperationDataTraceRepository;
 import com.github.dactiv.healthan.spring.security.audit.SecurityAuditEventRepositoryInterceptor;
+import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditProperties;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -16,13 +17,15 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 public class OperationDataTraceAuditAutoConfiguration {
 
     @Bean
-    @ConditionalOnProperty(prefix = "healthan.authentication.audit", name = "type", havingValue = "elasticsearch")
+    @ConditionalOnProperty(prefix = "healthan.security.audit", name = "type", havingValue = "elasticsearch")
     ElasticsearchOperationDataTraceRepository elasticsearchOperationDataTraceRepository(ElasticsearchOperations elasticsearchOperations,
+                                                                                        ControllerAuditProperties controllerAuditProperties,
                                                                                         SecurityAuditEventRepositoryInterceptor interceptor) {
 
         return new ElasticsearchOperationDataTraceRepository(
                 ElasticsearchOperationDataTraceRepository.DEFAULT_INDEX_NAME,
                 interceptor,
+                controllerAuditProperties,
                 elasticsearchOperations
         );
     }

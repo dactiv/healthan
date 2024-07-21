@@ -6,7 +6,7 @@
   ],
   "properties": [
     {
-      "name": "healthan.authentication.audit.enabled",
+      "name": "healthan.security.audit.enabled",
       "type": "java.lang.Boolean",
       "description": "是否开启审计支持 .",
       "defaultValue": true

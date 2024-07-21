@@ -3,6 +3,7 @@ package com.github.dactiv.healthan.spring.security;
 import com.github.dactiv.healthan.spring.security.audit.ControllerAuditHandlerInterceptor;
 import com.github.dactiv.healthan.spring.security.audit.RequestBodyAttributeAdviceAdapter;
 import com.github.dactiv.healthan.spring.security.audit.SecurityAuditEventRepositoryInterceptor;
+import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditProperties;
 import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
 import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
         AuthenticationProperties.class,
         AccessTokenProperties.class,
         CaptchaVerificationProperties.class,
+        ControllerAuditProperties.class,
         OAuth2Properties.class
 })
 @ConditionalOnProperty(prefix = "healthan.authentication.spring.security", value = "enabled", matchIfMissing = true)
@@ -54,31 +56,31 @@ public class SpringSecurityAutoConfiguration {
 
     @Bean
     @ConfigurationProperties("healthan.authentication.plugin")
-    PluginEndpoint pluginEndpoint(ObjectProvider<InfoContributor> infoContributor) {
+    public PluginEndpoint pluginEndpoint(ObjectProvider<InfoContributor> infoContributor) {
         return new PluginEndpoint(infoContributor.stream().collect(Collectors.toList()));
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "healthan.authentication.audit", name = "enabled", havingValue = "true")
-    ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor() {
-        return new ControllerAuditHandlerInterceptor();
+    @ConditionalOnProperty(prefix = "healthan.security.audit", name = "enabled", havingValue = "true")
+    public ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor(ControllerAuditProperties controllerAuditProperties) {
+        return new ControllerAuditHandlerInterceptor(controllerAuditProperties);
     }
 
     @Bean
     @ConditionalOnMissingBean(PasswordEncoder.class)
-    PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     @ConditionalOnProperty(prefix = "healthan.authentication.access-token", value = "enable-controller", havingValue = "true")
-    TokenController accessTokenController(CacheManager cacheManager,
+    public TokenController accessTokenController(CacheManager cacheManager,
                                           AccessTokenProperties accessTokenProperties) {
         return new TokenController(cacheManager, accessTokenProperties);
     }
 
     @Bean
-    DefaultTypeSecurityPrincipalService defaultUserDetailsService(PasswordEncoder passwordEncoder,
+    public DefaultTypeSecurityPrincipalService defaultUserDetailsService(PasswordEncoder passwordEncoder,
                                                                   AuthenticationProperties properties) {
 
         return new DefaultTypeSecurityPrincipalService(properties, passwordEncoder);
@@ -130,7 +132,7 @@ public class SpringSecurityAutoConfiguration {
 
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    @ConditionalOnProperty(prefix = "healthan.authentication.audit", name = "enabled", havingValue = "true")
+    @ConditionalOnProperty(prefix = "healthan.security.audit", name = "enabled", havingValue = "true")
     public static class DefaultWebMvcConfigurer extends UndertowWebSocketServletWebServerCustomizer implements WebMvcConfigurer {
 
         private final ControllerAuditHandlerInterceptor controllerAuditHandlerInterceptor;

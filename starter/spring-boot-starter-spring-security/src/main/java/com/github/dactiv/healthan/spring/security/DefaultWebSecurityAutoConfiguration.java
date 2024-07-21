@@ -88,7 +88,7 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
                 .authenticated()
                 .and()
                 .httpBasic()
-                .disable()
+                .and()
                 .formLogin()
                 .disable()
                 .logout()

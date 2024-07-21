@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDataTraceRepository implements EntityIdOperationDataTraceRepository{
+public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDataTraceRepository implements EntityIdOperationDataTraceRepository {
 
     public static final String WHERE_SEPARATE = "\\s+(?i:and|or)\\s+";
 

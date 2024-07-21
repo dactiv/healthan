@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @ConditionalOnMissingBean(AuditEventRepository.class)
 @EnableConfigurationProperties(AuditProperties.class)
 @Conditional(AuditConfiguration.AuditImportSelectorCondition.class)
-@ConditionalOnProperty(prefix = "healthan.authentication.audit", value = "enabled", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "healthan.security.audit", value = "enabled", matchIfMissing = true)
 public class CustomInMemoryAuditConfiguration {
 
     @Bean

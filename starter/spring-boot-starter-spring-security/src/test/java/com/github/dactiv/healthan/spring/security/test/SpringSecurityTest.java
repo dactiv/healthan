@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.spring.security.test;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
+import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditProperties;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
@@ -36,6 +37,8 @@ public class SpringSecurityTest {
 
     @Autowired
     private RememberMeProperties rememberMeProperties;
+
+    private ControllerAuditProperties controllerAuditProperties;
 
     @Autowired
     private CacheManager cacheManager;
@@ -193,7 +196,7 @@ public class SpringSecurityTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}},{\"principal\":\"test:1:test\",\"type\":\"OperateController:pluginTestPermsGetAuditOperate:SUCCESS\",\"data\":{\"header\":{\"X-AUTHENTICATION-TYPE\":\"audit\"},\"parameter\":{\"name\":[\"test\"],\"password\":[\"test\"]}}}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}},{\"principal\":\"test:1:test\",\"type\":\"" + controllerAuditProperties.getAuditPrefixName() + "_OperateController_pluginTestPermsGetAuditOperate_SUCCESS\",\"data\":{\"header\":{\"X-AUTHENTICATION-TYPE\":\"audit\"},\"parameter\":{\"name\":[\"test\"],\"password\":[\"test\"]}}}]}"));
 
     }
 

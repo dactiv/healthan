@@ -13,6 +13,7 @@ import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
 import com.github.dactiv.healthan.security.audit.elasticsearch.ElasticsearchAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.elasticsearch.index.IndexGenerator;
 import com.github.dactiv.healthan.security.audit.elasticsearch.index.support.DateIndexGenerator;
+import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditProperties;
 import com.github.dactiv.healthan.spring.security.entity.UserDetailsOperationDataTraceRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -55,8 +56,9 @@ public class ElasticsearchOperationDataTraceRepository extends AbstractPrincipal
 
     public ElasticsearchOperationDataTraceRepository(String indexName,
                                                      SecurityAuditEventRepositoryInterceptor interceptor,
+                                                     ControllerAuditProperties controllerAuditProperties,
                                                      ElasticsearchOperations elasticsearchOperations) {
-        super(interceptor);
+        super(interceptor, controllerAuditProperties);
         this.elasticsearchOperations = elasticsearchOperations;
         this.indexGenerator = new DateIndexGenerator(
                 indexName,

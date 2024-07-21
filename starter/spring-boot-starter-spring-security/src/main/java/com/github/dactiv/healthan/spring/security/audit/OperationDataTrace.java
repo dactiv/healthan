@@ -18,4 +18,10 @@ public @interface OperationDataTrace {
      * @return 目标名称
      */
     String name();
+
+    /**
+     *
+     * @return
+     */
+    String principal();
 }

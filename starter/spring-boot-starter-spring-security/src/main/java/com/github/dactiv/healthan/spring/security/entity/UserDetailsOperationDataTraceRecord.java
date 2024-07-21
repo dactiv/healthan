@@ -3,7 +3,6 @@ package com.github.dactiv.healthan.spring.security.entity;
 import com.github.dactiv.healthan.mybatis.plus.audit.EntityIdOperationDataTraceRecord;
 
 import java.util.Date;
-import java.util.Map;
 
 /**
  * 用户明细操作数据留痕记录
@@ -18,11 +17,6 @@ public class UserDetailsOperationDataTraceRecord extends EntityIdOperationDataTr
     public static final String AUDIT_TYPE_FIELD_NAME = "auditType";
 
     /**
-     * 当事人元数据
-     */
-    private Map<String, Object> principalMeta;
-
-    /**
      * 关联业务 id
      */
     private String traceId;
@@ -30,7 +24,7 @@ public class UserDetailsOperationDataTraceRecord extends EntityIdOperationDataTr
     /**
      * 目标类型
      */
-    private String auditType;
+    private String controllerAuditType;
 
     public UserDetailsOperationDataTraceRecord() {
     }
@@ -39,23 +33,6 @@ public class UserDetailsOperationDataTraceRecord extends EntityIdOperationDataTr
         super(id, creationTime);
     }
 
-    /**
-     * 获取当事人元数据
-     *
-     * @return 当事人元数据
-     */
-    public Map<String, Object> getPrincipalMeta() {
-        return principalMeta;
-    }
-
-    /**
-     * 设置当事人元数据
-     *
-     * @param principalMeta 当事人元数据
-     */
-    public void setPrincipalMeta(Map<String, Object> principalMeta) {
-        this.principalMeta = principalMeta;
-    }
 
     /**
      * 获取关联业务 id
@@ -80,16 +57,16 @@ public class UserDetailsOperationDataTraceRecord extends EntityIdOperationDataTr
      *
      * @return 审计类型
      */
-    public String getAuditType() {
-        return auditType;
+    public String getControllerAuditType() {
+        return controllerAuditType;
     }
 
     /**
      * 设置审计类型
      *
-     * @param auditType 审计类型
+     * @param controllerAuditType 审计类型
      */
-    public void setAuditType(String auditType) {
-        this.auditType = auditType;
+    public void setControllerAuditType(String controllerAuditType) {
+        this.controllerAuditType = controllerAuditType;
     }
 }

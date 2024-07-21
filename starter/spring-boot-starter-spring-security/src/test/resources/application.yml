@@ -1,13 +1,14 @@
 healthan:
+  security:
+    audit:
+      enabled: true
+      type: memory
   authentication:
     remember-me:
       always: true
       enabled: true
       key: healthan
       login-processing-url: /operate/isAuthenticated
-    audit:
-      enabled: true
-      type: memory
     captcha-verification:
       verify-urls:
         - "/login/**"

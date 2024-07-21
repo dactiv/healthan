@@ -3,8 +3,6 @@ package com.github.dactiv.healthan.spring.security.authentication;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,8 +23,6 @@ import java.util.Optional;
  * @author maurice.chen
  */
 public class RestResultAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
-    public static final Logger LOGGER = LoggerFactory.getLogger(RestResultAuthenticationEntryPoint.class);
 
     public static final String ERROR_INTERNAL_ATTRIBUTE = DefaultErrorAttributes.class.getName() + ".ERROR";
 
@@ -53,12 +49,9 @@ public class RestResultAuthenticationEntryPoint implements AuthenticationEntryPo
             } else {
                 result = RestResult.ofException(throwable);
             }
-            LOGGER.error("认证发生错误", e);
         } else if (InsufficientAuthenticationException.class.isAssignableFrom(e.getClass())) {
-            LOGGER.error("认证发生错误", e);
             result = RestResult.of(HttpStatus.UNAUTHORIZED.getReasonPhrase(), HttpStatus.UNAUTHORIZED.value(), String.valueOf(HttpStatus.UNAUTHORIZED.value()));
         } else {
-            LOGGER.error("认证发生错误", e);
             result = RestResult.ofException(e);
         }
 

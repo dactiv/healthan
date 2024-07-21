@@ -1,9 +1,9 @@
 package com.github.dactiv.healthan.spring.security.audit;
 
-import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.audit.Auditable;
 import com.github.dactiv.healthan.security.plugin.Plugin;
+import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,50 +35,15 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
     public static final String OPERATION_DATA_TRACE_ATT_NAME = "operationDataTrace";
 
-    public static final String AUDIT_TYPE_ATTR_NAME = "controllerAuditType";
-
-    private static final String DEFAULT_SUCCESS_SUFFIX_NAME = "SUCCESS";
-
-    private static final String DEFAULT_FAILURE_SUFFIX_NAME = "FAILURE";
-
-    private static final String DEFAULT_EXCEPTION_KEY_NAME = "exception";
-
-    public static final String DEFAULT_HEADER_KEY = "header";
-
-    public static final String DEFAULT_PARAM_KEY = "parameter";
-
-    public static final String DEFAULT_BODY_KEY = "body";
+    private final ControllerAuditProperties controllerAuditProperties;
 
     /**
      * spring 应用的事件推送器
      */
-    private ApplicationEventPublisher applicationEventPublisher;
+    private ApplicationEventPublisher applicationEventPublisher;;
 
-    /**
-     * 成功执行的后缀名称，用与说明执行某个动作时区分成功或失败或异常
-     */
-    private String successSuffixName = DEFAULT_SUCCESS_SUFFIX_NAME;
-
-    /**
-     * 失败执行的后缀名称，用与说明执行某个动作时区分成功或失败或异常
-     */
-    private String failureSuffixName = DEFAULT_FAILURE_SUFFIX_NAME;
-
-    /**
-     * 异常执行的后缀名称，用与说明执行某个动作时区分成功或失败或异常
-     */
-    private String exceptionKeyName = DEFAULT_EXCEPTION_KEY_NAME;
-
-    public ControllerAuditHandlerInterceptor() {
-    }
-
-    public ControllerAuditHandlerInterceptor(String successSuffixName,
-                                             String failureSuffixName,
-                                             String exceptionKeyName) {
-
-        this.successSuffixName = successSuffixName;
-        this.failureSuffixName = failureSuffixName;
-        this.exceptionKeyName = exceptionKeyName;
+    public ControllerAuditHandlerInterceptor(ControllerAuditProperties controllerAuditProperties) {
+        this.controllerAuditProperties = controllerAuditProperties;
     }
 
     @Override
@@ -93,19 +58,25 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         OperationDataTrace operationDataTrace = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), OperationDataTrace.class);
         Plugin plugin = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Plugin.class);
 
+        // 判断是否存在操作数据最终
+        String type = StringUtils.EMPTY;
         if (Objects.nonNull(auditable) && auditable.operationDataTrace()) {
-            request.setAttribute(AUDIT_TYPE_ATTR_NAME, auditable.type());
-            request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
+            type = auditable.type();
         } else if (Objects.nonNull(operationDataTrace)) {
-            request.setAttribute(AUDIT_TYPE_ATTR_NAME, operationDataTrace.name());
-            request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
+            type = operationDataTrace.name();
         } else if (Objects.nonNull(plugin) && plugin.operationDataTrace()) {
-            String type = plugin.name();
+            type = plugin.name();
             Plugin root = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Plugin.class);
             if (Objects.nonNull(root)) {
-                type = root.name() + CacheProperties.DEFAULT_SEPARATOR + type;
+                type = root.name() + Casts.UNDERSCORE + type;
             }
-            request.setAttribute(AUDIT_TYPE_ATTR_NAME, type);
+        }
+
+        if (StringUtils.isNotEmpty(type)) {
+            request.setAttribute(
+                    controllerAuditProperties.getAuditTypeAttrName(),
+                    controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type
+            );
             request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
         }
 
@@ -127,7 +98,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         Auditable auditable = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Auditable.class);
         if (Objects.nonNull(auditable)) {
             principal = getPrincipal(auditable.principal(), request);
-            type = auditable.type();
+            type = controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + auditable.type();
         } else {
             Plugin plugin = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Plugin.class);
             // 如果控制器方法带有 plugin 注解并且 audit 为 true 是，记录审计内容
@@ -136,14 +107,14 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             }
 
             principal = getPrincipal(null, request);
-            type = plugin.name();
+            type = controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + plugin.name();
             Plugin root = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Plugin.class);
             if (root != null) {
-                type = root.name() + CacheProperties.DEFAULT_SEPARATOR + type;
+                type = controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + root.name() + Casts.UNDERSCORE + type;
             }
         }
 
-        Object preHandleAuditType = request.getAttribute(AUDIT_TYPE_ATTR_NAME);
+        Object preHandleAuditType = request.getAttribute(controllerAuditProperties.getAuditTypeAttrName());
         if (Objects.nonNull(preHandleAuditType)) {
             type = preHandleAuditType.toString();
         }
@@ -165,12 +136,12 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         Map<String, Object> data = getData(request, response, handler);
 
         if (ex == null && HttpStatus.OK.value() == response.getStatus()) {
-            type = type + CacheProperties.DEFAULT_SEPARATOR + successSuffixName;
+            type = type + Casts.UNDERSCORE + controllerAuditProperties.getSuccessSuffixName();
         } else {
-            type = type + CacheProperties.DEFAULT_SEPARATOR + failureSuffixName;
+            type = type + Casts.UNDERSCORE + controllerAuditProperties.getFailureSuffixName();
 
             if (Objects.nonNull(ex)) {
-                data.put(exceptionKeyName, ex.getMessage());
+                data.put(controllerAuditProperties.getExceptionKeyName(), ex.getMessage());
             }
         }
 
@@ -201,17 +172,17 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             header.put(key, request.getHeader(key));
         }
 
-        data.put(DEFAULT_HEADER_KEY, header);
+        data.put(controllerAuditProperties.getHeaderKey(), header);
 
         Map<String, String[]> parameterMap = request.getParameterMap();
 
         if (!parameterMap.isEmpty()) {
-            data.put(DEFAULT_PARAM_KEY, parameterMap);
+            data.put(controllerAuditProperties.getParamKey(), parameterMap);
         }
 
         Object body = SpringMvcUtils.getRequestAttribute(RequestBodyAttributeAdviceAdapter.REQUEST_BODY_ATTRIBUTE_NAME);
         if (Objects.nonNull(body)) {
-            data.put(DEFAULT_BODY_KEY, body);
+            data.put(controllerAuditProperties.getBodyKey(), body);
         }
 
         return data;
@@ -221,7 +192,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
 
-        if (securityContext.getAuthentication() == null || !securityContext.getAuthentication().isAuthenticated()) {
+        if (Objects.isNull(securityContext.getAuthentication()) || !securityContext.getAuthentication().isAuthenticated()) {
             String principal = null;
 
             if (StringUtils.isNotBlank(key)) {
@@ -246,18 +217,6 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.applicationEventPublisher = applicationEventPublisher;
-    }
-
-    public String getSuccessSuffixName() {
-        return successSuffixName;
-    }
-
-    public String getFailureSuffixName() {
-        return failureSuffixName;
-    }
-
-    public String getExceptionKeyName() {
-        return exceptionKeyName;
     }
 
 }

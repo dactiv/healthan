@@ -1,16 +1,13 @@
 package com.github.dactiv.healthan.spring.security.audit;
 
 import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.commons.id.IdEntity;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
-import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
-import com.github.dactiv.healthan.security.entity.support.SimpleTypePrincipal;
+import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.entity.UserDetailsOperationDataTraceRecord;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import net.sf.jsqlparser.statement.Statement;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.springframework.security.core.Authentication;
@@ -32,8 +29,12 @@ public abstract class AbstractPrincipalOperationDataTraceRepository extends Myba
 
     private final SecurityAuditEventRepositoryInterceptor securityAuditEventRepositoryInterceptor;
 
-    public AbstractPrincipalOperationDataTraceRepository(SecurityAuditEventRepositoryInterceptor securityAuditEventRepositoryInterceptor) {
+    private final ControllerAuditProperties controllerAuditProperties;
+
+    public AbstractPrincipalOperationDataTraceRepository(SecurityAuditEventRepositoryInterceptor securityAuditEventRepositoryInterceptor,
+                                                         ControllerAuditProperties controllerAuditProperties) {
         this.securityAuditEventRepositoryInterceptor = securityAuditEventRepositoryInterceptor;
+        this.controllerAuditProperties = controllerAuditProperties;
     }
 
     @Override
@@ -79,16 +80,6 @@ public abstract class AbstractPrincipalOperationDataTraceRepository extends Myba
         }
 
         AuthenticationSuccessToken authenticationToken = Casts.cast(context.getAuthentication());
-        SecurityPrincipal userDetails = Casts.cast(authenticationToken.getPrincipal());
-        String username = userDetails.getUsername();
-
-        Map<String, Object> meta = Casts.convertValue(authenticationToken.getDetails(), Casts.MAP_TYPE_REFERENCE);
-        if (MapUtils.isEmpty(meta)) {
-            meta = new LinkedHashMap<>();
-        }
-
-        meta.put(SimpleTypePrincipal.TYPE_FIELD_NAME, authenticationToken.getPrincipalType());
-        meta.put(IdEntity.ID_FIELD_NAME, userDetails.getId());
 
         List<OperationDataTraceRecord> records = super.createOperationDataTraceRecord(
                 mappedStatement,
@@ -111,15 +102,14 @@ public abstract class AbstractPrincipalOperationDataTraceRepository extends Myba
                 continue;
             }
 
-            Object auditType = httpServletRequest.getAttribute(ControllerAuditHandlerInterceptor.AUDIT_TYPE_ATTR_NAME);
+            Object auditType = httpServletRequest.getAttribute(controllerAuditProperties.getAuditTypeAttrName());
             if (Objects.nonNull(auditType)) {
-                userDetailsRecord.setAuditType(auditType.toString());
+                userDetailsRecord.setControllerAuditType(auditType.toString());
             }
 
-            userDetailsRecord.setPrincipalMeta(meta);
-            userDetailsRecord.setPrincipal(username);
+            userDetailsRecord.setPrincipal(authenticationToken);
             userDetailsRecord.setTraceId(traceId.toString());
-            userDetailsRecord.setRemark(username + StringUtils.SPACE + getDateFormat().format(record.getCreationTime()) + StringUtils.SPACE + record.getType().getName());
+            userDetailsRecord.setRemark(authenticationToken.getName() + StringUtils.SPACE + getDateFormat().format(record.getCreationTime()) + StringUtils.SPACE + record.getType().getName());
 
             result.add(userDetailsRecord);
         }
