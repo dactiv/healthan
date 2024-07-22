@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("healthan.authentication.controller.audit")
 public class ControllerAuditProperties {
 
-    public static final String DEFAULT_AUDIT_TYPE_ATTR_NAME = "controllerAuditType";
+    public static final String DEFAULT_AUDIT_EVENT_ATTR_NAME = "controllerAuditEvent";
 
     public static final String DEFAULT_SUCCESS_SUFFIX_NAME = "SUCCESS";
 
@@ -63,9 +63,9 @@ public class ControllerAuditProperties {
     private String bodyKey = DEFAULT_BODY_KEY;
 
     /**
-     * 审计类型存储在 request 属性中的名称
+     * 审计时间存储在 request 属性中的名称
      */
-    private String auditTypeAttrName = DEFAULT_AUDIT_TYPE_ATTR_NAME;
+    private String auditEventAttrName = DEFAULT_AUDIT_EVENT_ATTR_NAME;
 
     public ControllerAuditProperties() {
     }
@@ -126,11 +126,11 @@ public class ControllerAuditProperties {
         this.bodyKey = bodyKey;
     }
 
-    public String getAuditTypeAttrName() {
-        return auditTypeAttrName;
+    public String getAuditEventAttrName() {
+        return auditEventAttrName;
     }
 
-    public void setAuditTypeAttrName(String auditTypeAttrName) {
-        this.auditTypeAttrName = auditTypeAttrName;
+    public void setAuditEventAttrName(String auditEventAttrName) {
+        this.auditEventAttrName = auditEventAttrName;
     }
 }

@@ -33,8 +33,6 @@ import java.util.Objects;
  */
 public class ControllerAuditHandlerInterceptor implements ApplicationEventPublisherAware, AsyncHandlerInterceptor {
 
-    public static final String OPERATION_DATA_TRACE_ATT_NAME = "operationDataTrace";
-
     private final ControllerAuditProperties controllerAuditProperties;
 
     /**
@@ -60,8 +58,10 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
         // 判断是否存在操作数据最终
         String type = StringUtils.EMPTY;
+        Object principal = null;
         if (Objects.nonNull(auditable) && auditable.operationDataTrace()) {
             type = auditable.type();
+            principal = getPrincipal(auditable.principal(), request);
         } else if (Objects.nonNull(operationDataTrace)) {
             type = operationDataTrace.name();
         } else if (Objects.nonNull(plugin) && plugin.operationDataTrace()) {
@@ -72,12 +72,24 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             }
         }
 
+        if (Objects.isNull(principal)) {
+            principal = getPrincipal(null, request);
+        }
+
         if (StringUtils.isNotEmpty(type)) {
-            request.setAttribute(
-                    controllerAuditProperties.getAuditTypeAttrName(),
-                    controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type
-            );
-            request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
+            Map<String, Object> data = getData(request, response, handler);
+            type = controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type;
+            request.setAttribute(SecurityPrincipalOperationDataTraceRepository.OPERATION_DATA_TRACE_ATT_NAME, true);
+            AuditEvent auditEvent;
+            if (AuthenticationSuccessToken.class.isAssignableFrom(principal.getClass())) {
+                AuthenticationSuccessToken authenticationToken = Casts.cast(principal);
+                data.put(AuthenticationSuccessToken.DETAILS_KEY, authenticationToken.getDetails());
+
+                auditEvent = new AuditEvent(Instant.now(), authenticationToken.getName(), type, data);
+            } else {
+                auditEvent = new AuditEvent(Instant.now(), principal.toString(), type, data);
+            }
+            request.setAttribute(controllerAuditProperties.getAuditEventAttrName(), auditEvent);
         }
 
         return AsyncHandlerInterceptor.super.preHandle(request, response, handler);
@@ -114,11 +126,6 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             }
         }
 
-        Object preHandleAuditType = request.getAttribute(controllerAuditProperties.getAuditTypeAttrName());
-        if (Objects.nonNull(preHandleAuditType)) {
-            type = preHandleAuditType.toString();
-        }
-
         AuditEvent auditEvent = createAuditEvent(principal, type, request, response, handler, ex);
 
         // 推送审计事件
@@ -135,7 +142,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
 
         Map<String, Object> data = getData(request, response, handler);
 
-        if (ex == null && HttpStatus.OK.value() == response.getStatus()) {
+        if (Objects.isNull(ex) && HttpStatus.OK.value() == response.getStatus()) {
             type = type + Casts.UNDERSCORE + controllerAuditProperties.getSuccessSuffixName();
         } else {
             type = type + Casts.UNDERSCORE + controllerAuditProperties.getFailureSuffixName();
@@ -152,7 +159,6 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         if (AuthenticationSuccessToken.class.isAssignableFrom(principal.getClass())) {
             AuthenticationSuccessToken authenticationToken = Casts.cast(principal);
             data.put(AuthenticationSuccessToken.DETAILS_KEY, authenticationToken.getDetails());
-
             return new AuditEvent(Instant.now(), authenticationToken.getName(), type, data);
         } else {
             return new AuditEvent(Instant.now(), principal.toString(), type, data);
