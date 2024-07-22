@@ -47,8 +47,8 @@ public class OperateController {
     }
 
     @PostMapping("pluginTestPermsPostAuditOperate")
-    @Plugin(name = "pluginTestPermsGetAuditOperate", sources = "test", audit = true)
     @PreAuthorize("hasAuthority('perms[operate]') and isFullyAuthenticated()")
+    @Plugin(name = "pluginTestPermsGetAuditOperate", sources = "test", audit = true)
     public RestResult<?> pluginTestPermsGetAuditOperate(HttpServletRequest request) {
         return RestResult.ofSuccess("pluginTestPermsGetAuditOperate", request.getParameterMap());
     }

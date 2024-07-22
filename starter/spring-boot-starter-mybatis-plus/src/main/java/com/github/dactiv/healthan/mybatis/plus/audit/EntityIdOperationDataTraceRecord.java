@@ -13,8 +13,6 @@ public class EntityIdOperationDataTraceRecord extends OperationDataTraceRecord {
     
     private static final long serialVersionUID = 7972904701408013089L;
 
-    public static final String ENTITY_ID_FIELD_NAME = "entityId";
-
     /**
      * 实体 id
      */

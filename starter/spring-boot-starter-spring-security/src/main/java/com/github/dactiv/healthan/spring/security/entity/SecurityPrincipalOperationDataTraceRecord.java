@@ -14,13 +14,6 @@ public class SecurityPrincipalOperationDataTraceRecord extends EntityIdOperation
     
     private static final long serialVersionUID = 3211452737634539720L;
 
-    public static final String AUDIT_TYPE_FIELD_NAME = "auditType";
-
-    /**
-     * 关联业务 id
-     */
-    private String traceId;
-
     /**
      * 目标类型
      */
@@ -32,25 +25,6 @@ public class SecurityPrincipalOperationDataTraceRecord extends EntityIdOperation
 
     public SecurityPrincipalOperationDataTraceRecord(String id, Date creationTime) {
         super(creationTime);
-    }
-
-
-    /**
-     * 获取关联业务 id
-     *
-     * @return 关联业务 id
-     */
-    public String getTraceId() {
-        return traceId;
-    }
-
-    /**
-     * 设置关联业务 id
-     *
-     * @param traceId 关联业务 id
-     */
-    public void setTraceId(String traceId) {
-        this.traceId = traceId;
     }
 
     /**

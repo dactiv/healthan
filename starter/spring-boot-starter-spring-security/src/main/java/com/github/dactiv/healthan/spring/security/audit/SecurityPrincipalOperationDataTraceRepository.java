@@ -26,8 +26,6 @@ import java.util.stream.Collectors;
  */
 public class SecurityPrincipalOperationDataTraceRepository extends MybatisPlusOperationDataTraceRepository {
 
-    public static final String OPERATION_DATA_TRACE_ID_ATTR_NAME = "operationDataTraceId";
-
     private final ControllerAuditProperties controllerAuditProperties;
 
     public SecurityPrincipalOperationDataTraceRepository(OperationDataTraceProperties operationDataTraceProperties,
@@ -73,12 +71,6 @@ public class SecurityPrincipalOperationDataTraceRepository extends MybatisPlusOp
                 parameter
         );
 
-        Object traceId = httpServletRequest.getAttribute(OPERATION_DATA_TRACE_ID_ATTR_NAME);
-        if (Objects.isNull(traceId)) {
-            traceId = UUID.randomUUID().toString();
-            httpServletRequest.setAttribute(OPERATION_DATA_TRACE_ID_ATTR_NAME, traceId);
-        }
-
         List<OperationDataTraceRecord> result = new LinkedList<>();
 
         for (OperationDataTraceRecord record : records.stream().filter(Objects::nonNull).collect(Collectors.toList())) {
@@ -94,7 +86,6 @@ public class SecurityPrincipalOperationDataTraceRepository extends MybatisPlusOp
             }
 
             userDetailsRecord.setPrincipal(authenticationToken);
-            userDetailsRecord.setTraceId(traceId.toString());
             userDetailsRecord.setRemark(authenticationToken.getName() + StringUtils.SPACE + getDateFormat().format(record.getCreationTime()) + StringUtils.SPACE + record.getType().getName());
 
             result.add(userDetailsRecord);

@@ -40,7 +40,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
     /**
      * spring 应用的事件推送器
      */
-    private ApplicationEventPublisher applicationEventPublisher;;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     public ControllerAuditHandlerInterceptor(ControllerAuditProperties controllerAuditProperties) {
         this.controllerAuditProperties = controllerAuditProperties;
@@ -75,7 +75,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         if (StringUtils.isNotEmpty(type)) {
             request.setAttribute(
                     controllerAuditProperties.getAuditTypeAttrName(),
-                    Casts.UNDERSCORE + type
+                    controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type
             );
             request.setAttribute(OPERATION_DATA_TRACE_ATT_NAME, true);
         }
@@ -98,7 +98,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
         Auditable auditable = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Auditable.class);
         if (Objects.nonNull(auditable)) {
             principal = getPrincipal(auditable.principal(), request);
-            type =auditable.type();
+            type = auditable.type();
         } else {
             Plugin plugin = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Plugin.class);
             // 如果控制器方法带有 plugin 注解并且 audit 为 true 是，记录审计内容
@@ -145,23 +145,17 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             }
         }
 
+        if (!StringUtils.startsWith(type, controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE)) {
+            type = controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type;
+        }
+
         if (AuthenticationSuccessToken.class.isAssignableFrom(principal.getClass())) {
             AuthenticationSuccessToken authenticationToken = Casts.cast(principal);
             data.put(AuthenticationSuccessToken.DETAILS_KEY, authenticationToken.getDetails());
 
-            return new AuditEvent(
-                    Instant.now(),
-                    authenticationToken.getName(),
-                    controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type,
-                    data
-            );
+            return new AuditEvent(Instant.now(), authenticationToken.getName(), type, data);
         } else {
-            return new AuditEvent(
-                    Instant.now(),
-                    principal.toString(),
-                    controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type,
-                    data
-            );
+            return new AuditEvent(Instant.now(), principal.toString(), type, data);
         }
     }
 
