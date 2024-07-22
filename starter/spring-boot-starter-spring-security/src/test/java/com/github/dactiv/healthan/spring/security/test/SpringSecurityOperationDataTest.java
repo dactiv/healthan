@@ -65,7 +65,29 @@ public class SpringSecurityOperationDataTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"OPERATION_DATA_AUDIT_tb_operation_data_INSERT\",\"data\":{\"details\":{\"remember\":false},\"operationDataTrace\":{\"target\":\"tb_operation_data\",\"type\":{\"name\":\"新增\",\"value\":\"INSERT\"},\"submitData\":{\"name\":\"test-operate-data\"},\"controllerAuditType\":\"CONTROLLER_AUDIT_OperateDataController_save\"}}},{\"principal\":\"test:1:test\",\"type\":\"CONTROLLER_AUDIT_OperateDataController_save_SUCCESS\",\"data\":{\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\",\"Content-Length\":\"100\"},\"body\":{\"name\":\"test-operate-data\"},\"details\":{\"remember\":false}}}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"OPERATION_DATA_AUDIT_tb_operation_data_INSERT\",\"data\":{\"details\":{\"remember\":false},\"operationDataTrace\":{\"target\":\"tb_operation_data\",\"type\":{\"name\":\"新增\",\"value\":\"INSERT\"},\"submitData\":{\"name\":\"test-operate-data\"},\"controllerAuditType\":\"CONTROLLER_AUDIT_OperateDataController_save\"}}},{\"principal\":\"test:1:test\",\"type\":\"CONTROLLER_AUDIT_OperateDataController_save_SUCCESS\",\"data\":{\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\"},\"body\":{\"name\":\"test-operate-data\"},\"details\":{\"remember\":false}}}]}"));
+
+        content.setName("test-operate-data-update");
+
+        mockMvc
+                .perform(post("/operateData/save").content(Casts.writeValueAsString(content)).contentType(MediaType.APPLICATION_JSON_VALUE).session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"message\":\"ok\",\"status\":200}"));
+
+        mockMvc
+                .perform(get("/actuator/auditevents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"OPERATION_DATA_AUDIT_tb_operation_data_INSERT\",\"data\":{\"details\":{\"remember\":false},\"operationDataTrace\":{\"target\":\"tb_operation_data\",\"submitData\":{\"name\":\"test-operate-data\"},\"type\":{\"name\":\"新增\",\"value\":\"INSERT\"},\"controllerAuditType\":\"CONTROLLER_AUDIT_OperateDataController_save\"},\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\"},\"parameter\":null,\"body\":{\"name\":\"test-operate-data\"}}},{\"principal\":\"test:1:test\",\"type\":\"CONTROLLER_AUDIT_OperateDataController_save_SUCCESS\",\"data\":{\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\"},\"body\":{\"name\":\"test-operate-data\"},\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"OPERATION_DATA_AUDIT_tb_operation_data_UPDATE\",\"data\":{\"details\":{\"remember\":false},\"operationDataTrace\":{\"target\":\"tb_operation_data\",\"submitData\":{\"name\":\"test-operate-data-update\"},\"type\":{\"name\":\"更新\",\"value\":\"UPDATE\"},\"controllerAuditType\":\"CONTROLLER_AUDIT_OperateDataController_save\"},\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\"},\"parameter\":null,\"body\":{\"name\":\"test-operate-data-update\"}}},{\"principal\":\"test:1:test\",\"type\":\"CONTROLLER_AUDIT_OperateDataController_save_SUCCESS\",\"data\":{\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\"},\"body\":{\"name\":\"test-operate-data-update\"},\"details\":{\"remember\":false}}}]}"));
+
+        mockMvc
+                .perform(post("/operateData/delete").param("ids", content.getId().toString()).session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"message\":\"删除 1 记录成功\",\"status\":200}"));
+
+        mockMvc
+                .perform(get("/actuator/auditevents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"OPERATION_DATA_AUDIT_tb_operation_data_INSERT\",\"data\":{\"details\":{\"remember\":false},\"operationDataTrace\":{\"target\":\"tb_operation_data\",\"submitData\":{\"name\":\"test-operate-data\"},\"type\":{\"name\":\"新增\",\"value\":\"INSERT\"},\"controllerAuditType\":\"CONTROLLER_AUDIT_OperateDataController_save\"},\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\"},\"parameter\":null,\"body\":{\"name\":\"test-operate-data\"}}},{\"principal\":\"test:1:test\",\"type\":\"CONTROLLER_AUDIT_OperateDataController_save_SUCCESS\",\"data\":{\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\"},\"body\":{\"name\":\"test-operate-data\"},\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"OPERATION_DATA_AUDIT_tb_operation_data_UPDATE\",\"data\":{\"details\":{\"remember\":false},\"operationDataTrace\":{\"target\":\"tb_operation_data\",\"submitData\":{\"name\":\"test-operate-data-update\"},\"type\":{\"name\":\"更新\",\"value\":\"UPDATE\"},\"controllerAuditType\":\"CONTROLLER_AUDIT_OperateDataController_save\"},\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\"},\"parameter\":null,\"body\":{\"name\":\"test-operate-data-update\"}}},{\"principal\":\"test:1:test\",\"type\":\"CONTROLLER_AUDIT_OperateDataController_save_SUCCESS\",\"data\":{\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\"},\"body\":{\"name\":\"test-operate-data-update\"},\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"CONTROLLER_AUDIT_OperateDataController_delete_SUCCESS\",\"data\":{\"header\":{},\"parameter\":{\"ids\":[\""+content.getId()+"\"]},\"details\":{\"remember\":false}}}]}"));
 
     }
 
