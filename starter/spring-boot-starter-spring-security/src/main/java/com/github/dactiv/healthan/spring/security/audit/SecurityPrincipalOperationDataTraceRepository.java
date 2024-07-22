@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.spring.security.audit;
 
 import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
 import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
 import com.github.dactiv.healthan.mybatis.plus.config.OperationDataTraceProperties;
@@ -11,6 +12,7 @@ import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import net.sf.jsqlparser.statement.Statement;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -75,22 +77,49 @@ public class SecurityPrincipalOperationDataTraceRepository extends MybatisPlusOp
 
         for (OperationDataTraceRecord record : records.stream().filter(Objects::nonNull).collect(Collectors.toList())) {
 
-            SecurityPrincipalOperationDataTraceRecord userDetailsRecord = Casts.of(record, SecurityPrincipalOperationDataTraceRecord.class);
-            if (Objects.isNull(userDetailsRecord)) {
+            SecurityPrincipalOperationDataTraceRecord traceRecord = Casts.of(record, SecurityPrincipalOperationDataTraceRecord.class);
+            if (Objects.isNull(traceRecord)) {
                 continue;
             }
 
             Object auditType = httpServletRequest.getAttribute(controllerAuditProperties.getAuditTypeAttrName());
             if (Objects.nonNull(auditType)) {
-                userDetailsRecord.setControllerAuditType(auditType.toString());
+                traceRecord.setControllerAuditType(auditType.toString());
             }
 
-            userDetailsRecord.setPrincipal(authenticationToken);
-            userDetailsRecord.setRemark(authenticationToken.getName() + StringUtils.SPACE + getDateFormat().format(record.getCreationTime()) + StringUtils.SPACE + record.getType().getName());
+            traceRecord.setPrincipal(authenticationToken);
+            traceRecord.setRemark(authenticationToken.getName() + StringUtils.SPACE + getDateFormat().format(record.getCreationTime()) + StringUtils.SPACE + record.getType().getName());
 
-            result.add(userDetailsRecord);
+            result.add(traceRecord);
         }
 
         return result;
+    }
+
+    @Override
+    public AuditEvent createAuditEvent(OperationDataTraceRecord record) {
+        AuditEvent event = super.createAuditEvent(record);
+        if (!SecurityPrincipalOperationDataTraceRecord.class.isAssignableFrom(record.getClass())) {
+            return event;
+        }
+
+        SecurityPrincipalOperationDataTraceRecord dataTraceRecord = Casts.cast(record);
+        AuthenticationSuccessToken authenticationToken = Casts.cast(dataTraceRecord.getPrincipal());
+
+        Map<String, Object> dataTraceRecordMap = Casts.convertValue(dataTraceRecord, Casts.MAP_TYPE_REFERENCE);
+        dataTraceRecordMap.remove(NumberIdEntity.CREATION_TIME_FIELD_NAME);
+        dataTraceRecordMap.remove(AuthenticationSuccessToken.PRINCIPAL_KEY);
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put(AuthenticationSuccessToken.DETAILS_KEY, authenticationToken.getDetails());
+
+        data.put(ControllerAuditHandlerInterceptor.OPERATION_DATA_TRACE_ATT_NAME, dataTraceRecordMap);
+
+        return new AuditEvent(
+                event.getTimestamp(),
+                authenticationToken.getName(),
+                event.getType(),
+                data
+        );
     }
 }

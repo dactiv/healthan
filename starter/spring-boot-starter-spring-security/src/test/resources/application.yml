@@ -34,6 +34,15 @@ management:
         include: "*"
 
 spring:
+  datasource:
+    url: jdbc:h2:mem:spring-security;INIT=create domain if not exists jsonb as other;MODE=MYSQL;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    username: root
+    password: qwerty123
+    type: com.zaxxer.hikari.HikariDataSource
+  sql:
+    init:
+      schema-locations: classpath:sql/schema.sql
   redis:
     host: 17.0.0.14
     port: 6379

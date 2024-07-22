@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.servlet.http.Cookie;
@@ -27,7 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class SpringSecurityTest {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+public class SpringSecurityAuditTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,7 +47,7 @@ public class SpringSecurityTest {
     private CacheManager cacheManager;
 
     @Test
-    public void testSpringSecurityFunction() throws Exception {
+    public void testAuditFunction() throws Exception {
 
         MockHttpSession session = new MockHttpSession();
 

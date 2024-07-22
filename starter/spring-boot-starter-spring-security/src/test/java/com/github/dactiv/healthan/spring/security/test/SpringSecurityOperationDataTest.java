@@ -1,0 +1,72 @@
+package com.github.dactiv.healthan.spring.security.test;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.commons.RestResult;
+import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.test.entity.OperationDataEntity;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+public class SpringSecurityOperationDataTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private AuthenticationProperties authenticationProperties;
+
+    @Test
+    public void testOperateData() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+
+        mockMvc
+                .perform(
+                        post(authenticationProperties.getLoginProcessingUrl())
+                                .param(authenticationProperties.getUsernameParamName(),"test")
+                                .param(authenticationProperties.getPasswordParamName(),"123456")
+                                .header(authenticationProperties.getTypeHeaderName(), "test")
+                                .session(session)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":200}"))
+                .andExpect(content().json("{\"data\":{\"type\":\"test\", \"principal\":{\"id\":1,\"username\":\"test\"}}}"));
+
+        OperationDataEntity content = new OperationDataEntity();
+        content.setName("test-operate-data");
+
+        RestResult<Integer> restResult = Casts.readValue(
+                mockMvc
+                        .perform(post("/operateData/save").content(Casts.writeValueAsString(content)).contentType(MediaType.APPLICATION_JSON_VALUE).session(session))
+                        .andExpect(status().isOk())
+                        .andExpect(content().json("{\"message\":\"ok\",\"status\":200}"))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString(),
+                new TypeReference<RestResult<Integer>>() {}
+        );
+        content.setId(restResult.getData());
+
+        mockMvc
+                .perform(get("/actuator/auditevents"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"OPERATION_DATA_AUDIT_tb_operation_data_INSERT\",\"data\":{\"details\":{\"remember\":false},\"operationDataTrace\":{\"target\":\"tb_operation_data\",\"type\":{\"name\":\"新增\",\"value\":\"INSERT\"},\"submitData\":{\"name\":\"test-operate-data\"},\"controllerAuditType\":\"CONTROLLER_AUDIT_OperateDataController_save\"}}},{\"principal\":\"test:1:test\",\"type\":\"CONTROLLER_AUDIT_OperateDataController_save_SUCCESS\",\"data\":{\"header\":{\"Content-Type\":\"application/json;charset=UTF-8\",\"Content-Length\":\"100\"},\"body\":{\"name\":\"test-operate-data\"},\"details\":{\"remember\":false}}}]}"));
+
+    }
+
+}

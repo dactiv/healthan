@@ -61,6 +61,9 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
         } else if (CollectionUtils.isNotEmpty(records)){
             for (OperationDataTraceRecord record : records) {
                 AuditEvent auditEvent = createAuditEvent(record);
+                if (Objects.isNull(auditEvent)) {
+                    continue;
+                }
                 applicationEventPublisher.publishEvent(new AuditApplicationEvent(auditEvent));
             }
         }

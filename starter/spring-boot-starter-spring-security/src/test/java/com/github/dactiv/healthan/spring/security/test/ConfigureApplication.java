@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDa
 import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -18,7 +17,6 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 @EnableMethodSecurity(securedEnabled = true)
 @SpringBootApplication(
         exclude = {
-                DataSourceAutoConfiguration.class,
                 MongoAutoConfiguration.class,
                 MongoDataAutoConfiguration.class,
                 ElasticsearchDataAutoConfiguration.class,
