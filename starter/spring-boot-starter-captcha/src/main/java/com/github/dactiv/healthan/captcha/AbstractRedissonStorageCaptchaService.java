@@ -1,27 +1,10 @@
 package com.github.dactiv.healthan.captcha;
 
-import com.github.dactiv.healthan.commons.CacheProperties;
-import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.commons.RestResult;
-import com.github.dactiv.healthan.commons.TimeProperties;
-import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
-import com.github.dactiv.healthan.commons.exception.SystemException;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.RBucket;
-import org.springframework.http.HttpStatus;
+public abstract class AbstractRedissonStorageCaptchaService<B> extends AbstractCaptchaService<B> {
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-
-public abstract class AbstractRedissonStorageCaptchaService<B> extends AbstractRedissonCaptchaService<B> {
-
-    @Override
+    /*@Override
     protected Object generateCaptcha(InterceptToken buildToken, B requestBody, HttpServletRequest request) throws Exception {
-        RBucket<SimpleCaptcha> bucket = getCaptchaBucket(buildToken);
-        SimpleCaptcha exist = bucket.get();
+        SimpleCaptcha exist = getCaptchaStorageManager().getCaptcha(buildToken);
 
         if (Objects.nonNull(exist) && !exist.isRetry()) {
             return RestResult.of("当前验证码未到可重试的时间", HttpStatus.PROCESSING.value());
@@ -32,7 +15,7 @@ public abstract class AbstractRedissonStorageCaptchaService<B> extends AbstractR
 
         SimpleCaptcha captcha = createMatchCaptcha(result.getMatchValue(), request, buildToken, requestBody);
 
-        bucket.setAsync(captcha, captcha.getExpireTime().getValue(), captcha.getExpireTime().getUnit());
+        getCaptchaStorageManager().saveCaptcha(captcha);
 
         return result.getResult();
     }
@@ -57,7 +40,7 @@ public abstract class AbstractRedissonStorageCaptchaService<B> extends AbstractR
     @Override
     protected RestResult<Map<String, Object>> verify(InterceptToken token, HttpServletRequest request) {
 
-        SimpleCaptcha exist = getCaptchaBucket(token).get();
+        SimpleCaptcha exist = getCaptchaStorageManager().getCaptcha(token);
         // 如果没有，表示超时，需要客户端重新生成一个
         if (exist == null || exist.isExpired()) {
             return new RestResult<>(
@@ -87,23 +70,23 @@ public abstract class AbstractRedissonStorageCaptchaService<B> extends AbstractR
             return ;
         }
         // 删除验证码信息
-        deleteCaptcha(token);
+        getCaptchaStorageManager().deleteCaptcha(token);
     }
 
     protected void onMatchesCaptchaSuccess(InterceptToken token, HttpServletRequest request, SimpleCaptcha exist) {
         if(token instanceof BuildToken && exist.isVerifySuccessDelete()) {
             BuildToken buildToken = Casts.cast(token);
             // 成功后删除 绑定 token
-            deleteBuildToken(buildToken);
+            getCaptchaStorageManager().deleteBuildToken(buildToken);
             // 删除验证码信息
-            deleteCaptcha(buildToken);
+            getCaptchaStorageManager().deleteCaptcha(buildToken);
         }
     }
 
-    @Override
-    public RestResult<Map<String, Object>> delete(HttpServletRequest request) {
+    *//*@Override
+    public RestResult<Map<String, Object>> deleteCaptcha(HttpServletRequest request) {
         String token = request.getParameter(getTokenParamName());
-        BuildToken buildToken = getBuildToken(token);
+        BuildToken buildToken = getCaptchaStorageManager().getBuildToken(token);
 
         String verifyTokenExist = StringUtils.defaultString(request.getParameter(captchaProperties.getVerifyTokenExistParamName()), Boolean.TRUE.toString());
 
@@ -112,20 +95,20 @@ public abstract class AbstractRedissonStorageCaptchaService<B> extends AbstractR
         }
 
         // 成功后删除 绑定 token
-        deleteBuildToken(buildToken);
+        getCaptchaStorageManager().deleteBuildToken(buildToken);
         // 删除验证码信息
-        deleteCaptcha(buildToken);
+        getCaptchaStorageManager().deleteCaptcha(buildToken);
 
         return RestResult.of("删除验证么缓存信息成功");
-    }
+    }*//*
 
-    /**
+    *//**
      * 匹配验证码是否正确
      *
      * @param request http servlet reuqest
      * @param captcha 当前验证码
      * @return true 是，否则 false
-     */
+     *//*
     protected boolean matchesCaptcha(HttpServletRequest request, SimpleCaptcha captcha) {
 
         String requestCaptcha = request.getParameter(getCaptchaParamName());
@@ -134,75 +117,42 @@ public abstract class AbstractRedissonStorageCaptchaService<B> extends AbstractR
 
     }
 
-    /**
+    *//**
      * 是否校验验证码失败直接删除当前验证码信息
      *
      * @return true 是，否则 false
-     */
+     *//*
     protected boolean isMatchesFailureDeleteCaptcha() {
         return true;
     }
 
+    *//**
+     * 生成验证码
+     *
+     * @param buildToken 绑定 token
+     * @param requestBody 请求体
+     * @param request 请i去对象
+     *
+     * @return 生成验证码结果集
+     *
+     * @throws Exception
+     *//*
     protected abstract GenerateCaptchaResult doGenerateCaptcha(InterceptToken buildToken, B requestBody, HttpServletRequest request)  throws Exception;
 
-    /**
+    *//**
      * 获取验证码过期时间
      *
      * @return 过期时间
-     */
+     *//*
     protected abstract TimeProperties getCaptchaExpireTime();
 
-    /**
+    *//**
      * 获取可重试时间
      *
      * @return 重试时间（单位：秒）
-     */
+     *//*
     protected TimeProperties getRetryTime() {
         return null;
-    }
-
-    /**
-     * 获取验证码桶
-     *
-     * @param token token 值
-     * @return 绑定 token 桶
-     */
-    public RBucket<SimpleCaptcha> getCaptchaBucket(InterceptToken token) {
-        return redissonClient.getBucket(getCaptchaKey(token));
-    }
-
-    /**
-     * 获取验证码桶
-     *
-     * @param token token 值
-     * @return 绑定 token 桶
-     */
-    public RBucket<SimpleCaptcha> getCaptchaBucket(String token) {
-        return redissonClient.getBucket(getCaptchaKey(token));
-    }
-
-    /**
-     * 删除缓存验证码
-     *
-     * @param token 绑定 token 值
-     */
-    public void deleteCaptcha(InterceptToken token) {
-        getCaptchaBucket(token).deleteAsync();
-    }
-
-    /**
-     * 获取存储在 redis 的验证码实体 key 名称
-     *
-     * @param token 拦截 token
-     * @return key 名称
-     */
-    private String getCaptchaKey(InterceptToken token) {
-        return getCaptchaKey(token.getToken().getName());
-    }
-
-    private String getCaptchaKey(String key) {
-        String name = getType() + CacheProperties.DEFAULT_SEPARATOR + SimpleCaptcha.class.getSimpleName().toLowerCase() + CacheProperties.DEFAULT_SEPARATOR + key;
-        return captchaProperties.getBuildTokenCache().getName(name);
-    }
+    }*/
 
 }

@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
+@Deprecated
 public class DefaultTypeSecurityPrincipalService extends AbstractTypeSecurityPrincipalService {
 
     public static final String DEFAULT_TYPES = "Default";

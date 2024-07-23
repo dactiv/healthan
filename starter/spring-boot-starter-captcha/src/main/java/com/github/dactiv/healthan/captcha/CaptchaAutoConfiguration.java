@@ -8,9 +8,9 @@ import com.github.dactiv.healthan.captcha.filter.CaptchaVerificationService;
 import com.github.dactiv.healthan.captcha.filter.support.TianaiCaptchaVerificationService;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.captcha.intercept.support.DelegateCaptchaInterceptor;
+import com.github.dactiv.healthan.captcha.storage.InMemoryCaptchaStorageManager;
 import com.github.dactiv.healthan.captcha.tianai.TianaiCaptchaService;
 import com.github.dactiv.healthan.captcha.tianai.config.TianaiCaptchaProperties;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -63,9 +63,15 @@ public class CaptchaAutoConfiguration {
     public TianaiCaptchaService tianaiCaptchaService(CaptchaProperties captchaProperties,
                                                      @Qualifier("mvcValidator") Validator validator,
                                                      @Lazy Interceptor interceptor,
-                                                     RedissonClient redissonClient,
+                                                     CaptchaStorageManager captchaStorageManager,
                                                      TianaiCaptchaProperties tianaiCaptchaProperties) {
-        return new TianaiCaptchaService(captchaProperties, validator, interceptor, redissonClient, tianaiCaptchaProperties);
+        return new TianaiCaptchaService(captchaProperties, validator, interceptor, captchaStorageManager, tianaiCaptchaProperties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CaptchaStorageManager.class)
+    public CaptchaStorageManager captchaStorageManager() {
+        return new InMemoryCaptchaStorageManager();
     }
 
     @Bean

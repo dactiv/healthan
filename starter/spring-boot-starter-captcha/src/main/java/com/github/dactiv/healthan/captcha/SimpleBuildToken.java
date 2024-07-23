@@ -5,7 +5,7 @@ package com.github.dactiv.healthan.captcha;
  *
  * @author maurice
  */
-public class SimpleBuildToken extends SimpleInterceptToken implements BuildToken{
+public class SimpleBuildToken extends SimpleInterceptToken implements BuildToken {
 
     private static final long serialVersionUID = 3913898137626092376L;
 

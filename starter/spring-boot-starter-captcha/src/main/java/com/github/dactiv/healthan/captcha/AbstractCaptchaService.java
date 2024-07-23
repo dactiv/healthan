@@ -4,12 +4,15 @@ import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
+import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 import com.github.dactiv.healthan.commons.exception.ServiceException;
+import com.github.dactiv.healthan.commons.exception.SystemException;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.http.HttpStatus;
 import org.springframework.objenesis.instantiator.util.ClassUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
@@ -22,6 +25,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * 抽象的验证码服务实现，实现一些 {@link CaptchaService} 的部分代码
@@ -34,17 +38,26 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
      * 默认提交验证码的参数名称
      */
     private static final String DEFAULT_CAPTCHA_PARAM_NAME = "captchaParamName";
-
+    /**
+     * 验证码配置
+     */
     protected CaptchaProperties captchaProperties;
-
+    /**
+     * 验证码拦截器
+     */
     private Interceptor interceptor;
-
     /**
      * 泛型实体class
      */
     private final Class<B> requestBodyClass;
-
+    /**
+     * sprig 的内容校验者，用于校验请求参数是否通过使用
+     */
     private Validator validator;
+    /**
+     * 验证码存储管理器
+     */
+    private CaptchaStorageManager captchaStorageManager;
 
     public AbstractCaptchaService() {
 
@@ -76,6 +89,14 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
         this.validator = validator;
     }
 
+    public CaptchaStorageManager getCaptchaStorageManager() {
+        return captchaStorageManager;
+    }
+
+    public void setCaptchaStorageManager(CaptchaStorageManager captchaStorageManager) {
+        this.captchaStorageManager = captchaStorageManager;
+    }
+
     @Override
     public boolean isSupport(HttpServletRequest request) {
         boolean result = CaptchaService.super.isSupport(request);
@@ -90,6 +111,24 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
         }
 
         return getType().equals(type);
+    }
+
+    protected InterceptToken createInterceptToken(String token) {
+        return createInterceptToken(token, null, null);
+    }
+
+    protected InterceptToken createInterceptToken(String token, String id, TimeProperties timeProperties) {
+        SimpleInterceptToken interceptToken = new SimpleInterceptToken();
+        if (StringUtils.isEmpty(id)) {
+            interceptToken.setId(UUID.randomUUID().toString());
+        }
+        Map<String, Object> args = getCreateArgs();
+        interceptToken.setArgs(args);
+        interceptToken.setTokenParamName(getTokenParamName());
+        interceptToken.setType(getType());
+        interceptToken.setToken(new CacheProperties(token, timeProperties));
+
+        return interceptToken;
     }
 
     @Override
@@ -114,8 +153,6 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
         Map<String, Object> args = getCreateArgs();
         token.setArgs(args);
 
-        saveBuildToken(token);
-
         String generateInterceptorValue = httpServletRequest.getParameter(captchaProperties.getIgnoreInterceptorParamName());
         String isGenerateInterceptor = StringUtils.defaultString(generateInterceptorValue, Boolean.TRUE.toString());
 
@@ -127,9 +164,9 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
                     interceptorType
             );
             token.setInterceptToken(interceptToken);
-            saveBuildToken(token);
         }
 
+        captchaStorageManager.saveBuildToken(token);
         return token;
     }
 
@@ -139,24 +176,40 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
 
     @Override
     public InterceptToken generateInterceptorToken(BuildToken buildToken) {
-        SimpleInterceptToken interceptToken = Casts.of(buildToken, SimpleInterceptToken.class);
-
-        interceptToken.setType(getType());
-        interceptToken.setTokenParamName(getTokenParamName());
-
-        Map<String, Object> args = getCreateArgs();
-        interceptToken.setArgs(args);
+        InterceptToken interceptToken = createInterceptToken(
+                buildToken.getToken().getName(),
+                buildToken.getId(),
+                buildToken.getToken().getExpiresTime()
+        );
 
         // 保存拦截token
-        saveInterceptToken(interceptToken);
+        captchaStorageManager.saveInterceptToken(interceptToken);
 
         return interceptToken;
     }
 
     @Override
-    public RestResult<Map<String, Object>> verify(HttpServletRequest request) {
+    public RestResult<Map<String, Object>> deleteCaptcha(HttpServletRequest request) {
         String token = request.getParameter(getTokenParamName());
-        BuildToken buildToken = getBuildToken(token);
+        BuildToken buildToken = getBuildToken(request);
+
+        String verifyTokenExist = StringUtils.defaultString(request.getParameter(captchaProperties.getVerifyTokenExistParamName()), Boolean.TRUE.toString());
+
+        if (Objects.isNull(buildToken) && BooleanUtils.toBoolean(verifyTokenExist)) {
+            return RestResult.ofException(ErrorCodeException.CONTENT_NOT_EXIST, new SystemException("找不到 token 为 [" + token + "] 的验证码 token 信息"));
+        }
+
+        // 成功后删除 绑定 token
+        captchaStorageManager.deleteBuildToken(buildToken);
+        // 删除验证码信息
+        captchaStorageManager.deleteCaptcha(buildToken);
+
+        return RestResult.of("删除验证么缓存信息成功");
+    }
+
+    @Override
+    public RestResult<Map<String, Object>> verify(HttpServletRequest request) {
+        BuildToken buildToken = getBuildToken(request);
 
         if (Objects.isNull(buildToken)) {
             throw new ServiceException("绑定 token 已过期");
@@ -168,7 +221,7 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
     @Override
     public RestResult<Map<String, Object>> verifyInterceptToken(HttpServletRequest request) {
         String token = request.getParameter(getTokenParamName());
-        InterceptToken interceptToken = getInterceptToken(token);
+        InterceptToken interceptToken = captchaStorageManager.getInterceptToken(token);
         if (Objects.isNull(interceptToken)) {
             throw new ServiceException("拦截 token 已过期");
         }
@@ -176,11 +229,23 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
     }
 
     @Override
+    public BuildToken getBuildToken(String token) {
+        return captchaStorageManager.getBuildToken(token);
+    }
+
+    @Override
+    public BuildToken getBuildToken(HttpServletRequest request) {
+        String token = request.getParameter(getTokenParamName());
+        return getBuildToken(token);
+    }
+
+    @Override
     public Object generateCaptcha(HttpServletRequest request) throws Exception {
-        InterceptToken token = getBuildToken(request);
+        String tokenValue = request.getParameter(getTokenParamName());
+        InterceptToken token = getBuildToken(tokenValue);
 
         if (Objects.isNull(token)) {
-            token = getInterceptToken(request);
+            token = captchaStorageManager.getInterceptToken(tokenValue);
         }
 
         if (Objects.isNull(token)) {
@@ -212,7 +277,6 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
         return entity;
     }
 
-
     /**
      * 生成验证码
      *
@@ -223,9 +287,66 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
      *
      * @return 验证码对象
      */
-    protected abstract Object generateCaptcha(InterceptToken buildToken,
-                                              B requestBody,
-                                              HttpServletRequest request)  throws Exception;
+    protected Object generateCaptcha(InterceptToken buildToken, B requestBody, HttpServletRequest request) throws Exception {
+        SimpleCaptcha exist = captchaStorageManager.getCaptcha(buildToken);
+
+        if (Objects.nonNull(exist) && !exist.isRetry()) {
+            return RestResult.of("当前验证码未到可重试的时间", HttpStatus.PROCESSING.value());
+        }
+
+        // 生成验证码
+        GenerateCaptchaResult result = doGenerateCaptcha(buildToken, requestBody, request);
+
+        SimpleCaptcha captcha = createMatchCaptcha(result.getMatchValue(), request, buildToken, requestBody);
+
+        captchaStorageManager.saveCaptcha(captcha);
+
+        return result.getResult();
+    }
+
+    protected SimpleCaptcha createMatchCaptcha(String value, HttpServletRequest request, InterceptToken buildToken, B requestBody) {
+        SimpleCaptcha captcha = new SimpleCaptcha();
+
+        captcha.setExpireTime(getCaptchaExpireTime());
+        captcha.setValue(value);
+
+        String verifySuccessDelete = StringUtils.defaultString(request.getParameter(captchaProperties.getVerifySuccessDeleteParamName()), Boolean.TRUE.toString());
+        captcha.setVerifySuccessDelete(BooleanUtils.toBoolean(verifySuccessDelete));
+
+        TimeProperties retryTime = getRetryTime();
+        if (Objects.nonNull(retryTime)) {
+            captcha.setRetryTime(retryTime);
+        }
+
+        return captcha;
+    }
+
+    /**
+     * 生成验证码
+     *
+     * @param buildToken 绑定 token
+     * @param requestBody 请求体
+     * @param request 请i去对象
+     *
+     * @return 生成验证码结果集
+     */
+    protected abstract GenerateCaptchaResult doGenerateCaptcha(InterceptToken buildToken, B requestBody, HttpServletRequest request)  throws Exception;
+
+    /**
+     * 获取验证码过期时间
+     *
+     * @return 过期时间
+     */
+    protected abstract TimeProperties getCaptchaExpireTime();
+
+    /**
+     * 获取可重试时间
+     *
+     * @return 重试时间（单位：秒）
+     */
+    protected TimeProperties getRetryTime() {
+        return null;
+    }
 
     /**
      * 校验验证码
@@ -235,7 +356,74 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
      *
      * @return 验证结果
      */
-    protected abstract RestResult<Map<String, Object>> verify(InterceptToken token, HttpServletRequest request);
+    protected RestResult<Map<String, Object>> verify(InterceptToken token, HttpServletRequest request) {
+
+        SimpleCaptcha exist = captchaStorageManager.getCaptcha(token);
+        // 如果没有，表示超时，需要客户端重新生成一个
+        if (exist == null || exist.isExpired()) {
+            return new RestResult<>(
+                    "验证码已过期",
+                    HttpStatus.REQUEST_TIMEOUT.value(),
+                    ErrorCodeException.DEFAULT_EXCEPTION_CODE,
+                    new LinkedHashMap<>()
+            );
+        }
+
+        // 匹配验证码是否通过
+        if (matchesCaptcha(request, exist)) {
+
+            onMatchesCaptchaSuccess(token, request, exist);
+
+            return RestResult.of("验证通过");
+        }
+        onMatchesCaptchaFailure(token, request, exist);
+        return RestResult.of("验证码不正确",
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ErrorCodeException.DEFAULT_EXCEPTION_CODE
+        );
+    }
+
+    /**
+     * 匹配验证码是否正确
+     *
+     * @param request http servlet reuqest
+     * @param captcha 当前验证码
+     * @return true 是，否则 false
+     */
+    protected boolean matchesCaptcha(HttpServletRequest request, SimpleCaptcha captcha) {
+
+        String requestCaptcha = request.getParameter(getCaptchaParamName());
+        // 匹配验证码
+        return StringUtils.equalsIgnoreCase(captcha.getValue(), requestCaptcha);
+
+    }
+
+    protected void onMatchesCaptchaFailure(InterceptToken token, HttpServletRequest request, SimpleCaptcha exist) {
+        if (!isMatchesFailureDeleteCaptcha()) {
+            return ;
+        }
+        // 删除验证码信息
+        captchaStorageManager.deleteCaptcha(token);
+    }
+
+    protected void onMatchesCaptchaSuccess(InterceptToken token, HttpServletRequest request, SimpleCaptcha exist) {
+        if(token instanceof BuildToken && exist.isVerifySuccessDelete()) {
+            BuildToken buildToken = Casts.cast(token);
+            // 成功后删除 绑定 token
+            captchaStorageManager.deleteBuildToken(buildToken);
+            // 删除验证码信息
+            captchaStorageManager.deleteCaptcha(buildToken);
+        }
+    }
+
+    /**
+     * 是否校验验证码失败直接删除当前验证码信息
+     *
+     * @return true 是，否则 false
+     */
+    protected boolean isMatchesFailureDeleteCaptcha() {
+        return true;
+    }
 
     @Override
     public String getTokenParamName() {

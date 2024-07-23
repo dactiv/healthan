@@ -41,7 +41,7 @@ public class DelegateCaptchaInterceptor implements Interceptor {
         InterceptToken interceptToken = interceptorService.generateInterceptorToken(buildToken);
 
         buildToken.setInterceptToken(interceptToken);
-        captchaService.saveBuildToken(buildToken);
+        //captchaService.saveBuildToken(buildToken);
 
         return interceptToken;
     }

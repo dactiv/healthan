@@ -87,6 +87,6 @@ public class DelegateCaptchaService {
     }
 
     public RestResult<Map<String, Object>> delete(HttpServletRequest request) {
-        return getCaptchaServiceByRequest(request).delete(request);
+        return getCaptchaServiceByRequest(request).deleteCaptcha(request);
     }
 }

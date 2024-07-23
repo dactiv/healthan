@@ -31,8 +31,6 @@ import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.CaseUtils;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.env.RandomValuePropertySource;
@@ -54,7 +52,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author maurice.chen
  */
-public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<TianaiRequestBody> implements ResourceStore {
+public class TianaiCaptchaService extends AbstractCaptchaService<TianaiRequestBody> implements ResourceStore {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(TianaiCaptchaService.class);
 
@@ -78,13 +76,13 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
     public TianaiCaptchaService(CaptchaProperties captchaProperties,
                                 Validator validator,
                                 Interceptor interceptor,
-                                RedissonClient redissonClient,
+                                CaptchaStorageManager captchaStorageManager,
                                 TianaiCaptchaProperties tianaiCaptchaProperties) {
 
         setCaptchaProperties(captchaProperties);
         setInterceptor(interceptor);
         setValidator(validator);
-        setRedissonClient(redissonClient);
+        setCaptchaStorageManager(captchaStorageManager);
 
         tianaiCaptchaProperties
                 .getTemplateMap()
@@ -166,8 +164,9 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
     }
 
     public RestResult<Object> clientVerify(ImageCaptchaTrack imageCaptchaTrack, String token) {
-        RBucket<SimpleCaptcha> bucket = getCaptchaBucket(token);
-        SimpleCaptcha captcha = bucket.getAndDelete();
+        InterceptToken interceptToken = createInterceptToken(token);
+        SimpleCaptcha captcha = getCaptchaStorageManager().getCaptcha(interceptToken);
+        //SimpleCaptcha captcha = bucket.getAndDelete();
 
         try {
             Assert.notNull(captcha, "验证内容已过期");
@@ -178,13 +177,13 @@ public class TianaiCaptchaService extends AbstractRedissonStorageCaptchaService<
 
                 String value = Casts.writeValueAsString(imageCaptchaTrack);
                 captcha.setValue(value);
-
-                if (Objects.nonNull(captcha.getExpireTime())) {
+                getCaptchaStorageManager().saveCaptcha(captcha);
+                /*if (Objects.nonNull(captcha.getExpireTime())) {
                     TimeProperties time = captcha.getExpireTime();
                     bucket.setAsync(captcha, time.getValue(), time.getUnit());
                 } else {
                     bucket.setAsync(captcha);
-                }
+                }*/
 
                 long useTime = imageCaptchaTrack.getEndSlidingTime().getTime() - imageCaptchaTrack.getStartSlidingTime().getTime();
                 return RestResult.ofSuccess("校验成功, 本次使用 " + useTime / 1000 + " 秒", (Object)DigestUtils.md5DigestAsHex(captcha.getValue().getBytes()));

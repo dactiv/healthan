@@ -15,6 +15,7 @@ import java.util.Map;
  *
  * @author maurice.chen
  */
+@Deprecated
 public class DefaultAuthenticationFailureResponse implements JsonAuthenticationFailureResponse {
 
     private final AuthenticationProperties properties;

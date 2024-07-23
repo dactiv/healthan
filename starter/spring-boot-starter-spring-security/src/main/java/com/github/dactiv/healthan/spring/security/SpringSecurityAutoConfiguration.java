@@ -13,8 +13,6 @@ import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAut
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationFailureResponse;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessHandler;
 import com.github.dactiv.healthan.spring.security.authentication.handler.JsonAuthenticationSuccessResponse;
-import com.github.dactiv.healthan.spring.security.authentication.service.DefaultAuthenticationFailureResponse;
-import com.github.dactiv.healthan.spring.security.authentication.service.DefaultTypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
 import com.github.dactiv.healthan.spring.security.controller.TokenController;
 import com.github.dactiv.healthan.spring.security.plugin.PluginEndpoint;
@@ -79,16 +77,16 @@ public class SpringSecurityAutoConfiguration {
         return new TokenController(cacheManager, accessTokenProperties);
     }
 
-    @Bean
+    /*@Bean
     public DefaultTypeSecurityPrincipalService defaultUserDetailsService(PasswordEncoder passwordEncoder,
                                                                   AuthenticationProperties properties) {
 
         return new DefaultTypeSecurityPrincipalService(properties, passwordEncoder);
-    }
+    }*/
 
     @Bean
     @ConditionalOnMissingBean(CacheManager.class)
-    public CacheManager cacheManager() {
+    public CacheManager inMemoryCacheManager() {
         return new InMemoryCacheManager();
     }
 
@@ -125,10 +123,10 @@ public class SpringSecurityAutoConfiguration {
         );
     }
 
-    @Bean
+    /*@Bean
     public DefaultAuthenticationFailureResponse defaultAuthenticationFailureResponse(AuthenticationProperties properties) {
         return new DefaultAuthenticationFailureResponse(properties);
-    }
+    }*/
 
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)

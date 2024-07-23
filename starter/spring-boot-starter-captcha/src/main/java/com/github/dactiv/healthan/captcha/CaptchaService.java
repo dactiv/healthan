@@ -33,6 +33,15 @@ public interface CaptchaService {
     Object generateCaptcha(HttpServletRequest request) throws Exception;
 
     /**
+     * 获取绑定 token
+     *
+     * @param token token 值
+     *
+     * @return
+     */
+    BuildToken getBuildToken(String token);
+
+    /**
      * 验证请求
      *
      * @param request http servlet 请求
@@ -77,56 +86,6 @@ public interface CaptchaService {
     String getTokenParamName();
 
     /**
-     * 获取当前存在的绑定 token
-     *
-     * @param token token 值
-     *
-     * @return 绑定 token
-     */
-    BuildToken getBuildToken(String token);
-
-    /**
-     * 获取拦截 token
-     *
-     * @param token 拦截 token 值
-     *
-     * @return 拦截 token
-     */
-    InterceptToken getInterceptToken(String token);
-
-    /**
-     * 获取当前存在的绑定 token
-     *
-     * @param request http servlet request
-     *
-     * @return 绑定 token
-     */
-    BuildToken getBuildToken(HttpServletRequest request);
-
-    /**
-     * 获取当前存在的拦截 token
-     *
-     * @param request http servlet request
-     *
-     * @return 绑定 token
-     */
-    InterceptToken getInterceptToken(HttpServletRequest request);
-
-    /**
-     * 保存绑定 token
-     *
-     * @param token token 值
-     */
-    void saveBuildToken(BuildToken token);
-
-    /**
-     * 保存拦截 token
-     *
-     * @param token token
-     */
-    void saveInterceptToken(InterceptToken token);
-
-    /**
      * 创建拦截 token
      *
      * @param token 绑定 token
@@ -151,5 +110,15 @@ public interface CaptchaService {
      *
      * @return 删除结果集
      */
-    RestResult<Map<String, Object>> delete(HttpServletRequest request);
+    RestResult<Map<String, Object>> deleteCaptcha(HttpServletRequest request);
+
+    /**
+     * 获取绑定 token
+     *
+     * @param request http servlet 请求
+     *
+     * @return 绑定 token
+     */
+    BuildToken getBuildToken(HttpServletRequest request);
+
 }
