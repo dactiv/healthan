@@ -1,4 +1,4 @@
-package com.github.dactiv.healthan.spring.security.captcha;
+package com.github.dactiv.healthan.spring.security.controller;
 
 import com.github.dactiv.healthan.captcha.CaptchaProperties;
 import com.github.dactiv.healthan.captcha.DelegateCaptchaService;

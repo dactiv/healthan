@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.spring.security;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
+import com.github.dactiv.healthan.security.entity.RoleAuthority;
 import com.github.dactiv.healthan.spring.security.authentication.*;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
@@ -13,9 +14,11 @@ import com.github.dactiv.healthan.spring.security.authentication.service.TypeTok
 import com.github.dactiv.healthan.spring.security.plugin.PluginSourceTypeVoter;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -31,12 +34,18 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.AbstractRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -115,7 +124,6 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
         if (rememberMeProperties.isEnabled()) {
             createRememberMeSetting(httpSecurity);
         }
-
         if (CollectionUtils.isNotEmpty(webSecurityConfigurerAfterAdapters)) {
             for (WebSecurityConfigurerAfterAdapter a : webSecurityConfigurerAfterAdapters) {
                 a.configure(httpSecurity);
@@ -174,6 +182,23 @@ public class DefaultWebSecurityAutoConfiguration extends GlobalMethodSecurityCon
                 }
             }
         };
+    }
+
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService(AuthenticationProperties authenticationProperties,
+                                                         PasswordEncoder passwordEncoder) {
+
+        List<UserDetails> userDetails = new LinkedList<>();
+        for (SecurityProperties.User user : authenticationProperties.getUsers()) {
+            List<SimpleGrantedAuthority> roleAuthorities = user
+                    .getRoles()
+                    .stream()
+                    .map(s -> StringUtils.prependIfMissing(s, RoleAuthority.DEFAULT_ROLE_PREFIX))
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList());
+            userDetails.add(new User(user.getName(), passwordEncoder.encode(user.getPassword()), roleAuthorities));
+        }
+        return new InMemoryUserDetailsManager(userDetails);
     }
 
     /**

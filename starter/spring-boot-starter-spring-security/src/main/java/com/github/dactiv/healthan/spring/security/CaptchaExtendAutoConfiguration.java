@@ -4,7 +4,7 @@ import com.github.dactiv.healthan.captcha.CaptchaAutoConfiguration;
 import com.github.dactiv.healthan.captcha.CaptchaProperties;
 import com.github.dactiv.healthan.captcha.DelegateCaptchaService;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
-import com.github.dactiv.healthan.spring.security.captcha.CaptchaExtendController;
+import com.github.dactiv.healthan.spring.security.controller.CaptchaExtendController;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

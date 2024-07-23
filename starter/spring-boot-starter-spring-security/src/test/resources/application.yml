@@ -17,6 +17,14 @@ healthan:
       - "/logout/**"
       - "/actuator/**"
     ignore-audit-types: AUTHENTICATION_FAILURE,AUTHORIZATION_FAILURE
+    users:
+      - name: feign
+        password: 123456
+        roles: FEIGN
+      - name: simple
+        password: 654321
+        roles: SIMPLE
+    ignore-audit-principals: feign
 
 logging:
   level:

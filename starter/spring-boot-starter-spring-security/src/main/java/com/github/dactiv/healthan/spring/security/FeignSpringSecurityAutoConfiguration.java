@@ -2,7 +2,6 @@ package com.github.dactiv.healthan.spring.security;
 
 
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.service.feign.FeignAuthenticationTypeTokenResolver;
 import com.github.dactiv.healthan.spring.security.authentication.service.feign.FeignExceptionResultResolver;
 import feign.FeignException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -25,8 +24,4 @@ public class FeignSpringSecurityAutoConfiguration {
         return new FeignExceptionResultResolver();
     }
 
-    @Bean
-    public FeignAuthenticationTypeTokenResolver feignAuthenticationTypeTokenResolver(AuthenticationProperties properties) {
-        return new FeignAuthenticationTypeTokenResolver(properties);
-    }
 }

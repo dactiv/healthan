@@ -59,4 +59,16 @@ public class OperateController {
     public RestResult<?> pluginAnyPermsOperate() {
         return RestResult.of("pluginAnyPermsOperate");
     }
+
+    @GetMapping("feignBasicAuthentication")
+    @PreAuthorize("hasRole('FEIGN')")
+    public RestResult<?> feignBasicAuthentication() {
+        return RestResult.of("feignBasicAuthentication");
+    }
+
+    @GetMapping("simpleBasicAuthentication")
+    @PreAuthorize("hasRole('SIMPLE')")
+    public RestResult<?> simpleBasicAuthentication() {
+        return RestResult.of("simpleBasicAuthentication");
+    }
 }
