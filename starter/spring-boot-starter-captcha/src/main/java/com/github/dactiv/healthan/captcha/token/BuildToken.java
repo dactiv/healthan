@@ -1,4 +1,4 @@
-package com.github.dactiv.healthan.captcha;
+package com.github.dactiv.healthan.captcha.token;
 
 /**
  * 验证码的绑定 token，主要用于让系统知道“谁”在用验证码服务，

@@ -1,5 +1,6 @@
 package com.github.dactiv.healthan.captcha;
 
+import com.github.dactiv.healthan.captcha.token.BuildToken;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.exception.ServiceException;
 

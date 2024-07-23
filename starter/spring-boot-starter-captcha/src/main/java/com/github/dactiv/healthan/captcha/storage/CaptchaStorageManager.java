@@ -1,4 +1,8 @@
-package com.github.dactiv.healthan.captcha;
+package com.github.dactiv.healthan.captcha.storage;
+
+import com.github.dactiv.healthan.captcha.SimpleCaptcha;
+import com.github.dactiv.healthan.captcha.token.BuildToken;
+import com.github.dactiv.healthan.captcha.token.InterceptToken;
 
 /**
  * 验证码存储管理器

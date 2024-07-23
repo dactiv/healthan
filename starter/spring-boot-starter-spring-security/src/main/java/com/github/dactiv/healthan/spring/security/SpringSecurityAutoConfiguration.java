@@ -77,13 +77,6 @@ public class SpringSecurityAutoConfiguration {
         return new TokenController(cacheManager, accessTokenProperties);
     }
 
-    /*@Bean
-    public DefaultTypeSecurityPrincipalService defaultUserDetailsService(PasswordEncoder passwordEncoder,
-                                                                  AuthenticationProperties properties) {
-
-        return new DefaultTypeSecurityPrincipalService(properties, passwordEncoder);
-    }*/
-
     @Bean
     @ConditionalOnMissingBean(CacheManager.class)
     public CacheManager inMemoryCacheManager() {
@@ -122,11 +115,6 @@ public class SpringSecurityAutoConfiguration {
                 properties
         );
     }
-
-    /*@Bean
-    public DefaultAuthenticationFailureResponse defaultAuthenticationFailureResponse(AuthenticationProperties properties) {
-        return new DefaultAuthenticationFailureResponse(properties);
-    }*/
 
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)

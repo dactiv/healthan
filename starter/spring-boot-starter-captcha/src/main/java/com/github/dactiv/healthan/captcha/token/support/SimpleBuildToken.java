@@ -1,4 +1,7 @@
-package com.github.dactiv.healthan.captcha;
+package com.github.dactiv.healthan.captcha.token.support;
+
+import com.github.dactiv.healthan.captcha.token.BuildToken;
+import com.github.dactiv.healthan.captcha.token.InterceptToken;
 
 /**
  * 简单的验证码绑定 token 实现

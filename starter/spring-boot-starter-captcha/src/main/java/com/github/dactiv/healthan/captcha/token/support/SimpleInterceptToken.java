@@ -1,5 +1,7 @@
-package com.github.dactiv.healthan.captcha;
+package com.github.dactiv.healthan.captcha.token.support;
 
+import com.github.dactiv.healthan.captcha.ConstructionCaptchaMeta;
+import com.github.dactiv.healthan.captcha.token.InterceptToken;
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.TimeProperties;
 

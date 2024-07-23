@@ -1,5 +1,6 @@
-package com.github.dactiv.healthan.captcha;
+package com.github.dactiv.healthan.captcha.token;
 
+import com.github.dactiv.healthan.captcha.Expired;
 import com.github.dactiv.healthan.commons.CacheProperties;
 
 import java.io.Serializable;

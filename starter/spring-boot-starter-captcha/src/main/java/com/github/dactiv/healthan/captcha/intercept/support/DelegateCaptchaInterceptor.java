@@ -1,10 +1,10 @@
 package com.github.dactiv.healthan.captcha.intercept.support;
 
-import com.github.dactiv.healthan.captcha.BuildToken;
 import com.github.dactiv.healthan.captcha.CaptchaService;
 import com.github.dactiv.healthan.captcha.DelegateCaptchaService;
-import com.github.dactiv.healthan.captcha.InterceptToken;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
+import com.github.dactiv.healthan.captcha.token.BuildToken;
+import com.github.dactiv.healthan.captcha.token.InterceptToken;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.exception.SystemException;
 

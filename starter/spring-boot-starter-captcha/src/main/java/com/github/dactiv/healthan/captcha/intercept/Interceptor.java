@@ -1,6 +1,6 @@
 package com.github.dactiv.healthan.captcha.intercept;
 
-import com.github.dactiv.healthan.captcha.InterceptToken;
+import com.github.dactiv.healthan.captcha.token.InterceptToken;
 import com.github.dactiv.healthan.commons.RestResult;
 
 import javax.servlet.http.HttpServletRequest;

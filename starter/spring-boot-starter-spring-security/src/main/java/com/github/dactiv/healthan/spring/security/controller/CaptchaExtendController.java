@@ -2,8 +2,8 @@ package com.github.dactiv.healthan.spring.security.controller;
 
 import com.github.dactiv.healthan.captcha.CaptchaProperties;
 import com.github.dactiv.healthan.captcha.DelegateCaptchaService;
-import com.github.dactiv.healthan.captcha.InterceptToken;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
+import com.github.dactiv.healthan.captcha.token.InterceptToken;
 import com.github.dactiv.healthan.commons.RestResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;

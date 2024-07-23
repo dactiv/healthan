@@ -1,5 +1,7 @@
 package com.github.dactiv.healthan.captcha;
 
+import com.github.dactiv.healthan.captcha.token.BuildToken;
+import com.github.dactiv.healthan.captcha.token.InterceptToken;
 import com.github.dactiv.healthan.commons.RestResult;
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,7 +39,7 @@ public interface CaptchaService {
      *
      * @param token token 值
      *
-     * @return
+     * @return 绑定 token
      */
     BuildToken getBuildToken(String token);
 

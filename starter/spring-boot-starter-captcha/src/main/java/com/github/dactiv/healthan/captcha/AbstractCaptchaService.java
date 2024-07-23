@@ -1,6 +1,11 @@
 package com.github.dactiv.healthan.captcha;
 
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
+import com.github.dactiv.healthan.captcha.storage.CaptchaStorageManager;
+import com.github.dactiv.healthan.captcha.token.BuildToken;
+import com.github.dactiv.healthan.captcha.token.InterceptToken;
+import com.github.dactiv.healthan.captcha.token.support.SimpleBuildToken;
+import com.github.dactiv.healthan.captcha.token.support.SimpleInterceptToken;
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;

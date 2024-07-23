@@ -1,9 +1,9 @@
-package com.github.dactiv.healthan.captcha.storage;
+package com.github.dactiv.healthan.captcha.storage.support;
 
-import com.github.dactiv.healthan.captcha.BuildToken;
-import com.github.dactiv.healthan.captcha.CaptchaStorageManager;
-import com.github.dactiv.healthan.captcha.InterceptToken;
 import com.github.dactiv.healthan.captcha.SimpleCaptcha;
+import com.github.dactiv.healthan.captcha.storage.CaptchaStorageManager;
+import com.github.dactiv.healthan.captcha.token.BuildToken;
+import com.github.dactiv.healthan.captcha.token.InterceptToken;
 
 /**
  * 内存形式的验证码存储管理实现

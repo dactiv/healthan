@@ -1,17 +1,27 @@
-package com.github.dactiv.healthan.captcha.storage;
+package com.github.dactiv.healthan.captcha.storage.support;
 
-import com.github.dactiv.healthan.captcha.BuildToken;
-import com.github.dactiv.healthan.captcha.CaptchaStorageManager;
-import com.github.dactiv.healthan.captcha.InterceptToken;
+import com.github.dactiv.healthan.captcha.CaptchaProperties;
 import com.github.dactiv.healthan.captcha.SimpleCaptcha;
+import com.github.dactiv.healthan.captcha.storage.CaptchaStorageManager;
+import com.github.dactiv.healthan.captcha.token.BuildToken;
+import com.github.dactiv.healthan.captcha.token.InterceptToken;
 import org.redisson.api.RedissonClient;
 
+/**
+ * redisson 验证码存储管理实现
+ *
+ * @author maurice.chen
+ */
 public class RedissonCaptchaStorageManager implements CaptchaStorageManager {
 
     private final RedissonClient redissonClient;
 
-    public RedissonCaptchaStorageManager(RedissonClient redissonClient) {
+    private final CaptchaProperties captchaProperties;
+
+    public RedissonCaptchaStorageManager(RedissonClient redissonClient,
+                                         CaptchaProperties captchaProperties) {
         this.redissonClient = redissonClient;
+        this.captchaProperties = captchaProperties;
     }
 
     @Override

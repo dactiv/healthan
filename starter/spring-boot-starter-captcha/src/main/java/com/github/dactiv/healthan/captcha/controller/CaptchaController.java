@@ -1,12 +1,12 @@
 package com.github.dactiv.healthan.captcha.controller;
 
 import cloud.tianai.captcha.validator.common.model.dto.ImageCaptchaTrack;
-import com.github.dactiv.healthan.captcha.BuildToken;
 import com.github.dactiv.healthan.captcha.CaptchaProperties;
 import com.github.dactiv.healthan.captcha.DelegateCaptchaService;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.captcha.tianai.TianaiCaptchaService;
 import com.github.dactiv.healthan.captcha.tianai.config.TianaiCaptchaProperties;
+import com.github.dactiv.healthan.captcha.token.BuildToken;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import org.apache.commons.io.IOUtils;
