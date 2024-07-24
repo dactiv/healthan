@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.captcha;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
+import com.github.dactiv.healthan.commons.TimeProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.Ordered;
 
@@ -31,11 +32,11 @@ public class CaptchaProperties {
     /**
      * 验证码 token 缓存配置
      */
-    private CacheProperties buildTokenCache;
+    private CacheProperties buildTokenCache = CacheProperties.of("healthan:captcha:build-token:", TimeProperties.ofMinutes(5));
     /**
      * 拦截器 token 缓存配置
      */
-    private CacheProperties interceptorTokenCache;
+    private CacheProperties interceptorTokenCache = CacheProperties.of("healthan:captcha:interceptor-token:", TimeProperties.ofMinutes(5));
 
     /**
      * 获取拦截器参数名称，用于在生成 token 时判断一些逻辑执行操作,参考:{@link AbstractCaptchaService#generateToken(String, HttpServletRequest)}

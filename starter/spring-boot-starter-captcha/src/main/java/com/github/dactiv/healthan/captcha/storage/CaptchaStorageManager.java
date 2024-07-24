@@ -54,8 +54,9 @@ public interface CaptchaStorageManager {
      * 保存带匹配值的验证码
      *
      * @param captcha 带匹配值的验证码
+     * @param interceptToken 拦截 token
      */
-    void saveCaptcha(SimpleCaptcha captcha);
+    void saveCaptcha(SimpleCaptcha captcha, InterceptToken interceptToken);
 
     /**
      * 获取带匹配值的验证码

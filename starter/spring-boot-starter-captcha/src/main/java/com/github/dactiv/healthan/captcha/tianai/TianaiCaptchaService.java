@@ -171,7 +171,7 @@ public class TianaiCaptchaService extends AbstractCaptchaService<TianaiRequestBo
     public RestResult<Object> clientVerify(ImageCaptchaTrack imageCaptchaTrack, String token) {
         InterceptToken interceptToken = createInterceptToken(token);
         SimpleCaptcha captcha = getCaptchaStorageManager().getCaptcha(interceptToken);
-        //SimpleCaptcha captcha = bucket.getAndDelete();
+        getCaptchaStorageManager().deleteCaptcha(interceptToken);
 
         try {
             Assert.notNull(captcha, "验证内容已过期");
@@ -182,16 +182,10 @@ public class TianaiCaptchaService extends AbstractCaptchaService<TianaiRequestBo
 
                 String value = Casts.writeValueAsString(imageCaptchaTrack);
                 captcha.setValue(value);
-                getCaptchaStorageManager().saveCaptcha(captcha);
-                /*if (Objects.nonNull(captcha.getExpireTime())) {
-                    TimeProperties time = captcha.getExpireTime();
-                    bucket.setAsync(captcha, time.getValue(), time.getUnit());
-                } else {
-                    bucket.setAsync(captcha);
-                }*/
+                getCaptchaStorageManager().saveCaptcha(captcha, interceptToken);
 
                 long useTime = imageCaptchaTrack.getEndSlidingTime().getTime() - imageCaptchaTrack.getStartSlidingTime().getTime();
-                return RestResult.ofSuccess("校验成功, 本次使用 " + useTime / 1000 + " 秒", (Object)DigestUtils.md5DigestAsHex(captcha.getValue().getBytes()));
+                return RestResult.ofSuccess("校验成功, 本次使用 " + useTime / 1000 + " 秒", DigestUtils.md5DigestAsHex(captcha.getValue().getBytes()));
             }
             return RestResult.of(response.getMsg(), HttpStatus.OK.value(), ErrorCodeException.DEFAULT_EXCEPTION_CODE);
         } catch (Exception e) {

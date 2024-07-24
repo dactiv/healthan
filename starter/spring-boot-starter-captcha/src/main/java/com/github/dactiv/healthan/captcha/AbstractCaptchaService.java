@@ -304,7 +304,7 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
 
         SimpleCaptcha captcha = createMatchCaptcha(result.getMatchValue(), request, buildToken, requestBody);
 
-        captchaStorageManager.saveCaptcha(captcha);
+        captchaStorageManager.saveCaptcha(captcha, buildToken);
 
         return result.getResult();
     }
