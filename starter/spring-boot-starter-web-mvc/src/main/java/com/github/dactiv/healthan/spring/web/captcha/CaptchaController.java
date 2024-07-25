@@ -1,4 +1,4 @@
-package com.github.dactiv.healthan.captcha.controller;
+package com.github.dactiv.healthan.spring.web.captcha;
 
 import cloud.tianai.captcha.validator.common.model.dto.ImageCaptchaTrack;
 import com.github.dactiv.healthan.captcha.CaptchaProperties;
@@ -16,7 +16,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +30,6 @@ import java.util.Objects;
  *
  * @author maurice.chen
  */
-@Controller
 @RequestMapping(CaptchaController.CONTROLLER_NAME)
 public class CaptchaController {
 
@@ -73,7 +71,6 @@ public class CaptchaController {
     public BuildToken generateToken(@RequestParam(required = false) String type,
                                     @RequestParam(required = false) String deviceIdentified,
                                     HttpServletRequest request) {
-
 
         if (StringUtils.isBlank(deviceIdentified)) {
             deviceIdentified = SpringMvcUtils.getDeviceIdentified();

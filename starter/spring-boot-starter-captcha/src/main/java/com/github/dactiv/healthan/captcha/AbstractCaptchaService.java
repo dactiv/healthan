@@ -27,6 +27,7 @@ import org.springframework.web.bind.WebDataBinder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -65,9 +66,12 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
     private CaptchaStorageManager captchaStorageManager;
 
     public AbstractCaptchaService() {
-
-        ParameterizedType type = Casts.cast(this.getClass().getGenericSuperclass(), ParameterizedType.class);
-        this.requestBodyClass = Casts.cast(type.getActualTypeArguments()[0]);
+        Type type = this.getClass().getGenericSuperclass();
+        while (!(type instanceof ParameterizedType)) {
+            type = ((Class)type).getGenericSuperclass();
+        }
+        ParameterizedType parameterizedType = Casts.cast(type, ParameterizedType.class);
+        this.requestBodyClass = Casts.cast(parameterizedType.getActualTypeArguments()[0]);
     }
 
     public CaptchaProperties getCaptchaProperties() {

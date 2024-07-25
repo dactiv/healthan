@@ -21,7 +21,6 @@ import com.github.dactiv.healthan.captcha.AbstractCaptchaService;
 import com.github.dactiv.healthan.captcha.CaptchaProperties;
 import com.github.dactiv.healthan.captcha.GenerateCaptchaResult;
 import com.github.dactiv.healthan.captcha.SimpleCaptcha;
-import com.github.dactiv.healthan.captcha.controller.CaptchaController;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.captcha.storage.CaptchaStorageManager;
 import com.github.dactiv.healthan.captcha.tianai.body.TianaiRequestBody;
@@ -35,12 +34,10 @@ import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.CaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.env.RandomValuePropertySource;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
 import org.springframework.validation.Validator;
@@ -131,13 +128,8 @@ public class TianaiCaptchaService extends AbstractCaptchaService<TianaiRequestBo
     @Override
     protected Map<String, Object> createGenerateArgs() {
         Map<String, Object> result = new LinkedHashMap<>();
-        String url = tianaiCaptchaProperties.getApiBaseUrl()
-                + AntPathMatcher.DEFAULT_PATH_SEPARATOR
-                + CaptchaController.CONTROLLER_NAME
-                + AntPathMatcher.DEFAULT_PATH_SEPARATOR
-                + TianaiCaptchaProperties.JS_CONTROLLER;
 
-        result.put(TianaiCaptchaProperties.JS_URL_KEY, url);
+        result.put(TianaiCaptchaProperties.JS_URL_KEY, tianaiCaptchaProperties.getJsPath());
 
         return result;
     }
@@ -216,7 +208,7 @@ public class TianaiCaptchaService extends AbstractCaptchaService<TianaiRequestBo
         // 这个map数据应该存到缓存中，校验的时候需要用到该数据
         Map<String, Object> map = imageCaptchaValidator.generateImageCaptchaValidData(imageCaptchaInfo);
 
-        imageCaptchaInfo.setType(CaseUtils.toCamelCase(imageCaptchaInfo.getType(), false, Casts.UNDERSCORE.toCharArray()));
+        //imageCaptchaInfo.setType(CaseUtils.toCamelCase(imageCaptchaInfo.getType(), false, Casts.UNDERSCORE.toCharArray()));
         Map<String, Object> body = Casts.convertValue(imageCaptchaInfo, Casts.MAP_TYPE_REFERENCE);
 
         return GenerateCaptchaResult.of(body, Casts.writeValueAsString(map));

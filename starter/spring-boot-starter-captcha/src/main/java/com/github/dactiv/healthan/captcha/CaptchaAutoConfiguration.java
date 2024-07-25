@@ -1,7 +1,6 @@
 package com.github.dactiv.healthan.captcha;
 
 
-import com.github.dactiv.healthan.captcha.controller.CaptchaController;
 import com.github.dactiv.healthan.captcha.filter.CaptchaVerificationFilter;
 import com.github.dactiv.healthan.captcha.filter.CaptchaVerificationInterceptor;
 import com.github.dactiv.healthan.captcha.filter.CaptchaVerificationService;
@@ -22,7 +21,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.validation.Validator;
 
 import java.util.stream.Collectors;
@@ -47,16 +45,6 @@ public class CaptchaAutoConfiguration {
     @ConditionalOnMissingBean(DelegateCaptchaService.class)
     public DelegateCaptchaService delegateCaptchaService(ObjectProvider<CaptchaService> captchaServices) {
         return  new DelegateCaptchaService(captchaServices.stream().collect(Collectors.toList()));
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "healthan.captcha.controller", value = "enabled", matchIfMissing = true)
-    public CaptchaController captchaController(@Lazy Interceptor interceptor,
-                                               CaptchaProperties captchaProperties,
-                                               TianaiCaptchaService captchaService,
-                                               ResourceLoader resourceLoader,
-                                               DelegateCaptchaService delegateCaptchaService) {
-        return new CaptchaController(delegateCaptchaService, interceptor, resourceLoader, captchaProperties, captchaService);
     }
 
     @Bean
