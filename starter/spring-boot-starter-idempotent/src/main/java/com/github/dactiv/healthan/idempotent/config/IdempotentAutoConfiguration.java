@@ -4,11 +4,11 @@ import com.github.dactiv.healthan.idempotent.advisor.IdempotentInterceptor;
 import com.github.dactiv.healthan.idempotent.advisor.IdempotentPointcutAdvisor;
 import com.github.dactiv.healthan.idempotent.advisor.concurrent.ConcurrentInterceptor;
 import com.github.dactiv.healthan.idempotent.advisor.concurrent.ConcurrentPointcutAdvisor;
-import com.github.dactiv.healthan.idempotent.exception.IdempotentErrorResultResolver;
 import com.github.dactiv.healthan.idempotent.generator.SpelExpressionValueGenerator;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
  * @author maurice.chen
  */
 @Configuration
+@ConditionalOnBean(RedissonClient.class)
 @AutoConfigureAfter(RedissonAutoConfiguration.class)
 @EnableConfigurationProperties(IdempotentProperties.class)
 @ConditionalOnProperty(prefix = "healthan.idempotent", value = "enabled", matchIfMissing = true)
@@ -53,11 +54,6 @@ public class IdempotentAutoConfiguration {
     @Bean
     IdempotentPointcutAdvisor idempotentPointcutAdvisor(IdempotentInterceptor idempotentInterceptor) {
         return new IdempotentPointcutAdvisor(idempotentInterceptor);
-    }
-
-    @Bean
-    IdempotentErrorResultResolver idempotentErrorResultResolver() {
-        return new IdempotentErrorResultResolver();
     }
 
 }

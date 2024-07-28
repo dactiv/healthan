@@ -27,6 +27,7 @@ import com.github.dactiv.healthan.spring.web.result.RestResultErrorAttributes;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import com.github.dactiv.healthan.spring.web.result.error.support.BindingResultErrorResultResolver;
 import com.github.dactiv.healthan.spring.web.result.error.support.ErrorCodeResultResolver;
+import com.github.dactiv.healthan.spring.web.result.error.support.IdempotentErrorResultResolver;
 import com.github.dactiv.healthan.spring.web.result.error.support.MissingServletRequestParameterResolver;
 import com.github.dactiv.healthan.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.healthan.spring.web.result.filter.FilterResultSerializerProvider;
@@ -118,6 +119,11 @@ public class SpringWebMvcAutoConfiguration {
     @Bean
     public MissingServletRequestParameterResolver missingServletRequestParameterResolver() {
         return new MissingServletRequestParameterResolver(MissingServletRequestParameterResolver.DEFAULT_OBJECT_NAME);
+    }
+
+    @Bean
+    public IdempotentErrorResultResolver idempotentErrorResultResolver() {
+        return new IdempotentErrorResultResolver();
     }
 
     @Bean

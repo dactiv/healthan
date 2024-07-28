@@ -1,7 +1,8 @@
-package com.github.dactiv.healthan.idempotent.exception;
+package com.github.dactiv.healthan.spring.web.result.error.support;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
+import com.github.dactiv.healthan.idempotent.exception.IdempotentException;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import org.springframework.http.HttpStatus;
 

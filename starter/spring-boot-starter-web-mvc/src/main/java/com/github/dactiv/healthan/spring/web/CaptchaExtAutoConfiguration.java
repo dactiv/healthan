@@ -12,6 +12,7 @@ import com.github.dactiv.healthan.spring.web.captcha.ControllerTianaiCaptchaServ
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +38,8 @@ public class CaptchaExtAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "healthan.captcha.controller", value = "enabled", matchIfMissing = true)
+    @ConditionalOnMissingBean(TianaiCaptchaService.class)
+    @ConditionalOnProperty(prefix = "healthan.captcha", value = "enabled", matchIfMissing = true)
     public ControllerTianaiCaptchaService controllerTianaiCaptchaService(CaptchaProperties captchaProperties,
                                                                          @Qualifier("mvcValidator") Validator validator,
                                                                          @Lazy Interceptor interceptor,
