@@ -327,7 +327,7 @@ public class MinioTemplate {
             Iterable<Result<DeleteError>> results = minioClient.removeObjects(removeObjectsArgs);
             for (Result<DeleteError>  result : results) {
                 DeleteError error = result.get();
-                LOGGER.warn("Error in deleting object " + error.objectName() + "; " + error.message());
+                LOGGER.warn("Error in deleting object {}; {}", error.objectName(), error.message());
             }
         } else {
 
@@ -834,9 +834,7 @@ public class MinioTemplate {
             statObjectArgs.matchETag(matchEtag);
         }
 
-        /*if (StringUtils.isNotEmpty(notMatchEtag)) {
-            statObjectArgs.notMatchETag(notMatchEtag);
-        }*/
+
         if (MapUtils.isNotEmpty(headers)) {
             statObjectArgs.extraHeaders(headers);
         }

@@ -76,7 +76,7 @@ public class IpAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return ;
         } else if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(request.getRequestURI() + " 只允许: " + ips + " 的 ip 才能访问，当前 ip 为: " + remoteIp);
+            LOGGER.debug("{} 只允许: {} 的 ip 才能访问，当前 ip 为: {}", request.getRequestURI(), ips, remoteIp);
         }
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());

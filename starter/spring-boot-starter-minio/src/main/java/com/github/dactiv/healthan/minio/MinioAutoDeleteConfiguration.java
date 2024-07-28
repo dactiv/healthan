@@ -57,7 +57,7 @@ public class MinioAutoDeleteConfiguration implements SchedulingConfigurer {
                 TimeProperties time = bucket.getExpirationTime();
 
                 if (Objects.isNull(time)) {
-                    LOGGER.warn("找不到 [" + bucket.getBucketName() + "] 桶的自动删除时间配置。");
+                    LOGGER.warn("找不到 [{}] 桶的自动删除时间配置。", bucket.getBucketName());
                     continue;
                 }
 
@@ -86,7 +86,7 @@ public class MinioAutoDeleteConfiguration implements SchedulingConfigurer {
 
                         if (LocalDateTime.now().isAfter(expirationTime)) {
                             minioTemplate.deleteObject(FileObject.of(bucket, item.objectName()));
-                            LOGGER.info("删除桶 [" + bucket.getBucketName() + "] 的 [" + item.objectName() + "] 对象");
+                            LOGGER.info("删除桶 [{}] 的 [{}] 对象", bucket.getBucketName(), item.objectName());
                         }
 
                     } catch (Exception e) {

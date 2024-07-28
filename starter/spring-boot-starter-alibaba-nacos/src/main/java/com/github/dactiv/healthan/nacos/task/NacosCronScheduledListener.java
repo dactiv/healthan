@@ -481,7 +481,7 @@ public class NacosCronScheduledListener implements SchedulingConfigurer, BeanPos
                     try {
                         configReceive(dataId, configInfo);
                     } catch (Exception e) {
-                        LOGGER.error("执行接受配置文件变化[" + dataId + "," + group + "]出错", e);
+                        LOGGER.error("执行接受配置文件变化[{},{}]出错", dataId, group, e);
                     }
                 }
             });

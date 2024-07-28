@@ -130,13 +130,6 @@ public class OAuth2WebSecurityAutoConfiguration {
         return new OidcUserInfoAuthenticationMapper(oidcUserInfoAuthenticationResolvers.orderedStream().collect(Collectors.toList()));
     }
 
-    /*@Bean
-    @ConditionalOnMissingBean(RedissonOAuth2AuthorizationService.class)
-    public RedissonOAuth2AuthorizationService redissonOAuth2AuthorizationService(RedissonClient redissonClient,
-                                                                                 OAuth2Properties oAuth2Properties) {
-        return new RedissonOAuth2AuthorizationService(redissonClient, oAuth2Properties);
-    }*/
-
     @Bean
     @ConditionalOnMissingBean(OAuth2AuthorizationService.class)
     public InMemoryOAuth2AuthorizationService inMemoryOAuth2AuthorizationService() {

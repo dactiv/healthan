@@ -20,8 +20,14 @@ public @interface OperationDataTrace {
     String name();
 
     /**
+     * 获取当事人值的属性名称
      *
-     * @return
+     * <p>
+     * 如：
+     * request 提交的参数或头信息存在 token=test，要获取 token 做 principal 的话，principal 就等于 token
+     * </p>
+     *
+     * @return 当事人值的属性名称
      */
     String principal();
 }

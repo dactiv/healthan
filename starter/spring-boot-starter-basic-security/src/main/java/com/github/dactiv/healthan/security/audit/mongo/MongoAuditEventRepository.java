@@ -70,7 +70,7 @@ public class MongoAuditEventRepository extends AbstractPluginAuditEventRepositor
             String index = indexGenerator.generateIndex(pluginAuditEvent).toLowerCase();
             mongoTemplate.save(pluginAuditEvent, index);
         } catch (Exception e) {
-            LOGGER.error("新增 mongo " + event.getPrincipal() + " 审计事件出现异常", e);
+            LOGGER.error("新增 mongo {} 审计事件出现异常", event.getPrincipal(), e);
         }
 
     }
@@ -108,7 +108,7 @@ public class MongoAuditEventRepository extends AbstractPluginAuditEventRepositor
             List<Map<String, Object>> data = Casts.cast(mongoTemplate.find(query, Map.class, index));
             content = data.stream().map(this::createAuditEvent).collect(Collectors.toList());
         } catch (Exception e) {
-            LOGGER.error("查询集合 [" + index + "] 出现错误", e);
+            LOGGER.error("查询集合 [{}] 出现错误", index, e);
         }
 
         return content;
@@ -124,7 +124,7 @@ public class MongoAuditEventRepository extends AbstractPluginAuditEventRepositor
                 return createAuditEvent(map);
             }
         } catch (Exception e) {
-            LOGGER.error("查询集合 [" + index + "] 出现错误", e);
+            LOGGER.error("查询集合 [{}] 出现错误", index, e);
         }
 
         return null;

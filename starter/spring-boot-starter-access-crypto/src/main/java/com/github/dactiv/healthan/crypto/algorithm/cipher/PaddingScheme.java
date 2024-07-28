@@ -78,7 +78,7 @@ public enum PaddingScheme {
      *
      * @param transformationName Cipher 转型名称
      */
-    private PaddingScheme(String transformationName) {
+    PaddingScheme(String transformationName) {
         this.transformationName = transformationName;
     }
 

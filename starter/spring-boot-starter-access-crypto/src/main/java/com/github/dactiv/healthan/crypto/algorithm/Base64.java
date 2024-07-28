@@ -1,6 +1,8 @@
 
 package com.github.dactiv.healthan.crypto.algorithm;
 
+import java.util.Arrays;
+
 /**
  * Base64 工具类
  *
@@ -89,9 +91,7 @@ public class Base64 {
     // Populating the lookup and character arrays
 
     static {
-        for (int i = 0; i < BASELENGTH; i++) {
-            base64Alphabet[i] = (byte) -1;
-        }
+        Arrays.fill(base64Alphabet, (byte) -1);
         for (int i = 'Z'; i >= 'A'; i--) {
             base64Alphabet[i] = (byte) (i - 'A');
         }
@@ -317,8 +317,7 @@ public class Base64 {
         if (fewerThan24bits == EIGHTBIT) {
             b1 = binaryData[dataIndex];
             k = (byte) (b1 & 0x03);
-            // log.debug("b1=" + b1);
-            // log.debug("b1<<2 = " + (b1>>2) );
+
             byte val1 = ((b1 & SIGN) == 0) ? (byte) (b1 >> 2) : (byte) ((b1) >> 2 ^ 0xc0);
             encodedData[encodedIndex] = lookUpBase64Alphabet[val1];
             encodedData[encodedIndex + 1] = lookUpBase64Alphabet[k << 4];
@@ -404,7 +403,7 @@ public class Base64 {
         }
 
         int numberQuadruple = base64Data.length / FOURBYTE;
-        byte decodedData[];
+        byte[] decodedData;
         byte b1, b2, b3, b4, marker0, marker1;
 
         // Throw away anything not in base64Data

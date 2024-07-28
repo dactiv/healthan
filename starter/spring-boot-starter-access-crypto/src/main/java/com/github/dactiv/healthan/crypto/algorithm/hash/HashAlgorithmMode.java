@@ -33,7 +33,7 @@ public enum HashAlgorithmMode {
      *
      * @param name 算法名称
      */
-    private HashAlgorithmMode(String name) {
+    HashAlgorithmMode(String name) {
         this.name = name;
     }
 

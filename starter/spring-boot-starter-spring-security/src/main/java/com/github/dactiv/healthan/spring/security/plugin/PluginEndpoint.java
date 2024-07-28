@@ -274,7 +274,7 @@ public class PluginEndpoint {
 
         pluginInfoList.addAll(parent.values());
 
-        LOGGER.info("找到" + CACHE.size() + "条记录信息");
+        LOGGER.info("找到{}条记录信息", CACHE.size());
 
         result = TreeUtils.buildTree(pluginInfoList);
 

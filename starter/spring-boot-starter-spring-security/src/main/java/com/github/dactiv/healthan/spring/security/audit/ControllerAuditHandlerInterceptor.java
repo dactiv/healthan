@@ -64,6 +64,7 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             principal = getPrincipal(auditable.principal(), request);
         } else if (Objects.nonNull(operationDataTrace)) {
             type = operationDataTrace.name();
+            principal = getPrincipal(operationDataTrace.principal(), request);
         } else if (Objects.nonNull(plugin) && plugin.operationDataTrace()) {
             type = plugin.name();
             Plugin root = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Plugin.class);

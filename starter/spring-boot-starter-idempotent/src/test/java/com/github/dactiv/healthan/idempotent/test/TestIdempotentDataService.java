@@ -43,7 +43,7 @@ public class TestIdempotentDataService {
                 idempotentDataService.saveEntityExceptionMessage(new Entity("321", 1, null), 4);
                 Assertions.assertEquals(idempotentDataService.getData().get(4).size(), 1);
             } catch (IdempotentException e) {
-                LOGGER.warn("出现 IdempotentException 异常，信息为:" + e.getMessage());
+                LOGGER.warn("出现 IdempotentException 异常，信息为:{}", e.getMessage());
                 Assertions.assertEquals(e.getMessage(), "不要重复提交");
             }
         }

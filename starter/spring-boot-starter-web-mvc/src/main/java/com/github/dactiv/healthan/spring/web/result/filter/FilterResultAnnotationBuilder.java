@@ -130,7 +130,7 @@ public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector
 
                 }
             } catch (Exception e) {
-                LOGGER.warn("加载資源出错，包路径为:" + locationPattern, e);
+                LOGGER.warn("加载資源出错，包路径为:{}", locationPattern, e);
             }
 
         }

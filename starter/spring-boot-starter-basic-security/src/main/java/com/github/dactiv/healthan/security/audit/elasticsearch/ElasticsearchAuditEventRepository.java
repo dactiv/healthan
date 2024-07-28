@@ -97,7 +97,7 @@ public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventR
             elasticsearchOperations.index(indexQuery, indexCoordinates);
 
         } catch (Exception e) {
-            LOGGER.warn("新增 elasticsearch" + event.getPrincipal() + " 审计事件出现异常", e);
+            LOGGER.warn("新增 elasticsearch{} 审计事件出现异常", event.getPrincipal(), e);
         }
 
     }
@@ -188,7 +188,7 @@ public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventR
                 return createAuditEvent(map);
             }
         } catch (Exception e) {
-            LOGGER.warn("通过 ID 查询索引 [" + index + "] 出现错误", e);
+            LOGGER.warn("通过 ID 查询索引 [{}] 出现错误", index, e);
         }
 
         return null;

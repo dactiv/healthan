@@ -352,15 +352,7 @@ public abstract class AbstractJcaCipherService implements CipherService {
         try {
 
             if (AbstractAsymmetricCipherService.class.isAssignableFrom(getClass())) {
-                RSAKey rsaPublicKey = (RSAKey) cipherInfo.getKey();
-                // 如果非对称加密，需要分段加解密，所以先求出分段开大小在做加解密
-                int blockSize = rsaPublicKey.getModulus().bitLength() / AbstractAsymmetricCipherService.DEFAULT_BLOCK_SIZE_MULTIPLE;
-
-                // 如果是加密，keySize <= 1024 时，需要使用128 - 11做块单位
-                if (Cipher.ENCRYPT_MODE == cipherInfo.getMode()) {
-                    // 由于加密时，要求位数必须比明文长度少11位，这里直接减
-                    blockSize = blockSize - AbstractAsymmetricCipherService.DEFAULT_ENCRYPT_ROUNDING_DIGIT;
-                }
+                int blockSize = getBlockSize(cipherInfo);
 
                 // 循环做块的加解密，首次设置的offSet(偏移量)为0. 当文本内容小于 blockSize 时，
                 // 直接 doFinal 完成加解密即可，否则得出每次循环偏移量后，在通偏移量定位每次取值的范围。
@@ -385,6 +377,19 @@ public abstract class AbstractJcaCipherService implements CipherService {
             String msg = "无法执行 " + Cipher.class.getName() + ".doFinal 方法";
             throw new CryptoException(msg, e);
         }
+    }
+
+    private static int getBlockSize(CipherInfo cipherInfo) {
+        RSAKey rsaPublicKey = (RSAKey) cipherInfo.getKey();
+        // 如果非对称加密，需要分段加解密，所以先求出分段开大小在做加解密
+        int blockSize = rsaPublicKey.getModulus().bitLength() / AbstractAsymmetricCipherService.DEFAULT_BLOCK_SIZE_MULTIPLE;
+
+        // 如果是加密，keySize <= 1024 时，需要使用128 - 11做块单位
+        if (Cipher.ENCRYPT_MODE == cipherInfo.getMode()) {
+            // 由于加密时，要求位数必须比明文长度少11位，这里直接减
+            blockSize = blockSize - AbstractAsymmetricCipherService.DEFAULT_ENCRYPT_ROUNDING_DIGIT;
+        }
+        return blockSize;
     }
 
     /**

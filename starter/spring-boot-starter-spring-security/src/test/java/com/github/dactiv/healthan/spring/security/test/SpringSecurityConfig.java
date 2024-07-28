@@ -181,6 +181,12 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
             redirectUri = null;        // Prevent redirects
         }
 
+        OAuth2AuthorizationCodeRequestAuthenticationToken token = getAuthorizationCodeRequestAuthenticationToken(authorizationCodeRequestAuthentication, redirectUri);
+
+        throw new OAuth2AuthorizationCodeRequestAuthenticationException(error, token);
+    }
+
+    private static OAuth2AuthorizationCodeRequestAuthenticationToken getAuthorizationCodeRequestAuthenticationToken(OAuth2AuthorizationCodeRequestAuthenticationToken authorizationCodeRequestAuthentication, String redirectUri) {
         OAuth2AuthorizationCodeRequestAuthenticationToken authorizationCodeRequestAuthenticationResult =
                 new OAuth2AuthorizationCodeRequestAuthenticationToken(
                         authorizationCodeRequestAuthentication.getAuthorizationUri(), authorizationCodeRequestAuthentication.getClientId(),
@@ -188,8 +194,7 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                         authorizationCodeRequestAuthentication.getState(), authorizationCodeRequestAuthentication.getScopes(),
                         authorizationCodeRequestAuthentication.getAdditionalParameters());
         authorizationCodeRequestAuthenticationResult.setAuthenticated(true);
-
-        throw new OAuth2AuthorizationCodeRequestAuthenticationException(error, authorizationCodeRequestAuthenticationResult);
+        return authorizationCodeRequestAuthenticationResult;
     }
 
     @Override

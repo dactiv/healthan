@@ -8,6 +8,7 @@ import com.github.dactiv.healthan.crypto.algorithm.CodecUtils;
 import com.github.dactiv.healthan.crypto.algorithm.SimpleByteSource;
 import com.github.dactiv.healthan.crypto.algorithm.exception.CodecException;
 import com.github.dactiv.healthan.crypto.algorithm.exception.UnknownAlgorithmException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
@@ -91,7 +92,7 @@ public class Hash extends AbstractByteSource implements Serializable {
      * @param hashIterations hash 迭代次数
      */
     public Hash(String algorithmName, Object source, Object salt, int hashIterations) {
-        if (algorithmName == null || "".equals(algorithmName.trim())) {
+        if (StringUtils.isEmpty(algorithmName)) {
             throw new IllegalArgumentException("算法参数不能空");
         }
         this.algorithmName = algorithmName;

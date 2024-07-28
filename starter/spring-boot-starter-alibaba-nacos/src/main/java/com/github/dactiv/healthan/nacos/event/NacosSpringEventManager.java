@@ -107,7 +107,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
             }
             try {
 
-                LOGGER.info("对服务 [" + sel.getService().getName() + "] 取消订阅");
+                LOGGER.info("对服务 [{}] 取消订阅", sel.getService().getName());
 
                 namingService.unsubscribe(sel.getService().getName(), sel.getService().getGroupName(), sel);
 
@@ -116,7 +116,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
 
                 applicationEventPublisher.publishEvent(new NacosServiceUnsubscribeEvent(sel.getService()));
             } catch (Exception e) {
-                LOGGER.error("取消订阅 [" + sel.getService().getName() + "] 服务失败", e);
+                LOGGER.error("取消订阅 [{}] 服务失败", sel.getService().getName(), e);
             }
         }
     }
@@ -162,7 +162,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
                     optional.get().setLastAccessTime(new Date());
 
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("[" + s + "] 服务已订阅，更新创建时间。");
+                        LOGGER.debug("[{}] 服务已订阅，更新创建时间。", s);
                     }
 
                     continue;
@@ -201,7 +201,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
                 // 添加到缓存中
                 listeners.add(listener);
 
-                LOGGER.info("订阅组为 [" + service.getGroupName() + "] 的 [" + s + "] 服务");
+                LOGGER.info("订阅组为 [{}] 的 [{}] 服务", service.getGroupName(), s);
                 // 订阅服务
                 namingService.subscribe(service.getName(), service.getGroupName(), listener);
                 // 推送订阅事件

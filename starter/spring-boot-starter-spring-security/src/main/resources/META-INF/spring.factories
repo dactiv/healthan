@@ -1,6 +1,6 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.github.dactiv.healthan.spring.security.FeignSpringSecurityAutoConfiguration,\
-com.github.dactiv.healthan.spring.security.RedissonCacheManagerAutoConfiguration,\
+com.github.dactiv.healthan.spring.security.RedissonOperationAutoConfiguration,\
 com.github.dactiv.healthan.spring.security.SpringSecurityAutoConfiguration,\
 com.github.dactiv.healthan.spring.security.OAuth2WebSecurityAutoConfiguration,\
 com.github.dactiv.healthan.spring.security.DefaultWebSecurityAutoConfiguration,\
