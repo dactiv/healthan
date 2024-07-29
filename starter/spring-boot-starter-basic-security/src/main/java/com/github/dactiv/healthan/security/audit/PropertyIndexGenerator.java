@@ -1,7 +1,6 @@
 package com.github.dactiv.healthan.security.audit;
 
 import com.github.dactiv.healthan.commons.ReflectionUtils;
-import com.github.dactiv.healthan.security.audit.elasticsearch.index.IndexGenerator;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 

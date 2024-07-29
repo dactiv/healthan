@@ -1,8 +1,7 @@
-package com.github.dactiv.healthan.security.audit.elasticsearch.index.support;
+package com.github.dactiv.healthan.security.audit;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.exception.SystemException;
-import com.github.dactiv.healthan.security.audit.PropertyIndexGenerator;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;

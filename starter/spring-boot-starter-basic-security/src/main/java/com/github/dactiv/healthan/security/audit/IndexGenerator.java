@@ -1,4 +1,4 @@
-package com.github.dactiv.healthan.security.audit.elasticsearch.index;
+package com.github.dactiv.healthan.security.audit;
 
 /**
  * 索引生成器
