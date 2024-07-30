@@ -87,11 +87,10 @@ public class RedissonCacheManager implements CacheManager {
         }
 
         AuthenticationSuccessToken authenticationToken = Casts.cast(context);
-        SecurityPrincipal securityPrincipal = Casts.cast(authenticationToken.getPrincipal());
 
         RBucket<SecurityContext> bucket = getSecurityContextBucket(
                 authenticationToken.getPrincipalType(),
-                securityPrincipal.getId(),
+                authenticationToken.getSecurityPrincipal().getId(),
                 accessTokenCache
         );
         bucket.expireAsync(timeProperties.toDuration());
@@ -101,10 +100,10 @@ public class RedissonCacheManager implements CacheManager {
     public void saveSecurityContext(SecurityContext context, CacheProperties accessTokenCache) {
 
         AuthenticationSuccessToken authenticationToken = Casts.cast(context);
-        SecurityPrincipal securityPrincipal = Casts.cast(authenticationToken.getPrincipal());
+        //SecurityPrincipal securityPrincipal = Casts.cast(authenticationToken.getPrincipal());
         RBucket<SecurityContext> bucket = getSecurityContextBucket(
                 authenticationToken.getPrincipalType(),
-                securityPrincipal.getId(),
+                authenticationToken.getSecurityPrincipal().getId(),
                 accessTokenCache
         );
 

@@ -9,7 +9,7 @@ import com.github.dactiv.healthan.crypto.algorithm.Base64;
 import com.github.dactiv.healthan.crypto.algorithm.ByteSource;
 import com.github.dactiv.healthan.crypto.algorithm.cipher.CipherService;
 import com.github.dactiv.healthan.crypto.algorithm.exception.CryptoException;
-import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
+import com.github.dactiv.healthan.security.audit.IdAuditEvent;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
@@ -36,6 +36,7 @@ import org.springframework.web.util.WebUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.Charset;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -113,7 +114,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 return null;
             }
 
-            String type = plaintextUserDetail.getOrDefault(PluginAuditEvent.TYPE_FIELD_NAME, StringUtils.EMPTY).toString();
+            String type = plaintextUserDetail.getOrDefault(IdAuditEvent.TYPE_FIELD_NAME, StringUtils.EMPTY).toString();
             Object id = plaintextUserDetail.getOrDefault(IdEntity.ID_FIELD_NAME, StringUtils.EMPTY).toString();
             SecurityContext context = cacheManager.getSecurityContext(
                     type,
@@ -148,7 +149,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
                 return null;
             }
 
-            SecurityPrincipal principal = Casts.cast(authenticationToken.getPrincipal());
+            SecurityPrincipal principal = authenticationToken.getSecurityPrincipal();
             if (principal instanceof MobileSecurityPrincipal) {
                 MobileSecurityPrincipal mobileSecurityPrincipal = Casts.cast(principal);
                 Object deviceIdentified = plaintextUserDetail.get(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME);
@@ -180,11 +181,14 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
     }
 
     public String generateCiphertext(AuthenticationSuccessToken token, String aesKey) {
-        Map<String, Object> json = Casts.convertValue(token.toTypeUserDetails(), Casts.MAP_TYPE_REFERENCE);
+        Map<String, Object> json = new LinkedHashMap<>();
 
         json.put(NumberIdEntity.CREATION_TIME_FIELD_NAME, System.currentTimeMillis());
+        json.put(IdAuditEvent.TYPE_FIELD_NAME, token.getPrincipalType());
+        json.put(IdEntity.ID_FIELD_NAME, token.getSecurityPrincipal().getId());
+        json.put(AuthenticationProperties.SECURITY_FORM_USERNAME_PARAM_NAME, token.getSecurityPrincipal().getUsername());
 
-        if (token.getPrincipal() instanceof MobileSecurityPrincipal) {
+        if (token.getSecurityPrincipal() instanceof MobileSecurityPrincipal) {
             MobileSecurityPrincipal mobileSecurityPrincipal = Casts.cast(token.getPrincipal());
             json.put(DeviceUtils.REQUEST_DEVICE_IDENTIFIED_PARAM_NAME, mobileSecurityPrincipal.getDeviceIdentified());
         }

@@ -2,7 +2,7 @@ package com.github.dactiv.healthan.security.test.audit;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.id.StringIdEntity;
-import com.github.dactiv.healthan.security.audit.PluginAuditEvent;
+import com.github.dactiv.healthan.security.audit.IdAuditEvent;
 import com.github.dactiv.healthan.security.audit.elasticsearch.ElasticsearchAuditEventRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -46,13 +46,13 @@ public class TestElasticsearchAuditEventRepository {
         map.put("data",date);
 
 
-        auditEventRepository.add(new PluginAuditEvent("admin", "test", map));
+        auditEventRepository.add(new IdAuditEvent("admin", "test", map));
         Thread.sleep(5000);
         List<AuditEvent> auditEvents = auditEventRepository.find("admin", instant, null);
 
         Assertions.assertEquals(before + 1, auditEvents.size());
 
-        PluginAuditEvent target = Casts.cast(auditEvents.iterator().next());
+        IdAuditEvent target = Casts.cast(auditEvents.iterator().next());
 
         StringIdEntity id = new StringIdEntity();
         id.setId(target.getId());

@@ -3,7 +3,6 @@ package com.github.dactiv.healthan.spring.security.controller;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
-import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.AccessToken;
@@ -83,10 +82,9 @@ public class TokenController {
                 "刷新令牌匹配不正确"
         );
 
-        SecurityPrincipal principal = Casts.cast(authenticationToken.getPrincipal());
         SecurityContext context = cacheManager.getSecurityContext(
                 authenticationToken.getPrincipalType(),
-                principal.getId(),
+                authenticationToken.getSecurityPrincipal().getId(),
                 accessTokenProperties.getAccessTokenCache()
         );
         if (Objects.isNull(context)) {

@@ -3,7 +3,7 @@ package com.github.dactiv.healthan.security.audit.mongo;
 import com.github.dactiv.healthan.security.AuditConfiguration;
 import com.github.dactiv.healthan.security.AuditProperties;
 import com.github.dactiv.healthan.security.audit.AuditEventRepositoryInterceptor;
-import com.github.dactiv.healthan.security.audit.PluginAuditEventRepository;
+import com.github.dactiv.healthan.security.audit.ExtendAuditEventRepository;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class MongoAuditConfiguration {
 
     @Bean
-    public PluginAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
+    public ExtendAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
                                                            ObjectProvider<AuditEventRepositoryInterceptor> interceptors) {
 
         return new MongoAuditEventRepository(

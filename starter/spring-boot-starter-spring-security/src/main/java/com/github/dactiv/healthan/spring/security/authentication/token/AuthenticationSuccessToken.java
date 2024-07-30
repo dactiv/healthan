@@ -1,11 +1,9 @@
 package com.github.dactiv.healthan.spring.security.authentication.token;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.dactiv.healthan.commons.CacheProperties;
-import com.github.dactiv.healthan.commons.Casts;
+import com.github.dactiv.healthan.security.audit.IdAuditEvent;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
-import com.github.dactiv.healthan.security.entity.TypePrincipal;
-import com.github.dactiv.healthan.security.entity.support.SimpleSecurityPrincipal;
-import com.github.dactiv.healthan.security.entity.support.SimpleTypePrincipal;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -81,22 +79,17 @@ public class AuthenticationSuccessToken extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
+        return getSecurityPrincipal();
+    }
+
+    @JsonIgnore
+    public SecurityPrincipal getSecurityPrincipal() {
         return principal;
     }
 
     @Override
     public String getName() {
         return getPrincipalType() + CacheProperties.DEFAULT_SEPARATOR + principal.getName();
-    }
-
-    /**
-     * 获取用户基本信息
-     *
-     * @return 用户基本信息
-     *
-     */
-    public <T> TypePrincipal<T> toTypeUserDetails() {
-        return new SimpleTypePrincipal<>(Casts.cast(principal.getId()), principal.getUsername(), getPrincipalType());
     }
 
     /**
@@ -153,8 +146,8 @@ public class AuthenticationSuccessToken extends AbstractAuthenticationToken {
      */
     public Map<String, Object> toMap(boolean loadAuthorities) {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put(SimpleTypePrincipal.TYPE_FIELD_NAME, getPrincipalType());
-        map.put(PRINCIPAL_KEY, Casts.of(getPrincipal(), SimpleSecurityPrincipal.class));
+        map.put(IdAuditEvent.TYPE_FIELD_NAME, getPrincipalType());
+        map.put(PRINCIPAL_KEY, getPrincipal());
         map.put(DETAILS_KEY, getDetails());
 
         if (loadAuthorities) {

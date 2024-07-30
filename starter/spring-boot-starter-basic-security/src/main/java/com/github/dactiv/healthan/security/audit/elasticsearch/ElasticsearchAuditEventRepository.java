@@ -2,13 +2,11 @@ package com.github.dactiv.healthan.security.audit.elasticsearch;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
-import com.github.dactiv.healthan.commons.id.IdEntity;
 import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.commons.page.Page;
 import com.github.dactiv.healthan.commons.page.PageRequest;
 import com.github.dactiv.healthan.security.audit.*;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -39,7 +37,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventRepository {
+public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventRepository {
 
     public static final String MAPPING_FILE_PATH = "elasticsearch/plugin-audit-mapping.json";
 
@@ -67,27 +65,27 @@ public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventR
     @Override
     public void doAdd(AuditEvent event) {
 
-        PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(
+        IdAuditEvent idAuditEvent = new IdAuditEvent(
                 event.getPrincipal(),
                 event.getType(),
                 event.getData()
         );
 
-        if (PluginAuditEvent.class.isAssignableFrom(event.getClass())) {
-            pluginAuditEvent = Casts.cast(event);
+        if (IdAuditEvent.class.isAssignableFrom(event.getClass())) {
+            idAuditEvent = Casts.cast(event);
         }
 
         try {
 
-            String index = indexGenerator.generateIndex(pluginAuditEvent).toLowerCase();
+            String index = indexGenerator.generateIndex(idAuditEvent).toLowerCase();
 
             IndexCoordinates indexCoordinates = IndexCoordinates.of(index);
             IndexOperations indexOperations = elasticsearchOperations.indexOps(indexCoordinates);
             createIndexIfNotExists(indexOperations, MAPPING_FILE_PATH);
 
             IndexQuery indexQuery = new IndexQueryBuilder()
-                    .withId(pluginAuditEvent.getId())
-                    .withObject(pluginAuditEvent)
+                    .withId(idAuditEvent.getId())
+                    .withObject(idAuditEvent)
                     .build();
 
             elasticsearchOperations.index(indexQuery, indexCoordinates);
@@ -126,10 +124,9 @@ public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventR
         try {
 
             return elasticsearchOperations
-                    .search(builder.build(), Map.class, IndexCoordinates.of(index))
+                    .search(builder.build(), IdAuditEvent.class, IndexCoordinates.of(index))
                     .stream()
                     .map(SearchHit::getContent)
-                    .map(o -> this.createPluginAuditEvent(Casts.cast(o)))
                     .collect(Collectors.toCollection(LinkedList::new));
         } catch (Exception e) {
             LOGGER.warn("查询 elasticsearch 审计事件出现异常", e);
@@ -152,11 +149,10 @@ public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventR
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
         try {
-            List<PluginAuditEvent> content = elasticsearchOperations
-                    .search(builder.build(), Map.class, IndexCoordinates.of(index))
+            List<IdAuditEvent> content = elasticsearchOperations
+                    .search(builder.build(), IdAuditEvent.class, IndexCoordinates.of(index))
                     .stream()
                     .map(SearchHit::getContent)
-                    .map(o -> this.createPluginAuditEvent(Casts.cast(o)))
                     .collect(Collectors.toCollection(LinkedList::new));
 
             return new Page<>(pageRequest, new ArrayList<>(content));
@@ -167,22 +163,11 @@ public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventR
     }
 
     @Override
-    public AuditEvent createAuditEvent(Map<String, Object> map) {
-        PluginAuditEvent pluginAuditEvent = Casts.cast(super.createAuditEvent(map));
-        pluginAuditEvent.setId(map.get(IdEntity.ID_FIELD_NAME).toString());
-        return pluginAuditEvent;
-    }
-
-    @Override
     public AuditEvent get(StringIdEntity idEntity) {
 
         String index = indexGenerator.generateIndex(idEntity).toLowerCase();
         try {
-            //noinspection unchecked
-            Map<String, Object> map = elasticsearchOperations.get(idEntity.getId(), Map.class, IndexCoordinates.of(index));
-            if (MapUtils.isNotEmpty(map)) {
-                return createAuditEvent(map);
-            }
+            return elasticsearchOperations.get(idEntity.getId(), IdAuditEvent.class, IndexCoordinates.of(index));
         } catch (Exception e) {
             LOGGER.warn("通过 ID 查询索引 [{}] 出现错误", index, e);
         }
@@ -194,22 +179,6 @@ public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventR
         StringIdEntity id = new StringIdEntity();
         id.setCreationTime(java.sql.Date.from(instant));
         return indexGenerator.generateIndex(id).toLowerCase();
-    }
-
-    /**
-     * 创建插件审计事件
-     *
-     * @param map map 数据源
-     *
-     * @return 插件审计事件
-     */
-    public PluginAuditEvent createPluginAuditEvent(Map<String, Object> map) {
-        AuditEvent auditEvent = createAuditEvent(map);
-
-        PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(auditEvent);
-        pluginAuditEvent.setId(map.get(IdEntity.ID_FIELD_NAME).toString());
-
-        return pluginAuditEvent;
     }
 
     /**
@@ -225,7 +194,7 @@ public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventR
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 
         if (StringUtils.isNotBlank(type)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(PluginAuditEvent.TYPE_FIELD_NAME, type));
+            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(IdAuditEvent.TYPE_FIELD_NAME, type));
         }
 
         if (Objects.nonNull(after)) {
@@ -233,7 +202,7 @@ public class ElasticsearchAuditEventRepository extends AbstractPluginAuditEventR
         }
 
         if (StringUtils.isNotBlank(principal)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(PluginAuditEvent.PRINCIPAL_FIELD_NAME, principal));
+            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(IdAuditEvent.PRINCIPAL_FIELD_NAME, principal));
         }
 
         return queryBuilder;

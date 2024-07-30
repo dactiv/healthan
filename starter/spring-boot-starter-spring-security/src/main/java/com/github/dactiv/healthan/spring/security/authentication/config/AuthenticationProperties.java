@@ -2,7 +2,6 @@ package com.github.dactiv.healthan.spring.security.authentication.config;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.TimeProperties;
-import com.github.dactiv.healthan.security.entity.support.SimpleTypePrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -38,7 +37,7 @@ public class AuthenticationProperties {
     /**
      * 默认的登陆账户参数名
      */
-    public static final String SECURITY_FORM_USERNAME_PARAM_NAME = SimpleTypePrincipal.NAME_FIELD_NAME;
+    public static final String SECURITY_FORM_USERNAME_PARAM_NAME = "username";
     /**
      * 默认的登陆密码参数名
      */

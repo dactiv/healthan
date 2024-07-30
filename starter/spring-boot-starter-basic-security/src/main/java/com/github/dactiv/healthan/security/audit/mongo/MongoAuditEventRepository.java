@@ -7,7 +7,6 @@ import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.commons.page.Page;
 import com.github.dactiv.healthan.commons.page.PageRequest;
 import com.github.dactiv.healthan.security.audit.*;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +19,17 @@ import org.springframework.util.Assert;
 
 import java.sql.Date;
 import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * mongo 审计事件仓库实现
  *
  * @author maurice.chen
  */
-public class MongoAuditEventRepository extends AbstractPluginAuditEventRepository {
+public class MongoAuditEventRepository extends AbstractExtendAuditEventRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoAuditEventRepository.class);
 
@@ -56,15 +57,15 @@ public class MongoAuditEventRepository extends AbstractPluginAuditEventRepositor
     @Override
     public void doAdd(AuditEvent event) {
 
-        PluginAuditEvent pluginAuditEvent = new PluginAuditEvent(event);
+        IdAuditEvent idAuditEvent = new IdAuditEvent(event);
 
-        if (PluginAuditEvent.class.isAssignableFrom(event.getClass())) {
-            pluginAuditEvent = Casts.cast(event);
+        if (IdAuditEvent.class.isAssignableFrom(event.getClass())) {
+            idAuditEvent = Casts.cast(event);
         }
 
         try {
-            String index = indexGenerator.generateIndex(pluginAuditEvent).toLowerCase();
-            mongoTemplate.save(pluginAuditEvent, index);
+            String index = indexGenerator.generateIndex(idAuditEvent).toLowerCase();
+            mongoTemplate.save(idAuditEvent, index);
         } catch (Exception e) {
             LOGGER.error("新增 mongo {} 审计事件出现异常", event.getPrincipal(), e);
         }
@@ -101,8 +102,7 @@ public class MongoAuditEventRepository extends AbstractPluginAuditEventRepositor
     private List<AuditEvent> findData(String index, Query query) {
         List<AuditEvent> content = new LinkedList<>();
         try {
-            List<Map<String, Object>> data = Casts.cast(mongoTemplate.find(query, Map.class, index));
-            content = data.stream().map(this::createAuditEvent).collect(Collectors.toList());
+            content = new LinkedList<>(mongoTemplate.find(query, IdAuditEvent.class, index));
         } catch (Exception e) {
             LOGGER.error("查询集合 [{}] 出现错误", index, e);
         }
@@ -115,23 +115,12 @@ public class MongoAuditEventRepository extends AbstractPluginAuditEventRepositor
         String index = indexGenerator.generateIndex(idEntity).toLowerCase();
 
         try {
-            Map<String, Object> map = Casts.cast(mongoTemplate.findById(idEntity.getId(), Map.class, index));
-            if (MapUtils.isNotEmpty(map)) {
-                return createAuditEvent(map);
-            }
+            return mongoTemplate.findById(idEntity.getId(), IdAuditEvent.class, index);
         } catch (Exception e) {
             LOGGER.error("查询集合 [{}] 出现错误", index, e);
         }
 
         return null;
-    }
-
-    @Override
-    public AuditEvent createAuditEvent(Map<String, Object> map) {
-        PluginAuditEvent pluginAuditEvent = Casts.cast(super.createAuditEvent(map));
-        pluginAuditEvent.setId(map.get(DEFAULT_ID_FIELD).toString());
-
-        return pluginAuditEvent;
     }
 
     public String getCollectionName(Instant instant) {
@@ -154,11 +143,11 @@ public class MongoAuditEventRepository extends AbstractPluginAuditEventRepositor
         Criteria criteria = new Criteria();
 
         if (StringUtils.isNotBlank(principal)) {
-            criteria = criteria.and(PluginAuditEvent.PRINCIPAL_FIELD_NAME).is(principal);
+            criteria = criteria.and(IdAuditEvent.PRINCIPAL_FIELD_NAME).is(principal);
         }
 
         if (StringUtils.isNotBlank(type)) {
-            criteria = criteria.and(PluginAuditEvent.TYPE_FIELD_NAME).is(type);
+            criteria = criteria.and(IdAuditEvent.TYPE_FIELD_NAME).is(type);
         }
 
         if (Objects.nonNull(after)) {

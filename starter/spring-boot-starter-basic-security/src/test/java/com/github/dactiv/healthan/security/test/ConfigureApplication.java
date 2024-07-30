@@ -1,7 +1,7 @@
 package com.github.dactiv.healthan.security.test;
 
 import com.github.dactiv.healthan.security.audit.AuditEventRepositoryInterceptor;
-import com.github.dactiv.healthan.security.audit.PluginAuditEventRepository;
+import com.github.dactiv.healthan.security.audit.ExtendAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.elasticsearch.ElasticsearchAuditEventRepository;
 import com.github.dactiv.healthan.security.audit.mongo.MongoAuditEventRepository;
 import org.springframework.beans.factory.ObjectProvider;
@@ -36,7 +36,7 @@ public class ConfigureApplication {
     }
 
     @Bean
-    public PluginAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
+    public ExtendAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
                                                            ObjectProvider<AuditEventRepositoryInterceptor> interceptors) {
 
         return new MongoAuditEventRepository(
