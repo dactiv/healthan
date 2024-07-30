@@ -15,9 +15,9 @@ spring:
       database: system_audit
       field-naming-strategy: org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy
   elasticsearch:
-    uris: http://localhost:9200
+    uris: http://16.1.4.48:9200
     username: elastic
-    password: 20160826
+    password: Dd4#dfafBda52h
 ---
 spring:
   config:
@@ -25,9 +25,11 @@ spring:
       on-profile: elasticsearch
 
 healthan:
-  authentication:
+  security:
     audit:
       type: elasticsearch
+      index:
+        prefix: ix_test_audit_event
 
 ---
 spring:
@@ -36,6 +38,8 @@ spring:
       on-profile: mongo
 
 healthan:
-  authentication:
+  security:
     audit:
       type: mongo
+      index:
+        prefix: col_test_audit_event

@@ -3,13 +3,16 @@ package com.github.dactiv.healthan.security;
 import com.github.dactiv.healthan.security.audit.AuditType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.io.Serializable;
+
 /**
  * 审计配置
  *
  * @author maurice.chen
  */
 @ConfigurationProperties("healthan.security.audit")
-public class AuditProperties {
+public class AuditProperties implements Serializable {
+
 
     /**
      * 审计类型
@@ -36,4 +39,6 @@ public class AuditProperties {
     public void setType(AuditType type) {
         this.type = type;
     }
+
+
 }

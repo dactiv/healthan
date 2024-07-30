@@ -23,21 +23,19 @@ public class IdAuditEvent extends AuditEvent {
     /**
      * 主键 id
      */
-    private String id;
+    private final String  id;
 
     public IdAuditEvent(AuditEvent auditEvent) {
-        super(auditEvent.getTimestamp(), auditEvent.getPrincipal(), auditEvent.getType(), auditEvent.getData());
-        this.id = UUID.randomUUID().toString();
+        this(UUID.randomUUID().toString(), auditEvent.getTimestamp(), auditEvent.getPrincipal(), auditEvent.getType(), auditEvent.getData());
     }
 
     public IdAuditEvent(String principal, String type, Map<String, Object> data) {
-        super(Instant.now(), principal, type, data);
-        this.id = UUID.randomUUID().toString();
+        this(UUID.randomUUID().toString(), Instant.now(), principal, type, data);
     }
 
-    public IdAuditEvent(Instant timestamp, String principal, String type, Map<String, Object> data) {
+    public IdAuditEvent(String id, Instant timestamp, String principal, String type, Map<String, Object> data) {
         super(timestamp, principal, type, data);
-        this.id = UUID.randomUUID().toString();
+        this.id = id;
     }
 
     /**
@@ -47,15 +45,6 @@ public class IdAuditEvent extends AuditEvent {
      */
     public String getId() {
         return id;
-    }
-
-    /**
-     * 设置主键 id
-     *
-     * @param id 主键 id
-     */
-    public void setId(String id) {
-        this.id = id;
     }
 
 }

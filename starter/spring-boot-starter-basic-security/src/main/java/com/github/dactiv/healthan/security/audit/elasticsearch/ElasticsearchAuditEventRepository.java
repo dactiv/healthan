@@ -3,10 +3,11 @@ package com.github.dactiv.healthan.security.audit.elasticsearch;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.id.StringIdEntity;
-import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.commons.page.Page;
 import com.github.dactiv.healthan.commons.page.PageRequest;
+import com.github.dactiv.healthan.security.AuditIndexProperties;
 import com.github.dactiv.healthan.security.audit.*;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -23,6 +24,7 @@ import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.util.Assert;
 
@@ -41,8 +43,6 @@ public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventR
 
     public static final String MAPPING_FILE_PATH = "elasticsearch/plugin-audit-mapping.json";
 
-    public static final String DEFAULT_INDEX_NAME = "ix_http_request_audit_event";
-
     private final static Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventRepository.class);
 
     private final ElasticsearchOperations elasticsearchOperations;
@@ -51,15 +51,11 @@ public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventR
 
     public ElasticsearchAuditEventRepository(List<AuditEventRepositoryInterceptor> interceptors,
                                              ElasticsearchOperations elasticsearchOperations,
-                                             String indexName) {
+                                             AuditIndexProperties auditIndexProperties) {
         super(interceptors);
         this.elasticsearchOperations = elasticsearchOperations;
 
-        this.indexGenerator = new DateIndexGenerator(
-                indexName,
-                Casts.UNDERSCORE,
-                Arrays.asList(RestResult.DEFAULT_TIMESTAMP_NAME, NumberIdEntity.CREATION_TIME_FIELD_NAME)
-        );
+        this.indexGenerator = new DateIndexGenerator(auditIndexProperties);
     }
 
     @Override
@@ -122,12 +118,7 @@ public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventR
                 .withSorts(SortBuilders.fieldSort(RestResult.DEFAULT_TIMESTAMP_NAME).order(SortOrder.DESC));
 
         try {
-
-            return elasticsearchOperations
-                    .search(builder.build(), IdAuditEvent.class, IndexCoordinates.of(index))
-                    .stream()
-                    .map(SearchHit::getContent)
-                    .collect(Collectors.toCollection(LinkedList::new));
+            return findData(builder.build(), index);
         } catch (Exception e) {
             LOGGER.warn("查询 elasticsearch 审计事件出现异常", e);
             return new LinkedList<>();
@@ -149,17 +140,21 @@ public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventR
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
 
         try {
-            List<IdAuditEvent> content = elasticsearchOperations
-                    .search(builder.build(), IdAuditEvent.class, IndexCoordinates.of(index))
-                    .stream()
-                    .map(SearchHit::getContent)
-                    .collect(Collectors.toCollection(LinkedList::new));
-
-            return new Page<>(pageRequest, new ArrayList<>(content));
+            List<AuditEvent> content = findData(builder.build(), index);
+            return new Page<>(pageRequest, content);
         } catch (Exception e) {
             LOGGER.warn("查询 elasticsearch 审计事件出现异常", e);
             return new Page<>(pageRequest, new ArrayList<>());
         }
+    }
+
+    public List<AuditEvent> findData(NativeSearchQuery query, String index) {
+        return elasticsearchOperations
+                .search(query, Map.class, IndexCoordinates.of(index))
+                .stream()
+                .map(SearchHit::getContent)
+                .map(c -> createAuditEvent(Casts.cast(c)))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -167,7 +162,12 @@ public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventR
 
         String index = indexGenerator.generateIndex(idEntity).toLowerCase();
         try {
-            return elasticsearchOperations.get(idEntity.getId(), IdAuditEvent.class, IndexCoordinates.of(index));
+            //noinspection unchecked
+            Map<String, Object> map = elasticsearchOperations.get(idEntity.getId(), Map.class, IndexCoordinates.of(index));
+            if (MapUtils.isEmpty(map)) {
+                return null;
+            }
+            return createAuditEvent(map);
         } catch (Exception e) {
             LOGGER.warn("通过 ID 查询索引 [{}] 出现错误", index, e);
         }

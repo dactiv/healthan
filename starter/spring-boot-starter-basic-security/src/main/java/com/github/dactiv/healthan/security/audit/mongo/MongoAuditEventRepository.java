@@ -3,10 +3,11 @@ package com.github.dactiv.healthan.security.audit.mongo;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.id.StringIdEntity;
-import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.commons.page.Page;
 import com.github.dactiv.healthan.commons.page.PageRequest;
+import com.github.dactiv.healthan.security.AuditIndexProperties;
 import com.github.dactiv.healthan.security.audit.*;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +20,11 @@ import org.springframework.util.Assert;
 
 import java.sql.Date;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * mongo 审计事件仓库实现
@@ -33,25 +35,17 @@ public class MongoAuditEventRepository extends AbstractExtendAuditEventRepositor
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoAuditEventRepository.class);
 
-    public static final String DEFAULT_COLLECTION_NAME = "col_http_request_audit_event";
-
-    public static final String DEFAULT_ID_FIELD = "_id";
-
     private final MongoTemplate mongoTemplate;
 
     private final IndexGenerator indexGenerator;
 
     public MongoAuditEventRepository(List<AuditEventRepositoryInterceptor> interceptors,
                                      MongoTemplate mongoTemplate,
-                                     String indexName) {
+                                     AuditIndexProperties auditIndexProperties) {
         super(interceptors);
         this.mongoTemplate = mongoTemplate;
 
-        this.indexGenerator = new DateIndexGenerator(
-                indexName,
-                Casts.UNDERSCORE,
-                Arrays.asList(RestResult.DEFAULT_TIMESTAMP_NAME, NumberIdEntity.CREATION_TIME_FIELD_NAME)
-        );
+        this.indexGenerator = new DateIndexGenerator(auditIndexProperties);
     }
 
     @Override
@@ -102,7 +96,11 @@ public class MongoAuditEventRepository extends AbstractExtendAuditEventRepositor
     private List<AuditEvent> findData(String index, Query query) {
         List<AuditEvent> content = new LinkedList<>();
         try {
-            content = new LinkedList<>(mongoTemplate.find(query, IdAuditEvent.class, index));
+            List<AuditEvent> data = mongoTemplate
+                    .find(query, Map.class, index).stream()
+                    .map(d -> this.createAuditEvent(Casts.cast(d)))
+                    .collect(Collectors.toList());
+            content.addAll(data);
         } catch (Exception e) {
             LOGGER.error("查询集合 [{}] 出现错误", index, e);
         }
@@ -115,7 +113,11 @@ public class MongoAuditEventRepository extends AbstractExtendAuditEventRepositor
         String index = indexGenerator.generateIndex(idEntity).toLowerCase();
 
         try {
-            return mongoTemplate.findById(idEntity.getId(), IdAuditEvent.class, index);
+            Map<String, Object> map = Casts.cast(mongoTemplate.findById(idEntity.getId(), Map.class, index));
+            if (MapUtils.isEmpty(map)) {
+                return null;
+            }
+            return createAuditEvent(map);
         } catch (Exception e) {
             LOGGER.error("查询集合 [{}] 出现错误", index, e);
         }

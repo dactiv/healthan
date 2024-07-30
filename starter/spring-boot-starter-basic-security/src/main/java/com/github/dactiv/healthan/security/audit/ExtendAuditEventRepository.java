@@ -35,5 +35,4 @@ public interface ExtendAuditEventRepository extends AuditEventRepository {
      * @return 审计事件
      */
     AuditEvent get(StringIdEntity idEntity);
-
 }

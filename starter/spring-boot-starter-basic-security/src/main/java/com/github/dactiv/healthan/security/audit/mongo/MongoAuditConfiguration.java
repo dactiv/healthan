@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.security.audit.mongo;
 
 import com.github.dactiv.healthan.security.AuditConfiguration;
+import com.github.dactiv.healthan.security.AuditIndexProperties;
 import com.github.dactiv.healthan.security.AuditProperties;
 import com.github.dactiv.healthan.security.audit.AuditEventRepositoryInterceptor;
 import com.github.dactiv.healthan.security.audit.ExtendAuditEventRepository;
@@ -30,12 +31,13 @@ public class MongoAuditConfiguration {
 
     @Bean
     public ExtendAuditEventRepository auditEventRepository(MongoTemplate mongoTemplate,
+                                                           AuditIndexProperties auditIndexProperties,
                                                            ObjectProvider<AuditEventRepositoryInterceptor> interceptors) {
 
         return new MongoAuditEventRepository(
                 interceptors.stream().collect(Collectors.toList()),
                 mongoTemplate,
-                MongoAuditEventRepository.DEFAULT_COLLECTION_NAME
+                auditIndexProperties
         );
 
     }

@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.security.audit;
 
 import com.github.dactiv.healthan.commons.ReflectionUtils;
+import com.github.dactiv.healthan.security.AuditIndexProperties;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,32 +16,13 @@ import java.util.Objects;
  */
 public class PropertyIndexGenerator implements IndexGenerator {
 
-    /**
-     * 属性名称集合
-     */
-    private List<String> propertyNames = new LinkedList<>();
-
-    /**
-     * 前缀
-     */
-    private String prefix;
-
-    /**
-     * 分隔符
-     */
-    private String separator;
+    private AuditIndexProperties auditIndexProperties;
 
     public PropertyIndexGenerator() {
     }
 
-    public PropertyIndexGenerator(List<String> propertyNames, String separator) {
-        this(propertyNames, null, separator);
-    }
-
-    public PropertyIndexGenerator(List<String> propertyNames, String prefix, String separator) {
-        this.propertyNames = propertyNames;
-        this.prefix = prefix;
-        this.separator = separator;
+    public PropertyIndexGenerator(AuditIndexProperties auditIndexProperties) {
+        this.auditIndexProperties = auditIndexProperties;
     }
 
     @Override
@@ -48,11 +30,12 @@ public class PropertyIndexGenerator implements IndexGenerator {
 
         List<String> result = new LinkedList<>();
 
-        if (StringUtils.isNotBlank(prefix)) {
-            result.add(prefix);
+        if (StringUtils.isNotBlank(auditIndexProperties.getPrefix())) {
+            result.add(auditIndexProperties.getPrefix());
         }
 
-        propertyNames
+        auditIndexProperties
+                .getPropertyNames()
                 .stream()
                 .map(s -> ReflectionUtils.getReadProperty(object, s))
                 .filter(Objects::nonNull)
@@ -79,60 +62,14 @@ public class PropertyIndexGenerator implements IndexGenerator {
      * @return 索引值
      */
     protected String afterSetting(List<String> result) {
-        return StringUtils.join(result, separator);
+        return StringUtils.join(result, auditIndexProperties.getSeparator());
     }
 
-    /**
-     * 获取属性名称集合
-     *
-     * @return 属性名称集合
-     */
-    public List<String> getPropertyNames() {
-        return propertyNames;
+    public AuditIndexProperties getAuditIndexProperties() {
+        return auditIndexProperties;
     }
 
-    /**
-     * 设置属性名称集合
-     *
-     * @param propertyNames 属性名称集合
-     */
-    public void setPropertyNames(List<String> propertyNames) {
-        this.propertyNames = propertyNames;
-    }
-
-    /**
-     * 获取前缀
-     *
-     * @return 前缀
-     */
-    public String getPrefix() {
-        return prefix;
-    }
-
-    /**
-     * 设置前缀
-     *
-     * @param prefix 前缀
-     */
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-    }
-
-    /**
-     * 获取分隔符
-     *
-     * @return 分隔符
-     */
-    public String getSeparator() {
-        return separator;
-    }
-
-    /**
-     * 设置分隔符
-     *
-     * @param separator 分隔符
-     */
-    public void setSeparator(String separator) {
-        this.separator = separator;
+    public void setAuditIndexProperties(AuditIndexProperties auditIndexProperties) {
+        this.auditIndexProperties = auditIndexProperties;
     }
 }
