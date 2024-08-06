@@ -3,7 +3,7 @@ package com.github.dactiv.healthan.spring.security.audit;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.id.number.NumberIdEntity;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
-import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
+import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceResolver;
 import com.github.dactiv.healthan.mybatis.plus.config.OperationDataTraceProperties;
 import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
@@ -26,14 +26,14 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class SecurityPrincipalOperationDataTraceRepository extends MybatisPlusOperationDataTraceRepository {
+public class SecurityPrincipalOperationDataTraceResolver extends MybatisPlusOperationDataTraceResolver {
 
     private final ControllerAuditProperties controllerAuditProperties;
 
     public static final String OPERATION_DATA_TRACE_ATT_NAME = "operationDataTrace";
 
-    public SecurityPrincipalOperationDataTraceRepository(OperationDataTraceProperties operationDataTraceProperties,
-                                                         ControllerAuditProperties controllerAuditProperties) {
+    public SecurityPrincipalOperationDataTraceResolver(OperationDataTraceProperties operationDataTraceProperties,
+                                                       ControllerAuditProperties controllerAuditProperties) {
         super(operationDataTraceProperties);
         this.controllerAuditProperties = controllerAuditProperties;
     }

@@ -52,6 +52,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.dactiv.healthan</groupId>
+            <artifactId>spring-boot-starter-basic-security</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -3,32 +3,35 @@ package com.github.dactiv.healthan.mybatis.plus.test;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.enumerate.support.DisabledOrEnabled;
 import com.github.dactiv.healthan.commons.enumerate.support.ExecuteStatus;
+import com.github.dactiv.healthan.commons.id.IdEntity;
 import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import com.github.dactiv.healthan.mybatis.enumerate.OperationDataType;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
-import com.github.dactiv.healthan.mybatis.plus.audit.EntityIdOperationDataTraceRecord;
-import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
 import com.github.dactiv.healthan.mybatis.plus.test.entity.AllTypeEntity;
 import com.github.dactiv.healthan.mybatis.plus.test.service.AllTypeEntityService;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.audit.AuditEvent;
+import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class TestBasicService {
 
     @Autowired
     private AllTypeEntityService allTypeEntityService;
 
     @Autowired
-    private MybatisPlusOperationDataTraceRepository mybatisPlusOperationDataTraceRepository;
+    private AuditEventRepository auditEventRepository;
 
     @Test
     public void testAllType() {
@@ -55,7 +58,7 @@ public class TestBasicService {
     }
 
     @Test
-    public void testInsertOrUpdate() throws UnknownHostException {
+    public void testInsertOrUpdate() throws Exception {
         AllTypeEntity entity = new AllTypeEntity();
 
         entity.setStatus(DisabledOrEnabled.Disabled);
@@ -63,102 +66,76 @@ public class TestBasicService {
 
         allTypeEntityService.save(entity);
 
-        List<OperationDataTraceRecord> data = mybatisPlusOperationDataTraceRepository.find("tb_all_type_entity");
-        Assertions.assertEquals(data.size(), 1);
+        List<AuditEvent> events = auditEventRepository.find(null, null, null);
+        Assertions.assertEquals(events.size(), 1);
 
-        OperationDataTraceRecord record = data.iterator().next();
-        Assertions.assertTrue(EntityIdOperationDataTraceRecord.class.isAssignableFrom(record.getClass()));
+        AuditEvent event = events.iterator().next();
+        Map<String, Object> submitData = Casts.cast(event.getData().get(OperationDataTraceRecord.SUBMIT_DATA_FIELD));
 
-        EntityIdOperationDataTraceRecord entityRecord = Casts.cast(record);
-        Assertions.assertEquals(entityRecord.getEntityId(), entity.getId());
+        Assertions.assertEquals(event.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
+        Assertions.assertEquals(submitData.get(IdEntity.ID_FIELD_NAME), entity.getId());
+        Assertions.assertTrue(StringUtils.endsWith(event.getType(), OperationDataType.INSERT.toString()));
 
-        Assertions.assertEquals(record.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
-        Assertions.assertEquals(record.getType(), OperationDataType.INSERT);
+        Map<String, Object> status = Casts.cast(submitData.get("status"));
+        Assertions.assertEquals(status.get("value"), DisabledOrEnabled.Disabled.getValue());
 
-        Map<String, Object> statusValue = Casts.cast(record.getSubmitData().get("status"));
-        Assertions.assertEquals(statusValue.get("value"), DisabledOrEnabled.Disabled.getValue());
+        allTypeEntityService
+                .lambdaUpdate()
+                .set(AllTypeEntity::getStatus, DisabledOrEnabled.Enabled.getValue())
+                .eq(AllTypeEntity::getId, entity.getId())
+                .update();
 
-        allTypeEntityService.lambdaUpdate().set(AllTypeEntity::getStatus, DisabledOrEnabled.Enabled.getValue()).eq(AllTypeEntity::getId, entity.getId()).update();
+        events = auditEventRepository.find(null, null, null);
+        Assertions.assertEquals(events.size(), 2);
 
-        data = mybatisPlusOperationDataTraceRepository.find("tb_all_type_entity");
-        Assertions.assertEquals(data.size(), 2);
+        event = events.get(events.size() - 1);
+        Assertions.assertEquals(event.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
+        Assertions.assertTrue(StringUtils.endsWith(event.getType(), OperationDataType.UPDATE.toString()));
 
-        record = data.iterator().next();
-        Assertions.assertTrue(EntityIdOperationDataTraceRecord.class.isAssignableFrom(record.getClass()));
-
-        entityRecord = Casts.cast(record);
-        Assertions.assertEquals(entityRecord.getEntityId(), entity.getId());
-
-        Assertions.assertEquals(record.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
-        Assertions.assertEquals(record.getType(), OperationDataType.UPDATE);
-
-        allTypeEntityService.lambdaUpdate().set(AllTypeEntity::getStatus, DisabledOrEnabled.Disabled.getValue()).eq(AllTypeEntity::getId, entity.getId()).eq(AllTypeEntity::getStatus, DisabledOrEnabled.Disabled.getValue()).update();
-
-        data = mybatisPlusOperationDataTraceRepository.find("tb_all_type_entity");
-        Assertions.assertEquals(data.size(), 2);
+        submitData = Casts.cast(event.getData().get(OperationDataTraceRecord.SUBMIT_DATA_FIELD));
+        Integer statusValue = Casts.cast(submitData.get("status"));
+        Assertions.assertEquals(statusValue, DisabledOrEnabled.Enabled.getValue());
 
         entity.setStatus(DisabledOrEnabled.Disabled);
         allTypeEntityService.updateById(entity);
-        data = mybatisPlusOperationDataTraceRepository.find("tb_all_type_entity");
-        Assertions.assertEquals(data.size(), 3);
+        events = auditEventRepository.find(null, null, null);
+        Assertions.assertEquals(events.size(), 3);
 
-        record = data.iterator().next();
-        Assertions.assertTrue(EntityIdOperationDataTraceRecord.class.isAssignableFrom(record.getClass()));
+        event = events.get(events.size() - 1);
+        Assertions.assertEquals(event.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
+        Assertions.assertTrue(StringUtils.endsWith(event.getType(), OperationDataType.UPDATE.toString()));
 
-        entityRecord = Casts.cast(record);
-        Assertions.assertEquals(entityRecord.getEntityId(), entity.getId());
-
-        Assertions.assertEquals(record.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
-        Assertions.assertEquals(record.getType(), OperationDataType.UPDATE);
-
-        statusValue = Casts.cast(record.getSubmitData().get("status"));
-        Assertions.assertEquals(statusValue.get("value"), DisabledOrEnabled.Disabled.getValue());
+        submitData = Casts.cast(event.getData().get(OperationDataTraceRecord.SUBMIT_DATA_FIELD));
+        status = Casts.cast(submitData.get("status"));
+        Assertions.assertEquals(status.get("value"), DisabledOrEnabled.Disabled.getValue());
 
         allTypeEntityService.deleteByEntity(entity);
-        data = mybatisPlusOperationDataTraceRepository.find("tb_all_type_entity");
-        Assertions.assertEquals(data.size(), 4);
+        events = auditEventRepository.find(null, null, null);
+        Assertions.assertEquals(events.size(), 4);
 
-        record = data.iterator().next();
-        Assertions.assertTrue(EntityIdOperationDataTraceRecord.class.isAssignableFrom(record.getClass()));
-
-        entityRecord = Casts.cast(record);
-        Assertions.assertEquals(entityRecord.getEntityId(), entity.getId());
-
-        Assertions.assertEquals(record.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
-        Assertions.assertEquals(record.getType(), OperationDataType.DELETE);
+        event = events.get(events.size() - 1);
+        Assertions.assertEquals(event.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
+        Assertions.assertTrue(StringUtils.endsWith(event.getType(), OperationDataType.DELETE.toString()));
 
         entity.setId(null);
         allTypeEntityService.save(entity);
+        events = auditEventRepository.find(null, null, null);
+        Assertions.assertEquals(events.size(), 5);
 
-        allTypeEntityService.deleteById(entity.getId());
+        event = events.get(events.size() - 1);
+        submitData = Casts.cast(event.getData().get(OperationDataTraceRecord.SUBMIT_DATA_FIELD));
 
-        data = mybatisPlusOperationDataTraceRepository.find("tb_all_type_entity");
-        Assertions.assertEquals(data.size(), 6);
+        Assertions.assertEquals(event.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
+        Assertions.assertEquals(submitData.get(IdEntity.ID_FIELD_NAME), entity.getId());
+        Assertions.assertTrue(StringUtils.endsWith(event.getType(), OperationDataType.INSERT.toString()));
 
-        record = data.iterator().next();
-        Assertions.assertTrue(EntityIdOperationDataTraceRecord.class.isAssignableFrom(record.getClass()));
+        allTypeEntityService.lambdaUpdate().eq(AllTypeEntity::getId,entity.getId()).remove();
+        events = auditEventRepository.find(null, null, null);
+        Assertions.assertEquals(events.size(), 6);
 
-        entityRecord = Casts.cast(record);
-        Assertions.assertEquals(entityRecord.getEntityId(), entity.getId());
-
-        Assertions.assertEquals(record.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
-        Assertions.assertEquals(record.getType(), OperationDataType.DELETE);
-
-        entity.setId(null);
-        allTypeEntityService.save(entity);
-
-        allTypeEntityService.lambdaUpdate().eq(AllTypeEntity::getId,entity.getId()).eq(AllTypeEntity::getStatus, DisabledOrEnabled.Disabled.getValue()).remove();
-        data = mybatisPlusOperationDataTraceRepository.find("tb_all_type_entity");
-        Assertions.assertEquals(data.size(), 8);
-
-        record = data.iterator().next();
-        Assertions.assertTrue(EntityIdOperationDataTraceRecord.class.isAssignableFrom(record.getClass()));
-
-        entityRecord = Casts.cast(record);
-        Assertions.assertEquals(entityRecord.getEntityId(), entity.getId());
-
-        Assertions.assertEquals(record.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
-        Assertions.assertEquals(record.getType(), OperationDataType.DELETE);
+        event = events.get(events.size() - 1);
+        Assertions.assertEquals(event.getPrincipal(), InetAddress.getLocalHost().getHostAddress());
+        Assertions.assertTrue(StringUtils.endsWith(event.getType(), OperationDataType.DELETE.toString()));
 
     }
 

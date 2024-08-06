@@ -1,12 +1,7 @@
-package com.github.dactiv.healthan.mybatis.interceptor.audit.support;
+package com.github.dactiv.healthan.mybatis.interceptor.audit;
 
 import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.commons.page.Page;
-import com.github.dactiv.healthan.commons.page.PageRequest;
-import com.github.dactiv.healthan.commons.page.TotalPage;
 import com.github.dactiv.healthan.mybatis.enumerate.OperationDataType;
-import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
-import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRepository;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
@@ -18,26 +13,27 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 内存形式的操作数据留痕仓库实现
  *
  * @author maurice.chen
  */
-public class InMemoryOperationDataTraceRepository implements OperationDataTraceRepository {
-
-    private static final Map<String, List<OperationDataTraceRecord>> MEMORY = new LinkedHashMap<>();
+public abstract class AbstractOperationDataTraceResolver implements OperationDataTraceResolver {
 
     public static final String DEFAULT_DATE_FORMATTER_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     private final DateFormat dateFormat;
 
-    public InMemoryOperationDataTraceRepository() {
+    public AbstractOperationDataTraceResolver() {
         dateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMATTER_PATTERN);
     }
 
-    public InMemoryOperationDataTraceRepository(String dateFormatPattern) {
+    public AbstractOperationDataTraceResolver(String dateFormatPattern) {
         this.dateFormat = new SimpleDateFormat(dateFormatPattern);
     }
 
@@ -101,32 +97,6 @@ public class InMemoryOperationDataTraceRepository implements OperationDataTraceR
         record.setRemark(record.getPrincipal() + StringUtils.SPACE + dateFormat.format(record.getCreationTime()) +  StringUtils.SPACE + record.getType().getName());
 
         return record;
-    }
-
-    @Override
-    public void saveOperationDataTraceRecord(List<OperationDataTraceRecord> records) {
-        for (OperationDataTraceRecord record : records) {
-            List<OperationDataTraceRecord> dataTraceRecords = MEMORY.computeIfAbsent(record.getTarget(), k -> new LinkedList<>());
-            dataTraceRecords.add(record);
-        }
-    }
-
-    @Override
-    public List<OperationDataTraceRecord> find(String target) {
-        List<OperationDataTraceRecord> result = MEMORY.get(target);
-        result.sort(Comparator.comparing(OperationDataTraceRecord::getCreationTime).reversed());
-        return result;
-    }
-
-    @Override
-    public Page<OperationDataTraceRecord> findPage(PageRequest pageRequest, String target) {
-
-        List<OperationDataTraceRecord> records = find(target);
-
-        int fromIndex = (pageRequest.getNumber() - 1) * pageRequest.getSize();
-        int toIndex = Math.min(pageRequest.getNumber() * pageRequest.getSize(), records.size());
-
-        return new TotalPage<>(pageRequest, records.subList(fromIndex, toIndex), records.size());
     }
 
     public DateFormat getDateFormat() {

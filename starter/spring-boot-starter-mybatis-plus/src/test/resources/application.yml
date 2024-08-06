@@ -8,6 +8,14 @@ mybatis-plus:
       id-type: auto
     banner: off
 
+management:
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 
 spring:
   datasource:
@@ -21,6 +29,10 @@ spring:
       schema-locations: classpath:sql/schema.sql
       data-locations: classpath:sql/data.sql
 healthan:
+  security:
+    audit:
+      enabled: true
+      type: memory
   mybatis:
     plus:
       crypto:

@@ -6,18 +6,15 @@ import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.id.BasicIdentification;
 import com.github.dactiv.healthan.commons.id.IdEntity;
-import com.github.dactiv.healthan.commons.page.Page;
-import com.github.dactiv.healthan.commons.page.PageRequest;
-import com.github.dactiv.healthan.commons.page.TotalPage;
 import com.github.dactiv.healthan.mybatis.enumerate.OperationDataType;
+import com.github.dactiv.healthan.mybatis.interceptor.audit.AbstractOperationDataTraceResolver;
 import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRecord;
-import com.github.dactiv.healthan.mybatis.interceptor.audit.support.InMemoryOperationDataTraceRepository;
+import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceResolver;
 import com.github.dactiv.healthan.mybatis.plus.config.OperationDataTraceProperties;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.update.Update;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -37,7 +34,7 @@ import java.util.stream.Collectors;
  *
  * @author maurice.chen
  */
-public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDataTraceRepository implements EntityIdOperationDataTraceRepository, ApplicationEventPublisherAware {
+public class MybatisPlusOperationDataTraceResolver extends AbstractOperationDataTraceResolver implements OperationDataTraceResolver, ApplicationEventPublisherAware {
 
     public static final String WHERE_SEPARATE = "\\s+(?i:and|or)\\s+";
 
@@ -45,36 +42,28 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
 
     private OperationDataTraceProperties operationDataTraceProperties;
 
-    public MybatisPlusOperationDataTraceRepository(OperationDataTraceProperties operationDataTraceProperties) {
+    public MybatisPlusOperationDataTraceResolver(OperationDataTraceProperties operationDataTraceProperties) {
+        super(operationDataTraceProperties.getDateFormat());
         this.operationDataTraceProperties = operationDataTraceProperties;
     }
 
-    public MybatisPlusOperationDataTraceRepository(OperationDataTraceProperties operationDataTraceProperties,
-                                                   ApplicationEventPublisher applicationEventPublisher) {
+    public MybatisPlusOperationDataTraceResolver(OperationDataTraceProperties operationDataTraceProperties,
+                                                 ApplicationEventPublisher applicationEventPublisher) {
+        super(operationDataTraceProperties.getDateFormat());
+        this.operationDataTraceProperties = operationDataTraceProperties;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    @Override
-    public void saveOperationDataTraceRecord(List<OperationDataTraceRecord> records) {
-        if (Objects.isNull(applicationEventPublisher)) {
-            super.saveOperationDataTraceRecord(records);
-        } else if (CollectionUtils.isNotEmpty(records)){
-            for (OperationDataTraceRecord record : records) {
-                AuditEvent auditEvent = createAuditEvent(record);
-                if (Objects.isNull(auditEvent)) {
-                    continue;
-                }
-                applicationEventPublisher.publishEvent(new AuditApplicationEvent(auditEvent));
-            }
-        }
-    }
-
     public AuditEvent createAuditEvent(OperationDataTraceRecord record) {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put(OperationDataTraceRecord.SUBMIT_DATA_FIELD, record.getSubmitData());
+        data.put(OperationDataTraceRecord.REMARK_FIELD, record.getRemark());
         return new AuditEvent(
                 record.getCreationTime().toInstant(),
                 record.getPrincipal().toString(),
                 operationDataTraceProperties.getAuditPrefixName() + Casts.UNDERSCORE + record.getTarget() + Casts.UNDERSCORE + record.getType(),
-                record.getSubmitData()
+                data
+
         );
     }
 
@@ -140,6 +129,17 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
         }
 
         return Collections.unmodifiableMap(result);
+    }
+
+    @Override
+    public void saveOperationDataTraceRecord(List<OperationDataTraceRecord> records) throws Exception {
+        for (OperationDataTraceRecord record : records) {
+            AuditEvent auditEvent = createAuditEvent(record);
+            if (Objects.isNull(auditEvent)) {
+                continue;
+            }
+            applicationEventPublisher.publishEvent(new AuditApplicationEvent(auditEvent));
+        }
     }
 
     private Object getIdValueExp(String sqlSegment, Object parameterObject) throws OgnlException {
@@ -257,24 +257,6 @@ public class MybatisPlusOperationDataTraceRepository extends InMemoryOperationDa
 
         return createUpdateOrDeleteRecord(delete.getTable().getName(), OperationDataType.DELETE, parameter);
 
-    }
-
-    @Override
-    public List<OperationDataTraceRecord> find(String target, Object entityId) {
-        List<OperationDataTraceRecord> records = find(target);
-        List<EntityIdOperationDataTraceRecord> result = records.stream().map(r -> Casts.cast(r, EntityIdOperationDataTraceRecord.class)).collect(Collectors.toList());
-        return result.stream().filter(e -> e.getEntityId().equals(entityId)).collect(Collectors.toCollection(LinkedList::new));
-    }
-
-    @Override
-    public Page<OperationDataTraceRecord> findPage(PageRequest pageRequest, String target, Object entityId) {
-
-        List<OperationDataTraceRecord> elements = find(target, entityId);
-
-        int fromIndex = (pageRequest.getNumber() - 1) * pageRequest.getSize();
-        int toIndex = Math.min(pageRequest.getNumber() * pageRequest.getSize(), elements.size());
-
-        return new TotalPage<>(pageRequest, elements.subList(fromIndex, toIndex), elements.size());
     }
 
     @Override

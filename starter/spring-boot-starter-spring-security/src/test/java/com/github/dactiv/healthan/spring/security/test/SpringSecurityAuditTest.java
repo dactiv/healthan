@@ -199,7 +199,7 @@ public class SpringSecurityAuditTest {
         mockMvc
                 .perform(get("/actuator/auditevents"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}},{\"principal\":\"test:1:test\",\"type\":\"" + controllerAuditProperties.getAuditPrefixName() + "_OperateController_pluginTestPermsGetAuditOperate_SUCCESS\",\"data\":{\"header\":{\"X-AUTHENTICATION-TYPE\":\"audit\"},\"parameter\":{\"name\":[\"test\"],\"password\":[\"test\"]}}}]}"));
+                .andExpect(content().json("{\"events\":[{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":false}}},{\"principal\":\"test:1:test\",\"type\":\"AUTHENTICATION_SUCCESS\",\"data\":{\"details\":{\"remember\":true}}},{\"principal\":\"test:1:test\",\"type\":\"" + controllerAuditProperties.getAuditPrefixName() + "_OperateController_pluginTestPermsGetAuditOperate_SUCCESS\",\"data\":{\"header\":{\"X-AUTHENTICATION-TYPE\":\"audit\"},\"parameter\":{\"username\":[\"test\"],\"password\":[\"test\"]}}}]}"));
 
         mockMvc
                 .perform(get("/operate/pluginAnyPermsOperate").session(session))

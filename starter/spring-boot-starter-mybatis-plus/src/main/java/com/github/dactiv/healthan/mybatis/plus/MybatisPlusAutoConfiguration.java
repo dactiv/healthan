@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInt
 import com.github.dactiv.healthan.crypto.algorithm.cipher.AesCipherService;
 import com.github.dactiv.healthan.crypto.algorithm.cipher.RsaCipherService;
 import com.github.dactiv.healthan.mybatis.MybatisAutoConfiguration;
-import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRepository;
-import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceRepository;
+import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceResolver;
+import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceResolver;
 import com.github.dactiv.healthan.mybatis.plus.config.CryptoProperties;
 import com.github.dactiv.healthan.mybatis.plus.config.OperationDataTraceProperties;
 import com.github.dactiv.healthan.mybatis.plus.crypto.DataAesCryptoService;
@@ -42,10 +42,10 @@ public class MybatisPlusAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(OperationDataTraceRepository.class)
+    @ConditionalOnMissingBean(OperationDataTraceResolver.class)
     @ConditionalOnProperty(prefix = "healthan.mybatis.operation-data-trace", value = "enabled", matchIfMissing = true)
-    public MybatisPlusOperationDataTraceRepository mybatisPlusOperationDataTraceRepository(OperationDataTraceProperties operationDataTraceProperties) {
-        return new MybatisPlusOperationDataTraceRepository(operationDataTraceProperties);
+    public MybatisPlusOperationDataTraceResolver mybatisPlusOperationDataTraceRepository(OperationDataTraceProperties operationDataTraceProperties) {
+        return new MybatisPlusOperationDataTraceResolver(operationDataTraceProperties);
     }
 
     @Bean

@@ -17,6 +17,10 @@ public class OperationDataTraceRecord implements Serializable {
     
     private static final long serialVersionUID = 1987280604707609834L;
 
+    public static final String SUBMIT_DATA_FIELD = "submitData";
+
+    public static final String REMARK_FIELD = "remark";
+
     /**
      * 创建时间
      */

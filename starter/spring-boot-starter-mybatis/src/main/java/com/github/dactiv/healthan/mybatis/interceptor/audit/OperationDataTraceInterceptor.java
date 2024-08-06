@@ -31,10 +31,10 @@ public class OperationDataTraceInterceptor implements Interceptor {
 
     private static final List<SqlCommandType> SQL_COMMAND_TYPES = Arrays.asList(SqlCommandType.INSERT, SqlCommandType.UPDATE, SqlCommandType.DELETE);
 
-    private final OperationDataTraceRepository operationDataTraceRepository;
+    private final OperationDataTraceResolver operationDataTraceResolver;
 
-    public OperationDataTraceInterceptor(OperationDataTraceRepository operationDataTraceRepository) {
-        this.operationDataTraceRepository = operationDataTraceRepository;
+    public OperationDataTraceInterceptor(OperationDataTraceResolver operationDataTraceResolver) {
+        this.operationDataTraceResolver = operationDataTraceResolver;
     }
 
     @Override
@@ -62,10 +62,10 @@ public class OperationDataTraceInterceptor implements Interceptor {
 
         Statement statement = CCJSqlParserUtil.parse(sql);
 
-        List<OperationDataTraceRecord> records = operationDataTraceRepository.createOperationDataTraceRecord(mappedStatement, statement, parameter);
+        List<OperationDataTraceRecord> records = operationDataTraceResolver.createOperationDataTraceRecord(mappedStatement, statement, parameter);
 
         if (CollectionUtils.isNotEmpty(records)) {
-            operationDataTraceRepository.saveOperationDataTraceRecord(records);
+            operationDataTraceResolver.saveOperationDataTraceRecord(records);
         }
 
         return result;
