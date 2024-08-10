@@ -63,6 +63,13 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
         entityClass = ReflectionUtils.getGenericClass(this, BigDecimal.ONE.intValue());
     }
 
+    /**
+     * 通过 ms id 获取审计的 orm 对象类型
+     *
+     * @param msId ms id
+     *
+     * @return orm 对象类型
+     */
     public static Class<?> getEntityClass(String msId) {
         Class<?> entityClass = ENTITY_CLASS_CACHE.get(msId);
         if (Objects.isNull(entityClass)) {
