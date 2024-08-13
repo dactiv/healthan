@@ -8,6 +8,8 @@ public class OperationDataEntity extends IntegerVersionEntity<Integer> {
 
     private String name;
 
+    private String owner;
+
     public OperationDataEntity() {
     }
 
@@ -19,4 +21,11 @@ public class OperationDataEntity extends IntegerVersionEntity<Integer> {
         this.name = name;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
 }

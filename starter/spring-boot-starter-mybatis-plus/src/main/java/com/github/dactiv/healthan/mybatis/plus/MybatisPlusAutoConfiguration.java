@@ -12,12 +12,9 @@ import com.github.dactiv.healthan.mybatis.plus.config.CryptoProperties;
 import com.github.dactiv.healthan.mybatis.plus.config.OperationDataTraceProperties;
 import com.github.dactiv.healthan.mybatis.plus.crypto.DataAesCryptoService;
 import com.github.dactiv.healthan.mybatis.plus.crypto.DataRsaCryptoService;
-import com.github.dactiv.healthan.mybatis.plus.interceptor.DataOwnerInterceptor;
 import com.github.dactiv.healthan.mybatis.plus.interceptor.DecryptInterceptor;
 import com.github.dactiv.healthan.mybatis.plus.interceptor.EncryptInnerInterceptor;
 import com.github.dactiv.healthan.mybatis.plus.interceptor.LastModifiedDateInnerInterceptor;
-import com.github.dactiv.healthan.mybatis.plus.service.DataOwnerService;
-import com.github.dactiv.healthan.mybatis.plus.service.support.LocalHostDataOwnerService;
 import com.github.dactiv.healthan.spring.web.query.QueryGenerator;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -26,8 +23,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.Objects;
 
 /**
  * mybatis-plus 自动配置实现
@@ -63,21 +58,7 @@ public class MybatisPlusAutoConfiguration {
         interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
         interceptor.addInnerInterceptor(new LastModifiedDateInnerInterceptor(true));
         interceptor.addInnerInterceptor(new EncryptInnerInterceptor(true, applicationContext));
-        try {
-            DataOwnerService ownerService = applicationContext.getBean(DataOwnerService.class);
-            if (Objects.nonNull(ownerService)) {
-                interceptor.addInnerInterceptor(new DataOwnerInterceptor(true, true, ownerService));
-            }
-        } catch (Exception ignored) {
-
-        }
         return interceptor;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(DataOwnerService.class)
-    public LocalHostDataOwnerService localHostDataOwnerService() {
-        return new LocalHostDataOwnerService();
     }
 
     @Bean

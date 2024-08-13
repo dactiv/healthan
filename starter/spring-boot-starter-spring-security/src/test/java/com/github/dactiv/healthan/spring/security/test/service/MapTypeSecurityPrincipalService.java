@@ -34,6 +34,7 @@ public class MapTypeSecurityPrincipalService extends AbstractTypeSecurityPrincip
     @Override
     public void afterPropertiesSet()  {
         USER_DETAILS.put("test", new SimpleSecurityPrincipal(1, getPasswordEncoder().encode("123456"), "test"));
+        USER_DETAILS.put("admin", new SimpleSecurityPrincipal(2, getPasswordEncoder().encode("123456"), "admin"));
     }
 
     @Override

@@ -37,4 +37,9 @@ public class OperationDataController {
     public RestResult<?> delete(@RequestParam List<Integer> ids) {
         return RestResult.of("删除 " + ids.size() + " 记录成功");
     }
+
+    @GetMapping("query")
+    public List<OperationDataEntity> query() {
+        return operationDataService.lambdaQuery().eq(OperationDataEntity::getName, "test").list();
+    }
 }

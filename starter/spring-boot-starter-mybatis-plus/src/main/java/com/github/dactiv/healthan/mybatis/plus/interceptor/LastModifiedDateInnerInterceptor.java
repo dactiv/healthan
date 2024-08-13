@@ -15,8 +15,10 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -81,20 +83,22 @@ public class LastModifiedDateInnerInterceptor implements InnerInterceptor {
             return ;
         }
 
-        if (ew instanceof Update) {
-            Update updateWrapper = Casts.cast(ew);
-            Class<?> entityClass = BasicService.getEntityClass(msId);
+        if (!Update.class.isAssignableFrom(ew.getClass())) {
+            return ;
+        }
 
-            List<Field> fields = this.getLastModifiedDateField(entityClass);
-            if (CollectionUtils.isEmpty(fields)) {
-                return;
-            }
+        Update updateWrapper = Casts.cast(ew);
+        Class<?> entityClass = BasicService.getEntityClass(msId);
 
-            if (snakeCase) {
-                fields.forEach(f -> updateWrapper.set(Casts.castCamelCaseToSnakeCase(f.getName()), getDateValue(f)));
-            } else {
-                fields.forEach(f -> updateWrapper.set(f.getName(), getDateValue(f)));
-            }
+        List<Field> fields = this.getLastModifiedDateField(entityClass);
+        if (CollectionUtils.isEmpty(fields)) {
+            return;
+        }
+
+        if (snakeCase) {
+            fields.forEach(f -> updateWrapper.set(Casts.castCamelCaseToSnakeCase(f.getName()), getDateValue(f)));
+        } else {
+            fields.forEach(f -> updateWrapper.set(f.getName(), getDateValue(f)));
         }
     }
 
@@ -111,6 +115,12 @@ public class LastModifiedDateInnerInterceptor implements InnerInterceptor {
             return LocalDateTime.now();
         } else if (LocalDate.class.isAssignableFrom(fieldType)) {
             return LocalDate.now();
+        } else if (LocalTime.class.isAssignableFrom(fieldType)) {
+            return LocalTime.now();
+        } else if (Long.class.isAssignableFrom(fieldType)) {
+            return System.currentTimeMillis();
+        } else if (Instant.class.isAssignableFrom(fieldType)) {
+            return Instant.now();
         }
         return null;
     }
