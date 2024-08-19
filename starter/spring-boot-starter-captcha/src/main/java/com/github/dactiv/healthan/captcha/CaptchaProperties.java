@@ -58,6 +58,11 @@ public class CaptchaProperties {
     private String tokenParamNameSuffix = DEFAULT_TOKEN_PARAM_NAME_SUFFIX;
 
     /**
+     * 是否永远验证成功后删除验证码
+     */
+    private boolean alwaysVerifySuccessDelete = true;
+
+    /**
      * 默认验证码类型
      */
     private String defaultCaptchaType = "tianai";
@@ -184,5 +189,13 @@ public class CaptchaProperties {
 
     public void setFilterOrderValue(int filterOrderValue) {
         this.filterOrderValue = filterOrderValue;
+    }
+
+    public boolean isAlwaysVerifySuccessDelete() {
+        return alwaysVerifySuccessDelete;
+    }
+
+    public void setAlwaysVerifySuccessDelete(boolean alwaysVerifySuccessDelete) {
+        this.alwaysVerifySuccessDelete = alwaysVerifySuccessDelete;
     }
 }

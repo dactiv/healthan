@@ -107,6 +107,9 @@ public class CaptchaVerificationFilter extends OncePerRequestFilter {
     }
 
     private boolean getVerifySuccessDelete(HttpServletRequest request) {
+        if (captchaProperties.isAlwaysVerifySuccessDelete()) {
+            return true;
+        }
         String verifySuccessDelete = request.getParameter(captchaProperties.getVerifySuccessDeleteParamName());
         if (StringUtils.isEmpty(verifySuccessDelete)) {
             return false;
