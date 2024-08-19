@@ -24,4 +24,9 @@ public interface CaptchaVerificationService {
      */
     void verify(HttpServletRequest request);
 
+    /**
+     * 删除验证码
+     * @param request http servlet request
+     */
+    void delete(HttpServletRequest request);
 }
