@@ -4,6 +4,7 @@ import com.github.dactiv.healthan.captcha.CaptchaProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.exception.SystemException;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +82,9 @@ public class CaptchaVerificationFilter extends OncePerRequestFilter {
                 LOGGER.debug("对 {} 请求校验验证码成功，请求参数为:{}", url, request.getParameterMap());
             }
             captchaVerificationInterceptors.forEach(a -> a.postVerify(request));
+            if (getVerifySuccessDelete(request)) {
+                captchaVerificationService.delete(request);
+            }
             filterChain.doFilter(request,response);
         } catch (Exception e) {
             LOGGER.error("验证码校验失败", e);
@@ -100,5 +104,14 @@ public class CaptchaVerificationFilter extends OncePerRequestFilter {
         }
 
         return type;
+    }
+
+    private boolean getVerifySuccessDelete(HttpServletRequest request) {
+        String verifySuccessDelete = request.getParameter(captchaProperties.getVerifySuccessDeleteParamName());
+        if (StringUtils.isEmpty(verifySuccessDelete)) {
+            return false;
+        }
+
+        return BooleanUtils.toBoolean(verifySuccessDelete);
     }
 }

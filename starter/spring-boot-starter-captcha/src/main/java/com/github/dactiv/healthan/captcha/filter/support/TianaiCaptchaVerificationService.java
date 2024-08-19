@@ -35,4 +35,9 @@ public class TianaiCaptchaVerificationService implements CaptchaVerificationServ
         RestResult<Map<String, Object>> result =  tianaiCaptchaService.verify(request);
         Assert.isTrue(result.isSuccess(), result.getMessage());
     }
+
+    @Override
+    public void delete(HttpServletRequest request) {
+        tianaiCaptchaService.delete(request);
+    }
 }
