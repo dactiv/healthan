@@ -261,7 +261,11 @@ public class SecurityUserDetails implements UserDetails, BasicIdentification<Obj
      * @return 字符串集合的資源类型授权信息
      */
     public List<String> getResourceAuthorityStrings() {
-        return resourceAuthorities.stream().map(ResourceAuthority::getAuthority).collect(Collectors.toList());
+        return resourceAuthorities
+                .stream()
+                .map(ResourceAuthority::getAuthority)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     /**
