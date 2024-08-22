@@ -5,6 +5,7 @@ import com.github.dactiv.healthan.mybatis.plus.MybatisPlusAutoConfiguration;
 import com.github.dactiv.healthan.security.audit.PluginAuditEventRepository;
 import com.github.dactiv.healthan.spring.security.audit.ElasticsearchOperationDataTraceRepository;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
+@ConditionalOnClass(MybatisPlusAutoConfiguration.class)
 @AutoConfigureBefore(MybatisPlusAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "healthan.mybatis.operation-data-trace", value = "enabled", matchIfMissing = true)
 public class OperationDataTraceAuditAutoConfiguration {
