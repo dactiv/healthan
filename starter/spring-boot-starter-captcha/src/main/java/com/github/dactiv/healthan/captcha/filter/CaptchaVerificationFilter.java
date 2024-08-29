@@ -4,6 +4,7 @@ import com.github.dactiv.healthan.captcha.CaptchaProperties;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.exception.SystemException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,12 +60,14 @@ public class CaptchaVerificationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 判断是否断言后为成功，如果是，不校验验证码，否则校验验证码。
-        boolean success = this.captchaVerificationInterceptors.stream().allMatch(a -> a.preVerify(request));
+        if (CollectionUtils.isNotEmpty(captchaVerificationInterceptors)) {
+            // 判断是否断言后为成功，如果是，不校验验证码，否则校验验证码。
+            boolean success = this.captchaVerificationInterceptors.stream().allMatch(a -> a.preVerify(request));
 
-        if (success) {
-            filterChain.doFilter(request, response);
-            return;
+            if (success) {
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
 
         try {
