@@ -464,7 +464,7 @@ public class MinioTemplate {
                 .builder()
                 .bucket(object.getTarget().getBucketName().toLowerCase())
                 .region(object.getTarget().getRegion())
-                .object(StringUtils.defaultString(object.getTarget().getObjectName(), object.getTarget().getObjectName()))
+                .object(Objects.toString(object.getTarget().getObjectName(), object.getTarget().getObjectName()))
                 .source(copySource.build());
 
         ObjectWriteResponse response = minioClient.copyObject(args.build()).get();

@@ -61,9 +61,9 @@ public class SnowflakeProperties {
      * @param serviceId    服务编号（业务编号），共3位以字符串组成，000~999，共1000个
      */
     public SnowflakeProperties(String serviceId) {
-        this.dataCenterId = RandomUtils.nextInt(MIN_NUMBER, MAX_NUMBER);
+        this.dataCenterId = RandomUtils.secure().randomLong(MIN_NUMBER, MAX_NUMBER);
         this.serviceId = serviceId;
-        this.workerId = RandomUtils.nextInt(MIN_NUMBER, MAX_NUMBER);
+        this.workerId = RandomUtils.secure().randomLong(MIN_NUMBER, MAX_NUMBER);
     }
 
     /**

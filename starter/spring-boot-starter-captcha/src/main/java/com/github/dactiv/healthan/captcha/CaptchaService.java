@@ -3,9 +3,9 @@ package com.github.dactiv.healthan.captcha;
 import com.github.dactiv.healthan.captcha.token.BuildToken;
 import com.github.dactiv.healthan.captcha.token.InterceptToken;
 import com.github.dactiv.healthan.commons.RestResult;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**

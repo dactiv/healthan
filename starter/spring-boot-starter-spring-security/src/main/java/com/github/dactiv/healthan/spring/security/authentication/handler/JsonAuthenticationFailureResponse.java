@@ -1,9 +1,9 @@
 package com.github.dactiv.healthan.spring.security.authentication.handler;
 
 import com.github.dactiv.healthan.commons.RestResult;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.AuthenticationException;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**

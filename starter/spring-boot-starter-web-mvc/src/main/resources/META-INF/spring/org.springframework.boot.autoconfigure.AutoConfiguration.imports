@@ -1,0 +1,3 @@
+com.github.dactiv.healthan.spring.web.SpringWebMvcAutoConfiguration
+com.github.dactiv.healthan.spring.web.UndertowServletWebServerFactoryConfiguration
+com.github.dactiv.healthan.spring.web.CaptchaExtAutoConfiguration

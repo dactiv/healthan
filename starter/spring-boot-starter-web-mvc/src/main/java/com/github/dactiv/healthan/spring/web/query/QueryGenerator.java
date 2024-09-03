@@ -3,11 +3,11 @@ package com.github.dactiv.healthan.spring.web.query;
 import com.github.dactiv.healthan.spring.web.query.condition.Condition;
 import com.github.dactiv.healthan.spring.web.query.condition.ConditionParser;
 import com.github.dactiv.healthan.spring.web.query.generator.WildcardParser;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,7 +73,7 @@ public interface QueryGenerator<T> {
                 .stream()
                 // 过滤掉空的值
                 .filter(e -> Objects.nonNull(e.getValue()))
-                .collect(Collectors.toList());
+                .toList();
         Map<String, List<Condition>> filterConditionMap = new LinkedHashMap<>();
         for (Map.Entry<String, List<Object>> entry : entryList) {
             List<Condition> conditions = getConditionParserList()

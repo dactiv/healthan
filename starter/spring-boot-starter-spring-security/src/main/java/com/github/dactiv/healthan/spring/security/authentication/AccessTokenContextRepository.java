@@ -20,6 +20,8 @@ import com.github.dactiv.healthan.spring.security.authentication.token.RefreshTo
 import com.github.dactiv.healthan.spring.security.entity.AccessTokenDetails;
 import com.github.dactiv.healthan.spring.security.entity.support.MobileSecurityPrincipal;
 import com.github.dactiv.healthan.spring.web.device.DeviceUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,8 +35,6 @@ import org.springframework.security.web.context.SaveContextOnUpdateOrErrorRespon
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.util.WebUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.Map;

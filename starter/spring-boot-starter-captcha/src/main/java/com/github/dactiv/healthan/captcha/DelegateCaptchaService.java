@@ -3,8 +3,8 @@ package com.github.dactiv.healthan.captcha;
 import com.github.dactiv.healthan.captcha.token.BuildToken;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.exception.ServiceException;
+import jakarta.servlet.http.HttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 

@@ -57,7 +57,7 @@ public class SpelExpressionValueGenerator implements ValueGenerator {
 
         StandardEvaluationContext evaluationContext = createStandardEvaluationContext(method, args);
 
-        return generate(StringUtils.defaultString(getPrefix(), StringUtils.EMPTY), expression, evaluationContext);
+        return generate(Objects.toString(getPrefix(), StringUtils.EMPTY), expression, evaluationContext);
     }
 
     private Object generate(String prefix, String expression, StandardEvaluationContext evaluationContext) {

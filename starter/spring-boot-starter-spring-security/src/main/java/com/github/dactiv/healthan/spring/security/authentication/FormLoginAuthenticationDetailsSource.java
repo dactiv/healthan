@@ -2,13 +2,13 @@ package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 
 public class FormLoginAuthenticationDetailsSource extends WebAuthenticationDetailsSource {

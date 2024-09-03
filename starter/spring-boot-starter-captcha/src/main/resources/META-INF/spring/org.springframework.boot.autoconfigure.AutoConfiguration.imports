@@ -1,0 +1,2 @@
+com.github.dactiv.healthan.captcha.RedissonStorageAutoConfiguration
+com.github.dactiv.healthan.captcha.CaptchaAutoConfiguration

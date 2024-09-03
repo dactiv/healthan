@@ -7,6 +7,7 @@ import com.github.dactiv.healthan.spring.web.SpringWebMvcProperties;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import com.github.dactiv.healthan.spring.web.result.filter.FilterResultAnnotationBuilder;
 import com.github.dactiv.healthan.spring.web.result.filter.holder.FilterResultHolder;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +26,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.util.*;
 

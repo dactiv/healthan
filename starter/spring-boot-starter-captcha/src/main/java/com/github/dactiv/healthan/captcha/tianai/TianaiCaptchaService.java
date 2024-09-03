@@ -32,6 +32,7 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,7 +43,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
 import org.springframework.validation.Validator;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -194,7 +194,7 @@ public class TianaiCaptchaService extends AbstractCaptchaService<TianaiRequestBo
                                                       HttpServletRequest request) {
         String type = requestBody.getGenerateImageType();
         if (RandomValuePropertySource.RANDOM_PROPERTY_SOURCE_NAME.equals(requestBody.getGenerateImageType())) {
-            type = tianaiCaptchaProperties.getRandomCaptchaType().get(RandomUtils.nextInt(0, tianaiCaptchaProperties.getRandomCaptchaType().size()));
+            type = tianaiCaptchaProperties.getRandomCaptchaType().get(RandomUtils.secure().randomInt(0, tianaiCaptchaProperties.getRandomCaptchaType().size()));
         }
         // 生成滑块验证码图片, 可选项
         // SLIDER (滑块验证码)

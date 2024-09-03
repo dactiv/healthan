@@ -15,9 +15,9 @@ import com.github.dactiv.healthan.spring.web.query.condition.ConditionParser;
 import com.github.dactiv.healthan.spring.web.query.condition.ConditionType;
 import com.github.dactiv.healthan.spring.web.query.condition.support.SimpleConditionParser;
 import com.github.dactiv.healthan.spring.web.query.generator.WildcardParser;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

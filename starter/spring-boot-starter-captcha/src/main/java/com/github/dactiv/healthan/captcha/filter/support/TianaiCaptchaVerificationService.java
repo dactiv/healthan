@@ -3,9 +3,9 @@ package com.github.dactiv.healthan.captcha.filter.support;
 import com.github.dactiv.healthan.captcha.filter.CaptchaVerificationService;
 import com.github.dactiv.healthan.captcha.tianai.TianaiCaptchaService;
 import com.github.dactiv.healthan.commons.RestResult;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.Assert;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +38,6 @@ public class TianaiCaptchaVerificationService implements CaptchaVerificationServ
 
     @Override
     public void delete(HttpServletRequest request) {
-        tianaiCaptchaService.delete(request);
+        tianaiCaptchaService.deleteCaptcha(request);
     }
 }

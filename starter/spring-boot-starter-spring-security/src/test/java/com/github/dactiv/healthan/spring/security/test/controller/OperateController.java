@@ -3,13 +3,12 @@ package com.github.dactiv.healthan.spring.security.test.controller;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.security.enumerate.ResourceType;
 import com.github.dactiv.healthan.security.plugin.Plugin;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @Plugin(

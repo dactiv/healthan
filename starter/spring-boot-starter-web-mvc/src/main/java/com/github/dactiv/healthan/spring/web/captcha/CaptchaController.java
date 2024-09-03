@@ -9,6 +9,7 @@ import com.github.dactiv.healthan.captcha.tianai.config.TianaiCaptchaProperties;
 import com.github.dactiv.healthan.captcha.token.BuildToken;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
@@ -19,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;

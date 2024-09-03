@@ -30,29 +30,29 @@ public class IdempotentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ConcurrentInterceptor.class)
-    ConcurrentInterceptor concurrentInterceptor(RedissonClient redissonClient,
-                                                IdempotentProperties idempotentProperties) {
+    public ConcurrentInterceptor concurrentInterceptor(RedissonClient redissonClient,
+                                                       IdempotentProperties idempotentProperties) {
         SpelExpressionValueGenerator generator = new SpelExpressionValueGenerator();
         generator.setPrefix(idempotentProperties.getConcurrentKeyPrefix());
         return new ConcurrentInterceptor(redissonClient, generator);
     }
 
     @Bean
-    ConcurrentPointcutAdvisor concurrentPointcutAdvisor(ConcurrentInterceptor concurrentInterceptor) {
+    public ConcurrentPointcutAdvisor concurrentPointcutAdvisor(ConcurrentInterceptor concurrentInterceptor) {
         return new ConcurrentPointcutAdvisor(concurrentInterceptor);
     }
 
     @Bean
     @ConditionalOnMissingBean(IdempotentInterceptor.class)
-    IdempotentInterceptor idempotentInterceptor(RedissonClient redissonClient,
-                                                IdempotentProperties idempotentProperties) {
+    public IdempotentInterceptor idempotentInterceptor(RedissonClient redissonClient,
+                                                       IdempotentProperties idempotentProperties) {
         SpelExpressionValueGenerator generator = new SpelExpressionValueGenerator();
         generator.setPrefix(idempotentProperties.getIdempotentKeyPrefix());
         return new IdempotentInterceptor(redissonClient, generator, idempotentProperties);
     }
 
     @Bean
-    IdempotentPointcutAdvisor idempotentPointcutAdvisor(IdempotentInterceptor idempotentInterceptor) {
+    public IdempotentPointcutAdvisor idempotentPointcutAdvisor(IdempotentInterceptor idempotentInterceptor) {
         return new IdempotentPointcutAdvisor(idempotentInterceptor);
     }
 

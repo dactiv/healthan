@@ -1,6 +1,6 @@
 package com.github.dactiv.healthan.captcha;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 验证码解析器

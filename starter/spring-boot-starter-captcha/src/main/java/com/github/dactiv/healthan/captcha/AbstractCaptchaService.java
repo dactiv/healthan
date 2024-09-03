@@ -13,6 +13,7 @@ import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 import com.github.dactiv.healthan.commons.exception.ServiceException;
 import com.github.dactiv.healthan.commons.exception.SystemException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +26,6 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
@@ -163,7 +163,7 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
         token.setArgs(args);
 
         String generateInterceptorValue = httpServletRequest.getParameter(captchaProperties.getIgnoreInterceptorParamName());
-        String isGenerateInterceptor = StringUtils.defaultString(generateInterceptorValue, Boolean.TRUE.toString());
+        String isGenerateInterceptor = Objects.toString(generateInterceptorValue, Boolean.TRUE.toString());
 
         String interceptorType = getInterceptorType();
         if (StringUtils.isNotEmpty(interceptorType) && BooleanUtils.toBoolean(isGenerateInterceptor)) {
@@ -202,7 +202,7 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
         String token = request.getParameter(getTokenParamName());
         BuildToken buildToken = getBuildToken(request);
 
-        String verifyTokenExist = StringUtils.defaultString(request.getParameter(captchaProperties.getVerifyTokenExistParamName()), Boolean.TRUE.toString());
+        String verifyTokenExist = Objects.toString(request.getParameter(captchaProperties.getVerifyTokenExistParamName()), Boolean.TRUE.toString());
 
         if (Objects.isNull(buildToken) && BooleanUtils.toBoolean(verifyTokenExist)) {
             return RestResult.ofException(ErrorCodeException.CONTENT_NOT_EXIST, new SystemException("找不到 token 为 [" + token + "] 的验证码 token 信息"));
@@ -319,7 +319,7 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
         captcha.setExpireTime(getCaptchaExpireTime());
         captcha.setValue(value);
 
-        String verifySuccessDelete = StringUtils.defaultString(request.getParameter(captchaProperties.getVerifySuccessDeleteParamName()), Boolean.TRUE.toString());
+        String verifySuccessDelete = Objects.toString(request.getParameter(captchaProperties.getVerifySuccessDeleteParamName()), Boolean.TRUE.toString());
         captcha.setVerifySuccessDelete(BooleanUtils.toBoolean(verifySuccessDelete));
 
         TimeProperties retryTime = getRetryTime();

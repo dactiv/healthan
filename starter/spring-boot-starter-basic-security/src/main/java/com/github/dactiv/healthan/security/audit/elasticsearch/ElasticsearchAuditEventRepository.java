@@ -1,5 +1,11 @@
 package com.github.dactiv.healthan.security.audit.elasticsearch;
 
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.json.JsonData;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.id.StringIdEntity;
@@ -9,23 +15,18 @@ import com.github.dactiv.healthan.security.AuditIndexProperties;
 import com.github.dactiv.healthan.security.audit.*;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.audit.AuditEvent;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.BaseQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
@@ -111,11 +112,11 @@ public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventR
 
         String index = getIndexName(after).toLowerCase();
 
-        QueryBuilder queryBuilder = createQueryBuilder(after, type, principal);
+        Query query = createQuery(after, type, principal);
 
-        NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
-                .withQuery(queryBuilder)
-                .withSorts(SortBuilders.fieldSort(RestResult.DEFAULT_TIMESTAMP_NAME).order(SortOrder.DESC));
+        NativeQueryBuilder builder = new NativeQueryBuilder()
+                .withQuery(query)
+                .withSort(SortOptions.of(s -> s.field(f -> f.field(RestResult.DEFAULT_TIMESTAMP_NAME).order(SortOrder.Desc))));
 
         try {
             return findData(builder.build(), index);
@@ -132,13 +133,12 @@ public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventR
 
         String index = getIndexName(after).toLowerCase();
 
-        QueryBuilder queryBuilder = createQueryBuilder(after, type, principal);
+        Query query = createQuery(after, type, principal);
 
-        NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
-                .withQuery(queryBuilder)
-                .withSorts(SortBuilders.fieldSort(RestResult.DEFAULT_TIMESTAMP_NAME).order(SortOrder.DESC))
+        NativeQueryBuilder builder = new NativeQueryBuilder()
+                .withQuery(query)
+                .withSort(SortOptions.of(s -> s.field(f -> f.field(RestResult.DEFAULT_TIMESTAMP_NAME).order(SortOrder.Desc))))
                 .withPageable(org.springframework.data.domain.PageRequest.of(pageRequest.getNumber() - 1, pageRequest.getSize()));
-
         try {
             List<AuditEvent> content = findData(builder.build(), index);
             return new Page<>(pageRequest, content);
@@ -148,7 +148,7 @@ public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventR
         }
     }
 
-    public List<AuditEvent> findData(NativeSearchQuery query, String index) {
+    public List<AuditEvent> findData(BaseQuery query, String index) {
         return elasticsearchOperations
                 .search(query, Map.class, IndexCoordinates.of(index))
                 .stream()
@@ -190,22 +190,23 @@ public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventR
      *
      * @return 查询条件
      */
-    private QueryBuilder createQueryBuilder(Instant after, String type, String principal) {
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+    private Query createQuery(Instant after, String type, String principal) {
+
+        BoolQuery.Builder queryBuilder = QueryBuilders.bool();
 
         if (StringUtils.isNotBlank(type)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(IdAuditEvent.TYPE_FIELD_NAME, type));
+            queryBuilder = queryBuilder.must(m -> m.term(t -> t.field(IdAuditEvent.TYPE_FIELD_NAME).value(type)));
         }
 
         if (Objects.nonNull(after)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.rangeQuery(RestResult.DEFAULT_TIMESTAMP_NAME).gte(after.getEpochSecond()));
+            queryBuilder = queryBuilder.must(m -> m.range(r -> r.field(RestResult.DEFAULT_TIMESTAMP_NAME).gte(JsonData.of(after.getEpochSecond()))));
         }
 
         if (StringUtils.isNotBlank(principal)) {
-            queryBuilder = queryBuilder.must(QueryBuilders.termQuery(IdAuditEvent.PRINCIPAL_FIELD_NAME, principal));
+            queryBuilder = queryBuilder.must(m -> m.term(t -> t.field(IdAuditEvent.PRINCIPAL_FIELD_NAME).value(principal)));
         }
 
-        return queryBuilder;
+        return new Query(queryBuilder.build());
     }
 
     public ElasticsearchOperations getElasticsearchOperations() {

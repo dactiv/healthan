@@ -1,8 +1,7 @@
 package com.github.dactiv.healthan.spring.security.authentication.handler;
 
 import com.github.dactiv.healthan.commons.RestResult;
-
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 响应 json 数据的认证成功处理实现后的数据追加接口

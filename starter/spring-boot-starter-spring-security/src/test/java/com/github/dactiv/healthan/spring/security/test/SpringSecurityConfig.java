@@ -94,7 +94,7 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                 .map(o -> Casts.cast(o, OAuth2AuthorizationCodeRequestAuthenticationProvider.class))
                 .findFirst();
 
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             return;
         }
         OAuth2AuthorizationCodeRequestAuthenticationProvider authenticationProvider = optional.get();
@@ -203,18 +203,22 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
         try {
 
             httpSecurity
-                    .formLogin()
-                    .passwordParameter(authenticationProperties.getPasswordParamName())
-                    .usernameParameter(authenticationProperties.getUsernameParamName())
-                    .loginProcessingUrl(authenticationProperties.getLoginProcessingUrl())
-                    .authenticationDetailsSource(new FormLoginAuthenticationDetailsSource(authenticationProperties))
-                    .failureHandler(authenticationFailureHandler)
-                    .successHandler(authenticationSuccessHandler)
-                    .and()
-                    .logout()
-                    .and()
-                    .sessionManagement()
-                    .maximumSessions(Integer.MAX_VALUE);
+                    .formLogin(f -> f.passwordParameter(authenticationProperties.getPasswordParamName())
+                            .usernameParameter(authenticationProperties.getUsernameParamName())
+                            .loginProcessingUrl(authenticationProperties.getLoginProcessingUrl())
+                            .authenticationDetailsSource(new FormLoginAuthenticationDetailsSource(authenticationProperties))
+                            .failureHandler(authenticationFailureHandler)
+                            .successHandler(authenticationSuccessHandler)
+                    )
+                    .sessionManagement(s -> s.maximumSessions(Integer.MAX_VALUE))
+                    .logout(l -> {
+                        try {
+                            l.configure(httpSecurity);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
 
                     httpSecurity.authenticationProvider(
                             new SecurityPrincipalAuthenticationProvider(

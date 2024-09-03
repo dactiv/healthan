@@ -1,9 +1,8 @@
 package com.github.dactiv.healthan.spring.security.authentication;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 记住我认证明细源, 用于获取请求 url 让 {@link com.github.dactiv.healthan.spring.security.audit.SecurityAuditEventRepositoryInterceptor}

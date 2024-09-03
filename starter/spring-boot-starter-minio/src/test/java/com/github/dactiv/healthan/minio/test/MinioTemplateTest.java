@@ -63,7 +63,7 @@ public class MinioTemplateTest {
     @Test
     void makeBucketIfNotExists() throws Exception {
 
-        String randomRegion = RandomStringUtils.randomAlphabetic(6);
+        String randomRegion = RandomStringUtils.secure().nextAlphabetic(6);
 
         Bucket bucket = Bucket.of(DEFAULT_TEST_BUCKET);
 

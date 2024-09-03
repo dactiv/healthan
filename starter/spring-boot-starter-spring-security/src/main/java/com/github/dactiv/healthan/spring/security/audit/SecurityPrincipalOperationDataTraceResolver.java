@@ -9,6 +9,7 @@ import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditPr
 import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import com.github.dactiv.healthan.spring.security.entity.SecurityPrincipalOperationDataTraceRecord;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import net.sf.jsqlparser.statement.Statement;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -17,9 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 用户明细操作数据留痕仓库实现
@@ -43,7 +42,7 @@ public class SecurityPrincipalOperationDataTraceResolver extends MybatisPlusOper
 
         Optional<HttpServletRequest> optional = SpringMvcUtils.getHttpServletRequest();
 
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             return null;
         }
 
@@ -78,7 +77,7 @@ public class SecurityPrincipalOperationDataTraceResolver extends MybatisPlusOper
         List<OperationDataTraceRecord> result = new LinkedList<>();
         AuditEvent controllerAuditEvent = Casts.cast(httpServletRequest.getAttribute(controllerAuditProperties.getAuditEventAttrName()));
 
-        for (OperationDataTraceRecord record : records.stream().filter(Objects::nonNull).collect(Collectors.toList())) {
+        for (OperationDataTraceRecord record : records.stream().filter(Objects::nonNull).toList()) {
 
             SecurityPrincipalOperationDataTraceRecord traceRecord = Casts.of(record, SecurityPrincipalOperationDataTraceRecord.class);
             if (Objects.isNull(traceRecord)) {
@@ -130,7 +129,7 @@ public class SecurityPrincipalOperationDataTraceResolver extends MybatisPlusOper
     private void syncControllerAuditEvent(Map<String, Object> data) {
         Optional<HttpServletRequest> optional = SpringMvcUtils.getHttpServletRequest();
 
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             return ;
         }
 

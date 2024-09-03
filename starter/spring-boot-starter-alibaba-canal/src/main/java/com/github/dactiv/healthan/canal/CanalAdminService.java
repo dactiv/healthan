@@ -23,9 +23,9 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.CookieGenerator;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
@@ -103,8 +103,8 @@ public class CanalAdminService {
      * @return 域名 + 接口名称值
      */
     public String getApiValue(String api) {
-        String apiValue = StringUtils.prependIfMissing(api, CookieGenerator.DEFAULT_COOKIE_PATH);
-        String url = StringUtils.removeEnd(canalAdminProperties.getUri(), CookieGenerator.DEFAULT_COOKIE_PATH);
+        String apiValue = StringUtils.prependIfMissing(api, AntPathMatcher.DEFAULT_PATH_SEPARATOR);
+        String url = StringUtils.removeEnd(canalAdminProperties.getUri(), AntPathMatcher.DEFAULT_PATH_SEPARATOR);
 
         return url + apiValue;
     }
@@ -134,7 +134,7 @@ public class CanalAdminService {
                 String url = getApiValue(CanalConstants.FIND_NODE_SERVERS_API) + Casts.QUESTION_MARK + Casts.castRequestBodyMapToString(param);
                 ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, Casts.MAP_PARAMETERIZED_TYPE_REFERENCE);
                 Map<String, Object> pageResult = postResponseEntity(response, url, Casts.MAP_TYPE_REFERENCE);
-                data = Casts.convertValue(pageResult.get(PAGE_ITEMS_FIELD), new TypeReference<List<CanalNodeServer>>() {});
+                data = Casts.convertValue(pageResult.get(PAGE_ITEMS_FIELD), new TypeReference<>() {});
                 if (CollectionUtils.isNotEmpty(data)) {
                     result.addAll(data);
                 }
@@ -161,7 +161,7 @@ public class CanalAdminService {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(headers);
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, Casts.MAP_PARAMETERIZED_TYPE_REFERENCE);
-        return postResponseEntity(response, url, new TypeReference<CanalNodeServerConfig>() {});
+        return postResponseEntity(response, url, new TypeReference<>() {});
 
     }
 
@@ -218,7 +218,7 @@ public class CanalAdminService {
 
         String url = getApiValue(MessageFormat.format(CanalConstants.FIND_ACTIVE_INSTANCES_API, serverId));
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, Casts.MAP_PARAMETERIZED_TYPE_REFERENCE);
-        List<CanalInstance> result = postResponseEntity(response, url, new TypeReference<List<CanalInstance>>() {});
+        List<CanalInstance> result = postResponseEntity(response, url, new TypeReference<>() {});
         if (CollectionUtils.isEmpty(result)) {
             return new LinkedList<>();
         }
@@ -306,7 +306,7 @@ public class CanalAdminService {
         String url = getApiValue(MessageFormat.format(CanalConstants.GET_AND_DELETE_INSTANCE_API, id));
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, Casts.MAP_PARAMETERIZED_TYPE_REFERENCE);
-        CanalInstance result = postResponseEntity(response, url, new TypeReference<CanalInstance>() {});
+        CanalInstance result = postResponseEntity(response, url, new TypeReference<>() {});
 
         setInstanceSubscribeStatus(result);
 
@@ -351,7 +351,7 @@ public class CanalAdminService {
         Long totalCount = Casts.cast(result.get(TotalPage.COUNT_FIELD), Long.class);
         List<CanalInstance> elements = Casts.convertValue(
                 result.get(PAGE_ITEMS_FIELD),
-                new TypeReference<List<CanalInstance>>() {}
+                new TypeReference<>() {}
         );
         elements.forEach(this::setInstanceSubscribeStatus);
         return new TotalPage<>(pageRequest, elements, totalCount);
@@ -421,7 +421,7 @@ public class CanalAdminService {
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, Casts.MAP_PARAMETERIZED_TYPE_REFERENCE);
-        return postResponseEntity(response, url, new TypeReference<List<Map<String, Object>>>() {});
+        return postResponseEntity(response, url, new TypeReference<>() {});
     }
 
     /**
@@ -436,6 +436,6 @@ public class CanalAdminService {
         HttpEntity<?> entity = new HttpEntity<>(headers);
         String url = getApiValue(MessageFormat.format(CanalConstants.GET_INSTANCE_LOG, instanceId, serverId));
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, Casts.MAP_PARAMETERIZED_TYPE_REFERENCE);
-        return postResponseEntity(response, url, new TypeReference<Map<String, Object>>() {});
+        return postResponseEntity(response, url, new TypeReference<>() {});
     }
 }

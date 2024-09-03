@@ -9,8 +9,8 @@ import com.github.dactiv.healthan.commons.id.BasicIdentification;
 import com.github.dactiv.healthan.commons.id.StringIdEntity;
 import com.github.dactiv.healthan.mybatis.handler.JacksonJsonTypeHandler;
 import com.github.dactiv.healthan.mybatis.handler.NameValueEnumTypeHandler;
+import jakarta.validation.constraints.NotEmpty;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
