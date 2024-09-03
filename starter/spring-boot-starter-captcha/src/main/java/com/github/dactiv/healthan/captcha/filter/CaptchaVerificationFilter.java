@@ -1,15 +1,12 @@
 package com.github.dactiv.healthan.captcha.filter;
 
 import com.github.dactiv.healthan.captcha.CaptchaProperties;
-import com.github.dactiv.healthan.commons.Casts;
-import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.commons.exception.SystemException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,9 +16,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 验证码校验认证过滤器
@@ -62,7 +57,7 @@ public class CaptchaVerificationFilter extends OncePerRequestFilter {
 
         if (CollectionUtils.isNotEmpty(captchaVerificationInterceptors)) {
             // 判断是否断言后为成功，如果是，不校验验证码，否则校验验证码。
-            boolean success = this.captchaVerificationInterceptors.stream().allMatch(a -> a.preVerify(request));
+            boolean success = this.captchaVerificationInterceptors.stream().allMatch(a -> a.preVerify(request, response));
 
             if (success) {
                 filterChain.doFilter(request, response);
@@ -84,19 +79,14 @@ public class CaptchaVerificationFilter extends OncePerRequestFilter {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("对 {} 请求校验验证码成功，请求参数为:{}", url, request.getParameterMap());
             }
-            captchaVerificationInterceptors.forEach(a -> a.postVerify(request));
+            captchaVerificationInterceptors.forEach(a -> a.postVerify(request, response));
             if (getVerifySuccessDelete(request)) {
                 captchaVerificationService.delete(request);
             }
             filterChain.doFilter(request,response);
         } catch (Exception e) {
             LOGGER.error("验证码校验失败", e);
-            RestResult<Map<String, Object>> result = RestResult.ofException(e);
-            result.setData(new LinkedHashMap<>());
-            captchaVerificationInterceptors.forEach(a -> a.exceptionVerify(request, result, e));
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(Casts.writeValueAsString(result));
+            captchaVerificationInterceptors.forEach(a -> a.exceptionVerify(request, response, e));
         }
     }
 

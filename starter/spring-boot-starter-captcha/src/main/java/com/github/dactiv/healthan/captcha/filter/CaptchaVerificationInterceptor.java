@@ -1,8 +1,13 @@
 package com.github.dactiv.healthan.captcha.filter;
 
+import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
+import org.springframework.http.MediaType;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -16,10 +21,11 @@ public interface CaptchaVerificationInterceptor {
      * 校验验证码之前触发此方法
      *
      * @param request http servlet request
+     * @param response http servlet response
      *
      * @return true 不需要校验验证码，否则 false，默认为 false
      */
-    default boolean preVerify(HttpServletRequest request) {
+    default boolean preVerify(HttpServletRequest request, HttpServletResponse response) {
         return false;
     }
 
@@ -27,8 +33,9 @@ public interface CaptchaVerificationInterceptor {
      * 校验验证码之后触发此方法
      *
      * @param request http servlet request
+     * @param response http servlet response
      */
-    default void postVerify(HttpServletRequest request) {
+    default void postVerify(HttpServletRequest request, HttpServletResponse response) {
 
     }
 
@@ -36,10 +43,18 @@ public interface CaptchaVerificationInterceptor {
      * 校验异常时触发此方法
      *
      * @param request http servlet request
-     * @param result 校验结果
+     * @param response http servlet response
      * @param e 异常信息
      */
-    default void exceptionVerify(HttpServletRequest request, RestResult<Map<String, Object>> result, Exception e) {
-
+    default void exceptionVerify(HttpServletRequest request, HttpServletResponse response, Exception e)  {
+        RestResult<Map<String, Object>> result = RestResult.ofException(e);
+        result.setData(new LinkedHashMap<>());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        try {
+            response.getWriter().write(Casts.writeValueAsString(result));
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }
