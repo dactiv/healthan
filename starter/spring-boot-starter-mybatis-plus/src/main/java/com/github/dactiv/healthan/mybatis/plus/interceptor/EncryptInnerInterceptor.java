@@ -1,5 +1,7 @@
 package com.github.dactiv.healthan.mybatis.plus.interceptor;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
@@ -7,6 +9,7 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.ReflectionUtils;
 import com.github.dactiv.healthan.crypto.algorithm.Base64;
 import com.github.dactiv.healthan.crypto.algorithm.CodecUtils;
+import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceInterceptor;
 import com.github.dactiv.healthan.mybatis.plus.CryptoNullClass;
 import com.github.dactiv.healthan.mybatis.plus.CryptoService;
 import com.github.dactiv.healthan.mybatis.plus.DecryptService;
@@ -14,9 +17,15 @@ import com.github.dactiv.healthan.mybatis.plus.EncryptService;
 import com.github.dactiv.healthan.mybatis.plus.annotation.EncryptProperties;
 import com.github.dactiv.healthan.mybatis.plus.annotation.Encryption;
 import com.github.dactiv.healthan.mybatis.plus.service.BasicService;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.insert.Insert;
+import net.sf.jsqlparser.statement.update.Update;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -72,15 +81,28 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         if (!SUPPORT_COMMANDS.contains(ms.getSqlCommandType())) {
             return;
         }
+
+        Statement statement = getStatement(ms, parameter);
         if (parameter instanceof Map) {
             Map<String, Object> map = Casts.cast(parameter);
-            encrypt(map, ms);
+            encrypt(map, ms, statement);
         } else {
-            Map<CryptoService, List<Field>> fields = this.getCryptoFields(parameter.getClass());
+
+            Map<CryptoService, List<Field>> fields = this.getCryptoFields(parameter.getClass(), statement);
             if (MapUtils.isEmpty(fields)) {
                 return;
             }
             doEncrypt(parameter, fields);
+        }
+    }
+
+    private Statement getStatement(MappedStatement ms, Object parameter) {
+        try {
+            BoundSql boundSql = ms.getSqlSource().getBoundSql(parameter);
+            String sql = RegExUtils.replaceAll(boundSql.getSql(), OperationDataTraceInterceptor.REMOVE_ESCAPE_REG, StringUtils.SPACE);
+            return CCJSqlParserUtil.parse(sql);
+        } catch (JSQLParserException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -105,22 +127,24 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         List<String> conditional = Arrays.asList(sql.split(CONDITIONAL_SEGMENTATION_REX));
 
         Class<?> entityClass = BasicService.getEntityClass(ms.getId());
-        Map<CryptoService, List<Field>> cryptoServiceListMap = getCryptoFields(entityClass);
+
+        Statement statement = getStatement(ms, parameter);
+        Map<CryptoService, List<Field>> cryptoServiceListMap = getCryptoFields(entityClass, statement);
         encryptAndReplaceParamNameValuePairs(queryWrapper, conditional, cryptoServiceListMap);
     }
 
-    public void encrypt(Map<String, Object> map, MappedStatement ms) {
+    public void encrypt(Map<String, Object> map, MappedStatement ms, Statement statement) {
         Object et = map.getOrDefault(Constants.ENTITY, null);
         if (Objects.nonNull(et)) {
 
-            Map<CryptoService, List<Field>> fields = this.getCryptoFields(et.getClass());
+            Map<CryptoService, List<Field>> fields = this.getCryptoFields(et.getClass(), statement);
             if (MapUtils.isEmpty(fields)) {
                 return;
             }
             this.doEncrypt(et, fields);
         } else if (wrapperMode && map.entrySet().stream().anyMatch(t -> Objects.equals(t.getKey(), Constants.WRAPPER))) {
             // update(LambdaUpdateWrapper) or update(UpdateWrapper)
-            this.doEncrypt(map, ms);
+            this.doEncrypt(map, ms, statement);
         }
     }
 
@@ -143,16 +167,15 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         }
     }
 
-    public void doEncrypt(Map<String, Object> map, MappedStatement ms) {
+    public void doEncrypt(Map<String, Object> map, MappedStatement ms, Statement statement) {
         Object ew = map.get(Constants.WRAPPER);
 
         if (Objects.isNull(ew) || !AbstractWrapper.class.isAssignableFrom(ew.getClass())) {
             return ;
         }
-
         Class<?> entityClass = BasicService.getEntityClass(ms.getId());
         AbstractWrapper<?, ?, ?> updateWrapper = Casts.cast(ew);
-        Map<CryptoService, List<Field>> fields = this.getCryptoFields(entityClass);
+        Map<CryptoService, List<Field>> fields = this.getCryptoFields(entityClass, statement);
         if (MapUtils.isEmpty(fields)) {
             return ;
         }
@@ -229,17 +252,17 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         return result;
     }
 
-    private Map<CryptoService, List<Field>> getCryptoFields(Class<?> entityClass) {
+    private Map<CryptoService, List<Field>> getCryptoFields(Class<?> entityClass, Statement statement) {
         Map<CryptoService, List<Field>> result = new LinkedHashMap<>();
         if (Objects.isNull(entityClass)) {
             return result;
         }
         List<Field> fields = ReflectionUtils.findFields(entityClass);
 
-        Set<EncryptProperties> decrypts = AnnotatedElementUtils.findAllMergedAnnotations(entityClass, EncryptProperties.class);
+        Set<EncryptProperties> encrypts = AnnotatedElementUtils.findAllMergedAnnotations(entityClass, EncryptProperties.class);
 
-        if (CollectionUtils.isNotEmpty(decrypts)) {
-            for (EncryptProperties properties : decrypts) {
+        if (CollectionUtils.isNotEmpty(encrypts)) {
+            for (EncryptProperties properties : encrypts) {
                 EncryptService encryptService = getEncryptService(properties.beanName(), properties.serviceClass());
                 List<Field> fieldList = result.computeIfAbsent(encryptService, k -> new LinkedList<>());
                 fields
@@ -255,11 +278,30 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
             if (Objects.isNull(encryption)) {
                 continue;
             }
+
+            if (isFieldIgnoredStrategy(field, statement)) {
+                continue;
+            }
+
             EncryptService encryptService = getEncryptService(encryption.beanName(), encryption.serviceClass());
             List<Field> fieldList = result.computeIfAbsent(encryptService, k -> new LinkedList<>());
             fieldList.add(field);
         }
         return result;
 
+    }
+
+    private boolean isFieldIgnoredStrategy(Field field, Statement statement) {
+        TableField tableField = AnnotatedElementUtils.findMergedAnnotation(field, TableField.class);
+
+        if (Objects.isNull(tableField)) {
+            return false;
+        }
+
+        if (Insert.class.isAssignableFrom(statement.getClass()) && FieldStrategy.IGNORED.equals(tableField.insertStrategy())) {
+            return true;
+        }
+
+        return Update.class.isAssignableFrom(statement.getClass()) && FieldStrategy.IGNORED.equals(tableField.updateStrategy());
     }
 }
