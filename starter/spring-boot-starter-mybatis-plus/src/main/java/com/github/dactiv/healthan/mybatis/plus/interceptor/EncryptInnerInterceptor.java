@@ -1,5 +1,7 @@
 package com.github.dactiv.healthan.mybatis.plus.interceptor;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
@@ -72,11 +74,13 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         if (!SUPPORT_COMMANDS.contains(ms.getSqlCommandType())) {
             return;
         }
+
         if (parameter instanceof Map) {
             Map<String, Object> map = Casts.cast(parameter);
             encrypt(map, ms);
         } else {
-            Map<CryptoService, List<Field>> fields = this.getCryptoFields(parameter.getClass());
+
+            Map<CryptoService, List<Field>> fields = this.getCryptoFields(parameter.getClass(), ms.getSqlCommandType());
             if (MapUtils.isEmpty(fields)) {
                 return;
             }
@@ -105,7 +109,8 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         List<String> conditional = Arrays.asList(sql.split(CONDITIONAL_SEGMENTATION_REX));
 
         Class<?> entityClass = BasicService.getEntityClass(ms.getId());
-        Map<CryptoService, List<Field>> cryptoServiceListMap = getCryptoFields(entityClass);
+
+        Map<CryptoService, List<Field>> cryptoServiceListMap = getCryptoFields(entityClass, ms.getSqlCommandType());
         encryptAndReplaceParamNameValuePairs(queryWrapper, conditional, cryptoServiceListMap);
     }
 
@@ -113,7 +118,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         Object et = map.getOrDefault(Constants.ENTITY, null);
         if (Objects.nonNull(et)) {
 
-            Map<CryptoService, List<Field>> fields = this.getCryptoFields(et.getClass());
+            Map<CryptoService, List<Field>> fields = this.getCryptoFields(et.getClass(), ms.getSqlCommandType());
             if (MapUtils.isEmpty(fields)) {
                 return;
             }
@@ -149,10 +154,9 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         if (Objects.isNull(ew) || !AbstractWrapper.class.isAssignableFrom(ew.getClass())) {
             return ;
         }
-
         Class<?> entityClass = BasicService.getEntityClass(ms.getId());
         AbstractWrapper<?, ?, ?> updateWrapper = Casts.cast(ew);
-        Map<CryptoService, List<Field>> fields = this.getCryptoFields(entityClass);
+        Map<CryptoService, List<Field>> fields = this.getCryptoFields(entityClass, ms.getSqlCommandType());
         if (MapUtils.isEmpty(fields)) {
             return ;
         }
@@ -229,17 +233,17 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         return result;
     }
 
-    private Map<CryptoService, List<Field>> getCryptoFields(Class<?> entityClass) {
+    private Map<CryptoService, List<Field>> getCryptoFields(Class<?> entityClass, SqlCommandType commandType) {
         Map<CryptoService, List<Field>> result = new LinkedHashMap<>();
         if (Objects.isNull(entityClass)) {
             return result;
         }
         List<Field> fields = ReflectionUtils.findFields(entityClass);
 
-        Set<EncryptProperties> decrypts = AnnotatedElementUtils.findAllMergedAnnotations(entityClass, EncryptProperties.class);
+        Set<EncryptProperties> encrypts = AnnotatedElementUtils.findAllMergedAnnotations(entityClass, EncryptProperties.class);
 
-        if (CollectionUtils.isNotEmpty(decrypts)) {
-            for (EncryptProperties properties : decrypts) {
+        if (CollectionUtils.isNotEmpty(encrypts)) {
+            for (EncryptProperties properties : encrypts) {
                 EncryptService encryptService = getEncryptService(properties.beanName(), properties.serviceClass());
                 List<Field> fieldList = result.computeIfAbsent(encryptService, k -> new LinkedList<>());
                 fields
@@ -255,11 +259,30 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
             if (Objects.isNull(encryption)) {
                 continue;
             }
+
+            if (isFieldNeverStrategy(field, commandType)) {
+                continue;
+            }
+
             EncryptService encryptService = getEncryptService(encryption.beanName(), encryption.serviceClass());
             List<Field> fieldList = result.computeIfAbsent(encryptService, k -> new LinkedList<>());
             fieldList.add(field);
         }
         return result;
 
+    }
+
+    private boolean isFieldNeverStrategy(Field field, SqlCommandType commandType) {
+        TableField tableField = AnnotatedElementUtils.findMergedAnnotation(field, TableField.class);
+
+        if (Objects.isNull(tableField)) {
+            return false;
+        }
+
+        if (SqlCommandType.INSERT.equals(commandType) && FieldStrategy.NEVER.equals(tableField.insertStrategy())) {
+            return true;
+        }
+
+        return SqlCommandType.INSERT.equals(commandType) && FieldStrategy.NEVER.equals(tableField.updateStrategy());
     }
 }
