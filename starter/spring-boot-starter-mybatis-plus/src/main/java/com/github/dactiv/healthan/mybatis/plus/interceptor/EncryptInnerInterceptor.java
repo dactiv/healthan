@@ -9,7 +9,6 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.ReflectionUtils;
 import com.github.dactiv.healthan.crypto.algorithm.Base64;
 import com.github.dactiv.healthan.crypto.algorithm.CodecUtils;
-import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceInterceptor;
 import com.github.dactiv.healthan.mybatis.plus.CryptoNullClass;
 import com.github.dactiv.healthan.mybatis.plus.CryptoService;
 import com.github.dactiv.healthan.mybatis.plus.DecryptService;
@@ -17,15 +16,9 @@ import com.github.dactiv.healthan.mybatis.plus.EncryptService;
 import com.github.dactiv.healthan.mybatis.plus.annotation.EncryptProperties;
 import com.github.dactiv.healthan.mybatis.plus.annotation.Encryption;
 import com.github.dactiv.healthan.mybatis.plus.service.BasicService;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.update.Update;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -82,27 +75,16 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
             return;
         }
 
-        Statement statement = getStatement(ms, parameter);
         if (parameter instanceof Map) {
             Map<String, Object> map = Casts.cast(parameter);
-            encrypt(map, ms, statement);
+            encrypt(map, ms);
         } else {
 
-            Map<CryptoService, List<Field>> fields = this.getCryptoFields(parameter.getClass(), statement);
+            Map<CryptoService, List<Field>> fields = this.getCryptoFields(parameter.getClass(), ms.getSqlCommandType());
             if (MapUtils.isEmpty(fields)) {
                 return;
             }
             doEncrypt(parameter, fields);
-        }
-    }
-
-    private Statement getStatement(MappedStatement ms, Object parameter) {
-        try {
-            BoundSql boundSql = ms.getSqlSource().getBoundSql(parameter);
-            String sql = RegExUtils.replaceAll(boundSql.getSql(), OperationDataTraceInterceptor.REMOVE_ESCAPE_REG, StringUtils.SPACE);
-            return CCJSqlParserUtil.parse(sql);
-        } catch (JSQLParserException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -128,23 +110,22 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
 
         Class<?> entityClass = BasicService.getEntityClass(ms.getId());
 
-        Statement statement = getStatement(ms, parameter);
-        Map<CryptoService, List<Field>> cryptoServiceListMap = getCryptoFields(entityClass, statement);
+        Map<CryptoService, List<Field>> cryptoServiceListMap = getCryptoFields(entityClass, ms.getSqlCommandType());
         encryptAndReplaceParamNameValuePairs(queryWrapper, conditional, cryptoServiceListMap);
     }
 
-    public void encrypt(Map<String, Object> map, MappedStatement ms, Statement statement) {
+    public void encrypt(Map<String, Object> map, MappedStatement ms) {
         Object et = map.getOrDefault(Constants.ENTITY, null);
         if (Objects.nonNull(et)) {
 
-            Map<CryptoService, List<Field>> fields = this.getCryptoFields(et.getClass(), statement);
+            Map<CryptoService, List<Field>> fields = this.getCryptoFields(et.getClass(), ms.getSqlCommandType());
             if (MapUtils.isEmpty(fields)) {
                 return;
             }
             this.doEncrypt(et, fields);
         } else if (wrapperMode && map.entrySet().stream().anyMatch(t -> Objects.equals(t.getKey(), Constants.WRAPPER))) {
             // update(LambdaUpdateWrapper) or update(UpdateWrapper)
-            this.doEncrypt(map, ms, statement);
+            this.doEncrypt(map, ms);
         }
     }
 
@@ -167,7 +148,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         }
     }
 
-    public void doEncrypt(Map<String, Object> map, MappedStatement ms, Statement statement) {
+    public void doEncrypt(Map<String, Object> map, MappedStatement ms) {
         Object ew = map.get(Constants.WRAPPER);
 
         if (Objects.isNull(ew) || !AbstractWrapper.class.isAssignableFrom(ew.getClass())) {
@@ -175,7 +156,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         }
         Class<?> entityClass = BasicService.getEntityClass(ms.getId());
         AbstractWrapper<?, ?, ?> updateWrapper = Casts.cast(ew);
-        Map<CryptoService, List<Field>> fields = this.getCryptoFields(entityClass, statement);
+        Map<CryptoService, List<Field>> fields = this.getCryptoFields(entityClass, ms.getSqlCommandType());
         if (MapUtils.isEmpty(fields)) {
             return ;
         }
@@ -252,7 +233,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
         return result;
     }
 
-    private Map<CryptoService, List<Field>> getCryptoFields(Class<?> entityClass, Statement statement) {
+    private Map<CryptoService, List<Field>> getCryptoFields(Class<?> entityClass, SqlCommandType commandType) {
         Map<CryptoService, List<Field>> result = new LinkedHashMap<>();
         if (Objects.isNull(entityClass)) {
             return result;
@@ -279,7 +260,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
                 continue;
             }
 
-            if (isFieldIgnoredStrategy(field, statement)) {
+            if (isFieldNeverStrategy(field, commandType)) {
                 continue;
             }
 
@@ -291,17 +272,17 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
 
     }
 
-    private boolean isFieldIgnoredStrategy(Field field, Statement statement) {
+    private boolean isFieldNeverStrategy(Field field, SqlCommandType commandType) {
         TableField tableField = AnnotatedElementUtils.findMergedAnnotation(field, TableField.class);
 
         if (Objects.isNull(tableField)) {
             return false;
         }
 
-        if (Insert.class.isAssignableFrom(statement.getClass()) && FieldStrategy.IGNORED.equals(tableField.insertStrategy())) {
+        if (SqlCommandType.INSERT.equals(commandType) && FieldStrategy.NEVER.equals(tableField.insertStrategy())) {
             return true;
         }
 
-        return Update.class.isAssignableFrom(statement.getClass()) && FieldStrategy.IGNORED.equals(tableField.updateStrategy());
+        return SqlCommandType.INSERT.equals(commandType) && FieldStrategy.NEVER.equals(tableField.updateStrategy());
     }
 }
