@@ -138,7 +138,7 @@ public class SpringSecurityAuditTest {
         newCookie = mockMvc
                 .perform(get("/operate/isFullyAuthenticated").cookie(cookie))
                 .andExpect(status().is4xxClientError())
-                .andExpect(content().json("{\"message\":\"Access is denied\"}"))
+                .andExpect(content().json("{\"message\":\"Access Denied\"}"))
                 .andReturn()
                 .getResponse()
                 .getCookie(rememberMeProperties.getCookieName());
@@ -155,7 +155,7 @@ public class SpringSecurityAuditTest {
         mockMvc
                 .perform(get("/operate/pluginTestPermsOperate").cookie(cookie))
                 .andExpect(status().is4xxClientError())
-                .andExpect(content().json("{\"message\":\"Access is denied\"}"))
+                .andExpect(content().json("{\"message\":\"Access Denied\"}"))
                 .andReturn()
                 .getResponse()
                 .getCookie(rememberMeProperties.getCookieName());
@@ -204,7 +204,7 @@ public class SpringSecurityAuditTest {
         mockMvc
                 .perform(get("/operate/pluginAnyPermsOperate").session(session))
                 .andExpect(status().is4xxClientError())
-                .andExpect(content().json("{\"message\":\"Access is denied\"}"));
+                .andExpect(content().json("{\"message\":\"Access Denied\"}"));
     }
 
 }

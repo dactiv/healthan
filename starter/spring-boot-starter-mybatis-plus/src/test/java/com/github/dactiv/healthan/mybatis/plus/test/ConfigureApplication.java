@@ -3,12 +3,11 @@ package com.github.dactiv.healthan.mybatis.plus.test;
 import com.github.dactiv.healthan.crypto.algorithm.cipher.AesCipherService;
 import com.github.dactiv.healthan.crypto.algorithm.cipher.OperationMode;
 import com.github.dactiv.healthan.mybatis.plus.crypto.DataAesCryptoService;
-import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication(exclude = {RedissonAutoConfiguration.class})
+@SpringBootApplication
 public class ConfigureApplication {
 
     public static void main(String[] args) {

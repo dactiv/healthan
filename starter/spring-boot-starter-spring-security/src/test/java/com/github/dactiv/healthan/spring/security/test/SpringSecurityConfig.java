@@ -219,7 +219,6 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                         }
                     });
 
-
                     httpSecurity.authenticationProvider(
                             new SecurityPrincipalAuthenticationProvider(
                                     authenticationProperties,

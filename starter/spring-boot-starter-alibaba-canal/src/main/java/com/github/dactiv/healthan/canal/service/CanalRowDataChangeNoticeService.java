@@ -7,7 +7,6 @@ import com.github.dactiv.healthan.canal.domain.entity.CanalRowDataChangeNoticeRe
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.domain.AckMessage;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -106,7 +105,7 @@ public interface CanalRowDataChangeNoticeService {
             for (Map.Entry<String, String> entry : data.entrySet()) {
                 // 获取 entry.getKey()，如果没有对应的字段映射，就用 entry.getKey() 值
                 String field = fields.getOrDefault(entry.getKey(), entry.getKey());
-                newValue.put(StringUtils.defaultString(field, entry.getKey()), entry.getValue());
+                newValue.put(Objects.toString(field, entry.getKey()), entry.getValue());
             }
             newData.add(newValue);
         }

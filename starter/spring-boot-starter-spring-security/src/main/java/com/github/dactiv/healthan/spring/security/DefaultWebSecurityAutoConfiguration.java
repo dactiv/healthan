@@ -21,7 +21,6 @@ import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -30,8 +29,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authorization.AuthorizationEventPublisher;
 import org.springframework.security.authorization.method.AuthorizationInterceptorsOrder;
 import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
@@ -39,6 +38,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.User;
@@ -103,14 +103,14 @@ public class DefaultWebSecurityAutoConfiguration {
                         .anyRequest()
                         .authenticated()
                 )
-                .httpBasic(b -> b.configure(httpSecurity))
+                .httpBasic(b -> b.init(httpSecurity))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .rememberMe(AbstractHttpConfigurer::disable)
                 .exceptionHandling(c -> c
                         .accessDeniedHandler(this.forbiddenAccessDeniedHandler())
-                        .authenticationEntryPoint(new RestResultAuthenticationEntryPoint(resultResolvers)))
-
+                        .authenticationEntryPoint(new RestResultAuthenticationEntryPoint(resultResolvers))
+                )
                 .cors(c -> c.configure(httpSecurity))
                 .csrf(AbstractHttpConfigurer::disable)
                 .requestCache(AbstractHttpConfigurer::disable)
@@ -206,12 +206,14 @@ public class DefaultWebSecurityAutoConfiguration {
         return new InMemoryUserDetailsManager(userDetails);
     }
 
-
-
     @Bean
-    @ConditionalOnMissingBean(AuthenticationTrustResolver.class)
-    public AuthenticationTrustResolver authenticationTrustResolver() {
-        return new SimpleAuthenticationTrustResolver();
+    public DefaultMethodSecurityExpressionHandler methodSecurityExpressionHandler(ObjectProvider<GrantedAuthorityDefaults> defaultsProvider,
+                                                                                  ApplicationContext context) {
+        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
+        handler.setTrustResolver(new AuthenticationSuccessTokenTrustResolver());
+        defaultsProvider.ifAvailable((d) -> handler.setDefaultRolePrefix(d.getRolePrefix()));
+        handler.setApplicationContext(context);
+        return handler;
     }
 
     @Bean

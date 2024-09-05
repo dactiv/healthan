@@ -14,6 +14,7 @@ import com.github.dactiv.healthan.commons.jackson.deserializer.ValueEnumDeserial
 import com.github.dactiv.healthan.commons.jackson.serializer.NameEnumSerializer;
 import com.github.dactiv.healthan.commons.jackson.serializer.NameValueEnumSerializer;
 import com.github.dactiv.healthan.commons.jackson.serializer.ValueEnumSerializer;
+import com.github.dactiv.healthan.idempotent.exception.IdempotentException;
 import com.github.dactiv.healthan.spring.web.argument.DeviceHandlerMethodArgumentResolver;
 import com.github.dactiv.healthan.spring.web.argument.GenericsListHandlerMethodArgumentResolver;
 import com.github.dactiv.healthan.spring.web.device.DeviceResolverRequestFilter;
@@ -35,6 +36,7 @@ import com.github.dactiv.healthan.spring.web.result.filter.holder.ClearFilterRes
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -122,6 +124,7 @@ public class SpringWebMvcAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnClass(IdempotentException.class)
     public IdempotentErrorResultResolver idempotentErrorResultResolver() {
         return new IdempotentErrorResultResolver();
     }

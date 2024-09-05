@@ -5,7 +5,7 @@ import com.github.dactiv.healthan.spring.security.authentication.token.Authentic
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.core.Authentication;
 
-public class SimpleAuthenticationTrustResolver extends AuthenticationTrustResolverImpl {
+public class AuthenticationSuccessTokenTrustResolver extends AuthenticationTrustResolverImpl {
 
     @Override
     public boolean isAnonymous(Authentication authentication) {

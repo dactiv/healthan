@@ -134,8 +134,37 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
             return insert(entity);
         }
 
-        return updateById(entity);
+        return save(entity, false);
 
+    }
+
+    /**
+     * 保存数据，如果实体实现 {@link BasicIdentification} 接口，并通过 {@link BasicIdentification#getId()}
+     * 得到的值为 null 时会新增数据，会通过 {@link BasicIdentification#getId()} 去更新当前数据。
+     *
+     * @param entity 实体内容
+     * @param exceptionOnNoUpdate 如果更行 mysql 数据库影响行号小于 1 时，抛出异常
+     *
+     * @return 影响行数
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public int save(T entity, boolean exceptionOnNoUpdate) {
+        if (!BasicIdentification.class.isAssignableFrom(entity.getClass())) {
+            return insert(entity);
+        }
+
+        BasicIdentification<?> basicIdentification = Casts.cast(entity);
+        if (Objects.isNull(basicIdentification.getId())) {
+            return insert(entity);
+        }
+
+        int result = updateById(entity);
+
+        if (result < 1) {
+            throw new SystemException("更新操作未影响数据库中的任何行，预期至少影响 1 行。");
+        }
+
+        return result;
     }
 
     /**
@@ -397,6 +426,14 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
         return MybatisPlusQueryGenerator.convertResultPage(result);
     }
 
+    /**
+     * 查找分页数据
+     *
+     * @param pageRequest 分页请求
+     * @param wrapper where 条件
+     *
+     * @return 带分页内容
+     */
     public TotalPage<T> findTotalPage(PageRequest pageRequest, Wrapper<T> wrapper) {
         IPage<T> result = baseMapper.selectPage(
                 MybatisPlusQueryGenerator.createQueryPage(pageRequest),
@@ -423,7 +460,7 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
     }
 
     /**
-     * 根据主键 id 删除数据，
+     * 根据主键 id 删除数据，如果执行过程中存在的影响行数小于 1 时，抛出异常
      *
      * @param ids 主键 id 集合
      * @param errorThrow true 如果执行过程中存在的影响行数小于 1 时抛出异常，否则 false
@@ -432,9 +469,23 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      */
     @Transactional(rollbackFor = Exception.class)
     public int deleteById(Collection<? extends Serializable> ids, boolean errorThrow) {
+        return deleteById(ids, errorThrow, true);
+    }
+
+    /**
+     * 根据主键 id 删除数据，
+     *
+     * @param ids 主键 id 集合
+     * @param errorThrow true 如果执行过程中存在的影响行数小于 1 时抛出异常，否则 false
+     * @param useFill 逻辑删除下是否填充
+     *
+     * @return 影响行数
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteById(Collection<? extends Serializable> ids, boolean errorThrow, boolean useFill) {
         Collection<Serializable> collection = new LinkedList<>();
         CollectionUtils.addAll(collection, ids);
-        int result = baseMapper.deleteBatchIds(collection);
+        int result = baseMapper.deleteByIds(collection, useFill);
         if (result != collection.size() && errorThrow) {
             String msg = "删除 id 为 [" + collection + "] 的 [" + getEntityClass() + "] 数据不成功";
             throw new SystemException(msg);
@@ -451,7 +502,19 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
      */
     @Transactional(rollbackFor = Exception.class)
     public int deleteById(Serializable id) {
-        return baseMapper.deleteById(id);
+        return deleteById(id, true);
+    }
+
+    /**
+     * 根据主键 id 删除数据，
+     *
+     * @param id 主键 id
+     *
+     * @return 影响行数
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteById(Serializable id, boolean useFill) {
+        return baseMapper.deleteById(id, useFill);
     }
 
     /**

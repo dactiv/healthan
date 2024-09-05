@@ -58,6 +58,7 @@
         <dependency>
             <groupId>com.github.dactiv.healthan</groupId>
             <artifactId>spring-boot-starter-idempotent</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
