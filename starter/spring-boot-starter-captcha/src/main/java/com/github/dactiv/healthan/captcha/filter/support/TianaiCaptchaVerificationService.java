@@ -38,6 +38,6 @@ public class TianaiCaptchaVerificationService implements CaptchaVerificationServ
 
     @Override
     public void delete(HttpServletRequest request) {
-        tianaiCaptchaService.delete(request);
+        tianaiCaptchaService.deleteCaptcha(request);
     }
 }
