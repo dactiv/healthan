@@ -60,8 +60,8 @@ public class CanalAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(HttpCanalRowDataChangeNoticeResolver.class)
-    public HttpCanalRowDataChangeNoticeResolver httpCanalRowDataChangeNoticeResolver(RestTemplate restTemplate) {
-        return new HttpCanalRowDataChangeNoticeResolver(restTemplate);
+    public HttpCanalRowDataChangeNoticeResolver httpCanalRowDataChangeNoticeResolver(ObjectProvider<RestTemplate> restTemplate) {
+        return new HttpCanalRowDataChangeNoticeResolver(restTemplate.getIfAvailable(RestTemplate::new));
     }
 
     @Bean

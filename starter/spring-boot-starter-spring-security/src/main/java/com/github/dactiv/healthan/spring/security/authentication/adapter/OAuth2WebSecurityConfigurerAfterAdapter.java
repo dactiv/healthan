@@ -51,14 +51,13 @@ public class OAuth2WebSecurityConfigurerAfterAdapter implements WebSecurityConfi
     @Override
     public void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .requestCache()
-                .disable()
-                .apply(new OAuth2AuthorizationServerConfigurer())
-                .oidc(this::configOidc)
-                .clientAuthentication(this::configClientAuthentication)
-                .authorizationEndpoint(this::configAuthorizationEndpoint)
-                .tokenEndpoint(this::configTokenEndpoint)
-                .and()
+                .with(
+                        new OAuth2AuthorizationServerConfigurer(),
+                        o -> o
+                                .oidc(this::configOidc)
+                                .clientAuthentication(this::configClientAuthentication)
+                                .authorizationEndpoint(this::configAuthorizationEndpoint)
+                                .tokenEndpoint(this::configTokenEndpoint))
                 .oauth2ResourceServer(this::configResourceServer);
     }
 

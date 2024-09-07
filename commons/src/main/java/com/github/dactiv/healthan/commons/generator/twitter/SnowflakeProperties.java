@@ -28,12 +28,12 @@ public class SnowflakeProperties {
     /**
      * 最小节点值
      */
-    public static int MIN_NUMBER = 0;
+    public final static int MIN_NUMBER = 0;
 
     /**
      * 最大节点值
      */
-    public static int MAX_NUMBER = 31;
+    public final static int MAX_NUMBER = 31;
 
     /**
      * 数据中心编号，最大支持数据中心节点数 0~31，一共 32 个

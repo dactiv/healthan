@@ -9,7 +9,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 参数绑定结果集异常解析器实现
@@ -45,7 +44,7 @@ public class BindingResultErrorResultResolver implements ErrorResultResolver {
                     .stream()
                     .filter(o -> FieldError.class.isAssignableFrom(o.getClass()))
                     .map(o -> (FieldError) o)
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
 

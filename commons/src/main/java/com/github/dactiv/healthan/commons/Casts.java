@@ -96,13 +96,14 @@ public abstract class Casts {
     /**
      *  map 类型范型引用
      */
-    public static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<Map<String, Object>>() {};
+    public static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<>() {};
 
-    public static final ParameterizedTypeReference<Map<String, Object>> MAP_PARAMETERIZED_TYPE_REFERENCE = new ParameterizedTypeReference<Map<String, Object>>() {};
+    public static final ParameterizedTypeReference<Map<String, Object>> MAP_PARAMETERIZED_TYPE_REFERENCE = new ParameterizedTypeReference<>() {};
+
     /**
      * list map 类型范型引用
      */
-    public static final TypeReference<List<Map<String, Object>>> LIST_MAP_TYPE_REFERENCE = new TypeReference<List<Map<String, Object>>>() {};
+    public static final TypeReference<List<Map<String, Object>>> LIST_MAP_TYPE_REFERENCE = new TypeReference<>() {};
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -646,7 +647,7 @@ public abstract class Casts {
                 .stream()
                 .map(StringUtils::trimToEmpty)
                 .filter(variableValue::containsKey)
-                .collect(Collectors.toList());
+                .toList();
 
         String temp = url;
 
@@ -668,9 +669,9 @@ public abstract class Casts {
      */
     public static <T> T of(Object source, Class<T> targetClass, String... ignoreProperties) {
 
-        if (Objects.isNull(source)) {
+        /*if (Objects.isNull(source)) {
             return null;
-        }
+        }*/
 
         T result = ClassUtils.newInstance(targetClass);
 

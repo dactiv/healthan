@@ -176,7 +176,7 @@ public class EncryptInnerInterceptor implements InnerInterceptor {
                     .stream()
                     .map(f -> Casts.castCamelCaseToSnakeCase(f.getName()))
                     .flatMap(s -> findSqlSetField(s, sqlExpressions).stream())
-                    .collect(Collectors.toList());
+                    .toList();
 
             for (String encryptionField : sqlEncryptionFieldList) {
                 String el = StringUtils.substringAfter(encryptionField, Casts.EQ);

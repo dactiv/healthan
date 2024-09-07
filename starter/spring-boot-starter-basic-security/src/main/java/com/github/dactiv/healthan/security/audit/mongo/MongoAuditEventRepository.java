@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * mongo 审计事件仓库实现
@@ -99,7 +98,7 @@ public class MongoAuditEventRepository extends AbstractExtendAuditEventRepositor
             List<AuditEvent> data = mongoTemplate
                     .find(query, Map.class, index).stream()
                     .map(d -> this.createAuditEvent(Casts.cast(d)))
-                    .collect(Collectors.toList());
+                    .toList();
             content.addAll(data);
         } catch (Exception e) {
             LOGGER.error("查询集合 [{}] 出现错误", index, e);

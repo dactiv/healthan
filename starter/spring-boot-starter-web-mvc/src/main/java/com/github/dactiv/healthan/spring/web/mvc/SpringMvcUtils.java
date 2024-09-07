@@ -174,13 +174,10 @@ public class SpringMvcUtils {
      * @return 设备
      */
     public static UserAgent getRequiredCurrentDevice() {
-
-        Optional<HttpServletRequest> optional = getHttpServletRequest();
-
-        if (!optional.isPresent()) {
-            throw new SystemException("当前线程中无法获取 HttpServletRequest 信息");
-        }
-        return DeviceUtils.getRequiredCurrentDevice(optional.get());
+        return DeviceUtils.getRequiredCurrentDevice(
+                getHttpServletRequest()
+                        .orElseThrow(() -> new SystemException("当前线程中无法获取 HttpServletRequest 信息"))
+        );
     }
 
     /**

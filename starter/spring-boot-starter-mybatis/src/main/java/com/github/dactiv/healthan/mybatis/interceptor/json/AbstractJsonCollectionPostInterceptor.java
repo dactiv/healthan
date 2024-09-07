@@ -57,7 +57,7 @@ public abstract class AbstractJsonCollectionPostInterceptor implements Intercept
         for (Object o : collection) {
 
             Optional<Class<?>> optional = map.keySet().stream().filter(t -> t.isAssignableFrom(o.getClass())).findFirst();
-            if (!optional.isPresent()) {
+            if (optional.isEmpty()) {
                 continue;
             }
 
@@ -73,7 +73,7 @@ public abstract class AbstractJsonCollectionPostInterceptor implements Intercept
                     .stream()
                     .map(v -> doMappingResult(v, entry.getKey(), map.get(entry.getKey())))
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
             newResult.addAll(mapValues);
         }
 

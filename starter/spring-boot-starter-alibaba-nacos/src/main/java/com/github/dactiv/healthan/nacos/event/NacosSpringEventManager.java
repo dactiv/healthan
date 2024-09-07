@@ -20,7 +20,6 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.event.EventListener;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * nacos 的 spring 事件管理器
@@ -98,7 +97,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
                 .values()
                 .stream()
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
 
         for (NacosServiceEventListener sel : listeners) {
 
@@ -182,7 +181,7 @@ public class NacosSpringEventManager implements ApplicationEventPublisherAware, 
                     List<NacosServiceListenerValidator> validators = nacosServiceListenerValidators
                             .stream()
                             .filter(v -> v.isSupport(nacosService))
-                            .collect(Collectors.toList());
+                            .toList();
 
                     boolean isContinue = false;
 

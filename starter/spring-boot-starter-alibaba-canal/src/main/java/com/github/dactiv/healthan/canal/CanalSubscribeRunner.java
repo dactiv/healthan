@@ -237,16 +237,16 @@ public class CanalSubscribeRunner implements Runnable {
             template.waitForResult();
             return data;
         } else {
-            final CanalEntryRowDataMeta[] datas = new CanalEntryRowDataMeta[message.getEntries().size()];
+            final CanalEntryRowDataMeta[] dataArray = new CanalEntryRowDataMeta[message.getEntries().size()];
             int i = 0;
             for (CanalEntry.Entry entry : message.getEntries()) {
                 final int index = i;
                 template.submit(() -> {
                     try {
                         CanalEntry.RowChange rowChange = CanalEntry.RowChange.parseFrom(entry.getStoreValue());
-                        datas[index] = new CanalEntryRowDataMeta();
-                        datas[index].setEntry(entry);
-                        datas[index].setRowChange(rowChange);
+                        dataArray[index] = new CanalEntryRowDataMeta();
+                        dataArray[index].setEntry(entry);
+                        dataArray[index].setRowChange(rowChange);
                     } catch (InvalidProtocolBufferException e) {
                         throw new RuntimeException(e);
                     }
@@ -256,13 +256,13 @@ public class CanalSubscribeRunner implements Runnable {
             }
 
             template.waitForResult();
-            return datas;
+            return dataArray;
         }
     }
 
-    public static List<FlatMessage> messageConverter(CanalEntryRowDataMeta[] datas, long id) {
+    public static List<FlatMessage> messageConverter(CanalEntryRowDataMeta[] dataArray, long id) {
         List<FlatMessage> flatMessages = new ArrayList<>();
-        for (CanalEntryRowDataMeta entryRowData : datas) {
+        for (CanalEntryRowDataMeta entryRowData : dataArray) {
             CanalEntry.Entry entry = entryRowData.getEntry();
             CanalEntry.RowChange rowChange = entryRowData.getRowChange();
             // 如果有分区路由,则忽略begin/end事件

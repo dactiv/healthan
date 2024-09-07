@@ -16,7 +16,6 @@ import org.springframework.util.ReflectionUtils;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 值于名称枚举的反序列化实现
@@ -38,21 +37,21 @@ public class NameValueEnumDeserializer<T extends NameValueEnum> extends JsonDese
         List<NameValueEnum> valueEnums = Arrays
                 .stream(type.getEnumConstants())
                 .map(v -> Casts.cast(v, NameValueEnum.class))
-                .collect(Collectors.toList());
+                .toList();
 
         Optional<NameValueEnum> optional = valueEnums
                 .stream()
                 .filter(v -> v.toString().equals(nodeValue))
                 .findFirst();
 
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             optional = valueEnums
                     .stream()
                     .filter(v -> v.getName().equals(nodeValue))
                     .findFirst();
         }
 
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
 
             optional = valueEnums
                     .stream()

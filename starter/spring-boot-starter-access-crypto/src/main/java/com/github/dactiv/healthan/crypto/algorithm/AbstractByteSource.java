@@ -81,8 +81,7 @@ public abstract class AbstractByteSource implements ByteSource, Serializable {
         if (o == this) {
             return true;
         }
-        if (o instanceof ByteSource) {
-            ByteSource bs = (ByteSource) o;
+        if (o instanceof ByteSource bs) {
             return Arrays.equals(obtainBytes(), bs.obtainBytes());
         }
         return false;

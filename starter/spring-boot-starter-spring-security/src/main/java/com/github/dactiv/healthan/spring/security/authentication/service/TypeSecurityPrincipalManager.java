@@ -33,12 +33,12 @@ public class TypeSecurityPrincipalManager implements InitializingBean {
     /**
      * 认证缓存块名称
      */
-    public static String DEFAULT_AUTHENTICATION_KEY_NAME = "healthan:spring:security:authentication:";
+    public final static String DEFAULT_AUTHENTICATION_KEY_NAME = "healthan:spring:security:authentication:";
 
     /**
      * 授权缓存块名称
      */
-    public static String DEFAULT_AUTHORIZATION_KEY_NAME = "healthan:spring:security:authorization:";
+    public final static String DEFAULT_AUTHORIZATION_KEY_NAME = "healthan:spring:security:authorization:";
 
     /**
      * 带类型的安全用户服务集合

@@ -84,7 +84,8 @@ public class CanalRowDataChangeNoticeRecordEntity implements AckMessage {
 
             List<HttpCanalRowDataChangeNoticeMeta> metas = Casts.convertValue(
                     notice.getProtocolMeta().get(CanalRowDataChangeNoticeService.HTTP_ENTITY_FIELD),
-                    new TypeReference<List<HttpCanalRowDataChangeNoticeMeta>>() {}
+                    new TypeReference<>() {
+                    }
             );
             for (HttpCanalRowDataChangeNoticeMeta map : metas) {
                 CanalRowDataChangeNoticeRecordEntity entity = Casts.of(

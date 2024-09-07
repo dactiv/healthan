@@ -18,7 +18,7 @@ public class Bucket implements Serializable {
     /**
      * minio 桶名称
      */
-    public static String MINIO_BUCKET_NAME = "bucket";
+    public final static String MINIO_BUCKET_NAME = "bucket";
 
     /**
      * 桶名称

@@ -27,7 +27,7 @@ public class FileObject extends Bucket {
     /**
      * minio 对象名称
      */
-    public static String MINIO_OBJECT_NAME = "object";
+    public final static String MINIO_OBJECT_NAME = "object";
 
     /**
      * minio 内容类型

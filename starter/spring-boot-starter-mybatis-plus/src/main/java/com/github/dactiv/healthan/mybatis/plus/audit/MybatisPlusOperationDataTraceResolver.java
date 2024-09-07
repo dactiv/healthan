@@ -27,7 +27,6 @@ import org.springframework.context.ApplicationEventPublisherAware;
 
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * mybatis-plus 操作数据留痕仓库实现
@@ -144,7 +143,7 @@ public class MybatisPlusOperationDataTraceResolver extends AbstractOperationData
 
     private Object getIdValueExp(String sqlSegment, Object parameterObject) throws OgnlException {
         List<String> conditions = Arrays.asList(StringUtils.substringsBetween(sqlSegment, StringPool.LEFT_BRACKET, StringPool.RIGHT_BRACKET));
-        List<String> fields = conditions.stream().flatMap(s -> Arrays.stream(s.split(WHERE_SEPARATE))).collect(Collectors.toList());
+        List<String> fields = conditions.stream().flatMap(s -> Arrays.stream(s.split(WHERE_SEPARATE))).toList();
 
         Object idValue = null;
         for (String field : fields) {

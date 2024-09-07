@@ -395,7 +395,7 @@ public abstract class AbstractCaptchaService<B> implements CaptchaService, Captc
     /**
      * 匹配验证码是否正确
      *
-     * @param request http servlet reuqest
+     * @param request http servlet request
      * @param captcha 当前验证码
      * @return true 是，否则 false
      */
