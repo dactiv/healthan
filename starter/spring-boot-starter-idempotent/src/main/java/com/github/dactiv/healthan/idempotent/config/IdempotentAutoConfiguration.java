@@ -38,8 +38,12 @@ public class IdempotentAutoConfiguration {
     }
 
     @Bean
-    public ConcurrentPointcutAdvisor concurrentPointcutAdvisor(ConcurrentInterceptor concurrentInterceptor) {
-        return new ConcurrentPointcutAdvisor(concurrentInterceptor);
+    public ConcurrentPointcutAdvisor concurrentPointcutAdvisor(ConcurrentInterceptor concurrentInterceptor,
+                                                               IdempotentProperties idempotentProperties) {
+        ConcurrentPointcutAdvisor concurrentPointcutAdvisor = new ConcurrentPointcutAdvisor(concurrentInterceptor);
+        concurrentPointcutAdvisor.setOrder(idempotentProperties.getConcurrentPointcutAdvisorOrderValue());
+
+        return concurrentPointcutAdvisor;
     }
 
     @Bean
@@ -52,8 +56,11 @@ public class IdempotentAutoConfiguration {
     }
 
     @Bean
-    public IdempotentPointcutAdvisor idempotentPointcutAdvisor(IdempotentInterceptor idempotentInterceptor) {
-        return new IdempotentPointcutAdvisor(idempotentInterceptor);
+    public IdempotentPointcutAdvisor idempotentPointcutAdvisor(IdempotentInterceptor idempotentInterceptor,
+                                                               IdempotentProperties idempotentProperties) {
+        IdempotentPointcutAdvisor idempotentPointcutAdvisor = new IdempotentPointcutAdvisor(idempotentInterceptor);
+        idempotentPointcutAdvisor.setOrder(idempotentProperties.getIdempotentPointcutAdvisorOrderValue());
+        return idempotentPointcutAdvisor;
     }
 
 }

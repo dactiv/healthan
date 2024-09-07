@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.idempotent.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.Ordered;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +28,16 @@ public class IdempotentProperties {
      * 幂等锁 key 前缀
      */
     private String idempotentKeyPrefix = "idempotent:";
+
+    /**
+     * 并发切面排序值
+     */
+    private int concurrentPointcutAdvisorOrderValue = Ordered.LOWEST_PRECEDENCE;
+
+    /**
+     * 幂等切面排序值
+     */
+    private int idempotentPointcutAdvisorOrderValue = Ordered.LOWEST_PRECEDENCE;
 
     public IdempotentProperties() {
     }
@@ -83,5 +94,41 @@ public class IdempotentProperties {
      */
     public void setIdempotentKeyPrefix(String idempotentKeyPrefix) {
         this.idempotentKeyPrefix = idempotentKeyPrefix;
+    }
+
+    /**
+     * 获取并发切面排序值
+     *
+     * @return 并发切面排序值
+     */
+    public int getConcurrentPointcutAdvisorOrderValue() {
+        return concurrentPointcutAdvisorOrderValue;
+    }
+
+    /**
+     * 设置并发切面排序值
+     *
+     * @param concurrentPointcutAdvisorOrderValue 并发切面排序值
+     */
+    public void setConcurrentPointcutAdvisorOrderValue(int concurrentPointcutAdvisorOrderValue) {
+        this.concurrentPointcutAdvisorOrderValue = concurrentPointcutAdvisorOrderValue;
+    }
+
+    /**
+     * 获取幂等切面排序值
+     *
+     * @return 幂等切面排序值
+     */
+    public int getIdempotentPointcutAdvisorOrderValue() {
+        return idempotentPointcutAdvisorOrderValue;
+    }
+
+    /**
+     * 设置幂等切面排序值
+     *
+     * @param idempotentPointcutAdvisorOrderValue 幂等切面排序值
+     */
+    public void setIdempotentPointcutAdvisorOrderValue(int idempotentPointcutAdvisorOrderValue) {
+        this.idempotentPointcutAdvisorOrderValue = idempotentPointcutAdvisorOrderValue;
     }
 }

@@ -3,3 +3,12 @@ healthan:
     web:
       mvc:
         filter-view-base-packages: com.github.dactiv.healthan.spring.web.test.result.entity
+
+
+spring:
+  data:
+    redis:
+      host: 17.0.0.14
+      port: 6379
+      password: 33DEfda34VD
+      database: 11

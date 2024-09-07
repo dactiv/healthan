@@ -3,10 +3,8 @@ package com.github.dactiv.healthan.spring.security;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.security.entity.RoleAuthority;
-import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
-import com.github.dactiv.healthan.spring.security.authentication.IpAuthenticationFilter;
-import com.github.dactiv.healthan.spring.security.authentication.RememberMeAuthenticationDetailsSource;
-import com.github.dactiv.healthan.spring.security.authentication.RestResultAuthenticationEntryPoint;
+import com.github.dactiv.healthan.security.plugin.Plugin;
+import com.github.dactiv.healthan.spring.security.authentication.*;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
@@ -14,10 +12,15 @@ import com.github.dactiv.healthan.spring.security.authentication.provider.TypeRe
 import com.github.dactiv.healthan.spring.security.authentication.service.PersistentTokenRememberMeUserDetailsService;
 import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
 import com.github.dactiv.healthan.spring.security.authentication.service.TypeTokenBasedRememberMeServices;
+import com.github.dactiv.healthan.spring.security.plugin.PluginSourceAuthorizationManager;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -25,12 +28,19 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authorization.AuthorizationEventPublisher;
+import org.springframework.security.authorization.method.AuthorizationInterceptorsOrder;
+import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +52,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.rememberme.AbstractRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -196,4 +207,40 @@ public class DefaultWebSecurityAutoConfiguration {
         return new InMemoryUserDetailsManager(userDetails);
     }
 
+
+
+    @Bean
+    @ConditionalOnMissingBean(PluginSourceAuthorizationManager.class)
+    public PluginSourceAuthorizationManager pluginSourceAuthorizationManager(AuthenticationProperties authenticationProperties) {
+        return new PluginSourceAuthorizationManager(authenticationProperties);
+    }
+
+    @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    public Advisor pluginAuthorizationMethodInterceptor(ObjectProvider<SecurityContextHolderStrategy> strategyProvider,
+                                                        PluginSourceAuthorizationManager pluginSourceAuthorizationManager,
+                                                        ObjectProvider<AuthorizationEventPublisher> eventPublisherProvider) {
+
+
+        AuthorizationManagerBeforeMethodInterceptor interceptor = new AuthorizationManagerBeforeMethodInterceptor(
+                new AnnotationMatchingPointcut(null, Plugin.class, true),
+                pluginSourceAuthorizationManager
+        );
+
+        interceptor.setOrder(AuthorizationInterceptorsOrder.PRE_AUTHORIZE.getOrder() - BigDecimal.ONE.intValue());
+        strategyProvider.ifAvailable(interceptor::setSecurityContextHolderStrategy);
+        eventPublisherProvider.ifAvailable(interceptor::setAuthorizationEventPublisher);
+
+        return interceptor;
+    }
+
+    @Bean
+    public DefaultMethodSecurityExpressionHandler authenticationSuccessTokenTrustResolverExpressionHandler(ObjectProvider<GrantedAuthorityDefaults> defaultsProvider,
+                                                                                                           ApplicationContext context) {
+        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
+        handler.setTrustResolver(new AuthenticationSuccessTokenTrustResolver());
+        defaultsProvider.ifAvailable((d) -> handler.setDefaultRolePrefix(d.getRolePrefix()));
+        handler.setApplicationContext(context);
+        return handler;
+    }
 }
