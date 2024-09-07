@@ -1,5 +1,6 @@
 package com.github.dactiv.healthan.commons.minio;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -9,6 +10,7 @@ import java.io.Serializable;
  */
 public class MoveFileObject implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -8637215027233473463L;
 
     /**

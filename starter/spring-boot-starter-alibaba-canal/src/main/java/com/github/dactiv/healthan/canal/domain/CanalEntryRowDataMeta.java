@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.canal.domain;
 
 import com.alibaba.otter.canal.protocol.CanalEntry;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -11,6 +12,7 @@ import java.io.Serializable;
  */
 public class CanalEntryRowDataMeta implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 7857439908947971423L;
 
     private CanalEntry.Entry entry;

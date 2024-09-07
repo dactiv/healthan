@@ -10,8 +10,8 @@ import java.lang.annotation.*;
  * @author maurice.chen
  */
 @Documented
-@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
 public @interface Plugin {
 
     /**

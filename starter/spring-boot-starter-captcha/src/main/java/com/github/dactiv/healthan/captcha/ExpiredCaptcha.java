@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.captcha;
 
 import com.github.dactiv.healthan.commons.TimeProperties;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,6 +15,7 @@ import java.util.Date;
  */
 public class ExpiredCaptcha implements Expired, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 2371567553401150929L;
 
     /**

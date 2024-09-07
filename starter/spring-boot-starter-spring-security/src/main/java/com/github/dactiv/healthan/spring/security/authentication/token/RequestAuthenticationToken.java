@@ -5,6 +5,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.util.MultiValueMap;
 
+import java.io.Serial;
+
 
 /**
  * 请求认证 token
@@ -13,6 +15,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class RequestAuthenticationToken extends TypeAuthenticationToken {
 
+    @Serial
     private static final long serialVersionUID = 8070060147431763553L;
 
     private final MultiValueMap<String, String> parameterMap;

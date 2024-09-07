@@ -4,13 +4,16 @@ import com.github.dactiv.healthan.security.entity.support.SimpleSecurityPrincipa
 import com.github.dactiv.healthan.security.enumerate.UserStatus;
 import com.github.dactiv.healthan.spring.security.entity.DeviceIdentifiedUserDetails;
 
+import java.io.Serial;
+
 /**
  * 移动端的用户明细实现
  *
  * @author maurice
  */
 public class MobileSecurityPrincipal extends SimpleSecurityPrincipal implements DeviceIdentifiedUserDetails {
-    
+
+    @Serial
     private static final long serialVersionUID = -848955060608795664L;
 
     /**

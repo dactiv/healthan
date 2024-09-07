@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.commons.page;
 
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 public class ScrollPage<T> implements Serializable {
 
-    
+    @Serial
     private static final long serialVersionUID = 9118490108501020682L;
 
     /**

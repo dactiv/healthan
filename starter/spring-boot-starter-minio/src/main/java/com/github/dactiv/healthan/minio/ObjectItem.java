@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.minio;
 
 import io.minio.messages.Item;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Map;
  */
 public class ObjectItem implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 5808561181950704489L;
 
     private final Item item;

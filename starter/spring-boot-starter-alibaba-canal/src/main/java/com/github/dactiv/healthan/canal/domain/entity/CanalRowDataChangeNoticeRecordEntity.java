@@ -11,6 +11,7 @@ import com.github.dactiv.healthan.commons.domain.meta.ProtocolMeta;
 import com.github.dactiv.healthan.commons.enumerate.support.ExecuteStatus;
 import com.github.dactiv.healthan.commons.enumerate.support.Protocol;
 
+import java.io.Serial;
 import java.util.*;
 
 /**
@@ -20,6 +21,7 @@ import java.util.*;
  */
 public class CanalRowDataChangeNoticeRecordEntity implements AckMessage {
 
+    @Serial
     private static final long serialVersionUID = 7867580272505563609L;
 
     /**

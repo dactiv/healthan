@@ -4,6 +4,7 @@ import com.github.dactiv.healthan.canal.domain.CanalRowDataChangeNotice;
 import com.github.dactiv.healthan.commons.enumerate.support.Protocol;
 import com.github.dactiv.healthan.commons.enumerate.support.YesOrNo;
 
+import java.io.Serial;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Map;
  */
 public class CanalRowDataChangeNoticeEntity implements CanalRowDataChangeNotice {
 
+    @Serial
     private static final long serialVersionUID = -5105461307882560087L;
 
     public static final String PROTOCOL_META_FIELD_NAME = "protocolMeta";

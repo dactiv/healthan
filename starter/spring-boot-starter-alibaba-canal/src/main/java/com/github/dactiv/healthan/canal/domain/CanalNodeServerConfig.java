@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
+import java.io.Serial;
 import java.util.Properties;
 
 /**
@@ -14,6 +15,7 @@ import java.util.Properties;
  */
 public class CanalNodeServerConfig extends CanalNodeServer {
 
+    @Serial
     private static final long serialVersionUID = -5902050923310113485L;
 
     /**

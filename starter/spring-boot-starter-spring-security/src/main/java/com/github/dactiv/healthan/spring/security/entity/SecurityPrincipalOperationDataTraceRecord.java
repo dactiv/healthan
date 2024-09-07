@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.spring.security.entity;
 
 import com.github.dactiv.healthan.mybatis.plus.audit.EntityIdOperationDataTraceRecord;
 
+import java.io.Serial;
 import java.util.Date;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Date;
  */
 public class SecurityPrincipalOperationDataTraceRecord extends EntityIdOperationDataTraceRecord {
 
-    
+    @Serial
     private static final long serialVersionUID = 3211452737634539720L;
 
     /**

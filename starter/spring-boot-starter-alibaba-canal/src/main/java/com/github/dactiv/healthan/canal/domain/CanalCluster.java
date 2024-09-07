@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.canal.domain;
 
 import com.github.dactiv.healthan.commons.id.IdEntity;
 
+import java.io.Serial;
 import java.util.Date;
 
 /**
@@ -11,6 +12,7 @@ import java.util.Date;
  */
 public class CanalCluster extends IdEntity<Long> {
 
+    @Serial
     private static final long serialVersionUID = 7325407486272402604L;
 
     /**

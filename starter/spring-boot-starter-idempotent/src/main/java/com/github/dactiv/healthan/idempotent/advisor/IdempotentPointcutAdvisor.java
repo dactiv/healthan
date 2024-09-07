@@ -4,10 +4,9 @@ import com.github.dactiv.healthan.idempotent.annotation.Idempotent;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
-import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 
 import java.io.Serial;
-import java.lang.reflect.Method;
 
 /**
  * aop 的幂等性切面处理实现
@@ -27,13 +26,7 @@ public class IdempotentPointcutAdvisor extends AbstractPointcutAdvisor {
 
     @Override
     public Pointcut getPointcut() {
-        return new StaticMethodMatcherPointcut() {
-            @Override
-            public boolean matches(Method method, Class<?> targetClass) {
-                return method.isAnnotationPresent(Idempotent.class);
-            }
-
-        };
+        return new AnnotationMatchingPointcut(null, Idempotent.class, true);
     }
 
     @Override

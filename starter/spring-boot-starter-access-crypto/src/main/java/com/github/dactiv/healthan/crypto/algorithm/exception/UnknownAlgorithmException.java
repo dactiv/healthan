@@ -2,6 +2,7 @@
 package com.github.dactiv.healthan.crypto.algorithm.exception;
 
 
+import java.io.Serial;
 
 /**
  * 未知的加密解密算法异常，当存在不支出的加密解密算法时抛出
@@ -10,7 +11,7 @@ package com.github.dactiv.healthan.crypto.algorithm.exception;
  */
 public class UnknownAlgorithmException extends CryptoException {
 
-    
+    @Serial
     private static final long serialVersionUID = -1361033500633398137L;
 
     /**

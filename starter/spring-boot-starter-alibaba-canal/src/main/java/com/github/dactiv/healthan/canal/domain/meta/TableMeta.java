@@ -1,5 +1,6 @@
 package com.github.dactiv.healthan.canal.domain.meta;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
  */
 public class TableMeta implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -3280652379059502703L;
 
     /**

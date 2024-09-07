@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.commons.exception;
 
 
+import java.io.Serial;
 
 /**
  * 业务逻辑异常实现.
@@ -9,7 +10,7 @@ package com.github.dactiv.healthan.commons.exception;
  **/
 public class ServiceException extends RuntimeException {
 
-    
+    @Serial
     private static final long serialVersionUID = 5031974444998025805L;
 
     /**

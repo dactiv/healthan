@@ -1,5 +1,6 @@
 package com.github.dactiv.healthan.captcha;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import java.util.Map;
  */
 public class ConstructionCaptchaMeta implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -2135082237130733550L;
 
     private String type;

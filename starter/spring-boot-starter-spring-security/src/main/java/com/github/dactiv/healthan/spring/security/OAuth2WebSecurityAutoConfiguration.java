@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 @Configuration
 @AutoConfigureBefore(SpringSecurityAutoConfiguration.class)
 @EnableConfigurationProperties(AuthenticationProperties.class)
-@ConditionalOnClass(OAuth2AuthorizationServerConfigurer.class)
+@ConditionalOnClass({OAuth2AuthorizationServerConfigurer.class, SpringSecurityAutoConfiguration.class})
 @ConditionalOnProperty(prefix = "healthan.authentication.spring.security.oauth2", value = "enabled", matchIfMissing = true)
 public class OAuth2WebSecurityAutoConfiguration {
 

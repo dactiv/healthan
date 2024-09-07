@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.spring.security.plugin;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.plugin.Plugin;
+import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,21 +22,10 @@ import java.util.function.Supplier;
  */
 public class PluginSourceAuthorizationManager implements AuthorizationManager<MethodInvocation> {
 
-    /**
-     * 默认同意的来源类型值
-     */
-    public static final List<String> DEFAULT_GRANTED_SOURCES = Arrays.asList("SYSTEM","ALL");
+    private final AuthenticationProperties authenticationProperties;
 
-    /**
-     * 默认同意的来源类型
-     */
-    private List<String> grantedSources = DEFAULT_GRANTED_SOURCES;
-
-    public PluginSourceAuthorizationManager() {
-    }
-
-    public PluginSourceAuthorizationManager(List<String> grantedSources) {
-        this.grantedSources = grantedSources;
+    public PluginSourceAuthorizationManager(AuthenticationProperties authenticationProperties) {
+        this.authenticationProperties = authenticationProperties;
     }
 
     @Override
@@ -59,7 +49,7 @@ public class PluginSourceAuthorizationManager implements AuthorizationManager<Me
 
         List<String> resourceTypes = Arrays
                 .stream(plugin.sources())
-                .filter(s -> !grantedSources.contains(s))
+                .filter(s -> !authenticationProperties.getPluginAuthorizationManagerSources().contains(s))
                 .toList();
 
         if (CollectionUtils.isEmpty(resourceTypes)) {
@@ -75,21 +65,4 @@ public class PluginSourceAuthorizationManager implements AuthorizationManager<Me
         }
     }
 
-    /**
-     * 获取默认同意的来源类型
-     *
-     * @return 默认同意的来源类型
-     */
-    public List<String> getGrantedSources() {
-        return grantedSources;
-    }
-
-    /**
-     * 设置默认同意的来源类型
-     *
-     * @param grantedSources 默认同意的来源类型
-     */
-    public void setGrantedSources(List<String> grantedSources) {
-        this.grantedSources = grantedSources;
-    }
 }

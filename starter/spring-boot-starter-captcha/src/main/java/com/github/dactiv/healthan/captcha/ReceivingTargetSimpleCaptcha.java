@@ -1,5 +1,7 @@
 package com.github.dactiv.healthan.captcha;
 
+import java.io.Serial;
+
 /**
  * 收信目标匹配验证码,在收验证码时，有一个目标信息，如：短信验证码为手机号，邮箱验证码为邮箱，用该类可以得知目标是否一致
  *
@@ -7,7 +9,7 @@ package com.github.dactiv.healthan.captcha;
  */
 public class ReceivingTargetSimpleCaptcha extends SimpleCaptcha {
 
-
+    @Serial
     private static final long serialVersionUID = 3083613530309672558L;
 
     /**

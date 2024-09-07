@@ -6,6 +6,7 @@ import com.github.dactiv.healthan.captcha.DelegateCaptchaService;
 import com.github.dactiv.healthan.captcha.intercept.Interceptor;
 import com.github.dactiv.healthan.spring.security.controller.CaptchaExtendController;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Lazy;
 @Configuration
 @AutoConfigureAfter(CaptchaAutoConfiguration.class)
 @EnableConfigurationProperties(CaptchaProperties.class)
+@ConditionalOnClass(SpringSecurityAutoConfiguration.class)
 @ConditionalOnProperty(prefix = "healthan.captcha", value = "enabled", matchIfMissing = true)
 public class CaptchaExtendAutoConfiguration {
 

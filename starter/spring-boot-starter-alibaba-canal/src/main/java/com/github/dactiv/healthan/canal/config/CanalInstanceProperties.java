@@ -2,6 +2,8 @@ package com.github.dactiv.healthan.canal.config;
 
 import com.github.dactiv.healthan.commons.id.IdEntity;
 
+import java.io.Serial;
+
 /**
  * canal 实例配置
  *
@@ -9,6 +11,7 @@ import com.github.dactiv.healthan.commons.id.IdEntity;
  */
 public class CanalInstanceProperties extends IdEntity<Long>  {
 
+    @Serial
     private static final long serialVersionUID = 9075497464601557570L;
 
     /**

@@ -7,6 +7,7 @@ import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
+import java.io.Serial;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
  */
 public class AuthenticationSuccessToken extends AbstractAuthenticationToken {
 
+    @Serial
     private static final long serialVersionUID = 3747271533448473641L;
 
     public static final String PRINCIPAL_KEY = "principal";

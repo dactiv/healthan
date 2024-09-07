@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.dactiv.healthan.commons.id.IdEntity;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serial;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Objects;
  */
 public class CanalNodeServer extends IdEntity<Long> {
 
+    @Serial
     private static final long serialVersionUID = -6776019605471544293L;
     /**
      * 集群信息

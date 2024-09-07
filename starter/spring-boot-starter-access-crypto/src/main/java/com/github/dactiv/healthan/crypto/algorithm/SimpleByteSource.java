@@ -3,6 +3,7 @@ package com.github.dactiv.healthan.crypto.algorithm;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.Serial;
 import java.nio.charset.Charset;
 
 /**
@@ -12,7 +13,7 @@ import java.nio.charset.Charset;
  */
 public class SimpleByteSource extends AbstractByteSource {
 
-    
+    @Serial
     private static final long serialVersionUID = 3094636554790450900L;
     /**
      * 字节数组

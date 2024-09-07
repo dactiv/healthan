@@ -4,6 +4,8 @@ package com.github.dactiv.healthan.crypto.access.token;
 import com.github.dactiv.healthan.crypto.access.AccessToken;
 import com.github.dactiv.healthan.crypto.algorithm.ByteSource;
 
+import java.io.Serial;
+
 
 /**
  * 带签名信息的 token 实现，用于非对称加密数据后，客户端需要校验签名使用
@@ -12,7 +14,7 @@ import com.github.dactiv.healthan.crypto.algorithm.ByteSource;
  */
 public class SignToken extends SimpleToken {
 
-    
+    @Serial
     private static final long serialVersionUID = -7966065869382142057L;
     /**
      * 签名信息

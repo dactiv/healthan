@@ -11,6 +11,7 @@ import com.github.dactiv.healthan.mybatis.handler.JacksonJsonTypeHandler;
 import com.github.dactiv.healthan.mybatis.handler.NameValueEnumTypeHandler;
 import jakarta.validation.constraints.NotEmpty;
 
+import java.io.Serial;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ import java.util.Map;
 @TableName(value = "tb_all_type_entity", autoResultMap = true)
 public class AllTypeEntity implements BasicIdentification<Integer> {
 
-    
+    @Serial
     private static final long serialVersionUID = 5548079224380108843L;
 
     private Integer id;

@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.idempotent.exception;
 
 
+import java.io.Serial;
 
 /**
  * 并发异常
@@ -9,7 +10,7 @@ package com.github.dactiv.healthan.idempotent.exception;
  */
 public class ConcurrentException extends IdempotentException {
 
-    
+    @Serial
     private static final long serialVersionUID = 2181395755678626994L;
 
     public ConcurrentException() {

@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.security.entity;
 
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -10,7 +11,7 @@ import java.io.Serializable;
  */
 public class ResourceAuthority implements Serializable {
 
-    
+    @Serial
     private static final long serialVersionUID = -8731394878680391630L;
 
     public static final String DEFAULT_RESOURCE_PREFIX = "perms[";

@@ -4,6 +4,7 @@ package com.github.dactiv.healthan.commons;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -17,7 +18,7 @@ import java.util.Objects;
  **/
 public class RestResult<T> implements Serializable {
 
-
+    @Serial
     private static final long serialVersionUID = 8809220528389402403L;
 
     public static final String SUCCESS_EXECUTE_CODE = "200";

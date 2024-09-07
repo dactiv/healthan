@@ -4,6 +4,7 @@ import com.alibaba.otter.canal.protocol.FlatMessage;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.dactiv.healthan.commons.id.StringIdEntity;
 
+import java.io.Serial;
 import java.util.List;
 
 /**
@@ -13,6 +14,7 @@ import java.util.List;
  */
 public class CanalMessage extends StringIdEntity {
 
+    @Serial
     private static final long serialVersionUID = 5994433350821723923L;
     /**
      * 事务 id

@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
+import java.io.Serial;
 import java.util.*;
 
 /**
@@ -17,6 +18,7 @@ import java.util.*;
  */
 public class CanalInstance extends IdEntity<Long> {
 
+    @Serial
     private static final long serialVersionUID = 5124204804701344110L;
 
     /**

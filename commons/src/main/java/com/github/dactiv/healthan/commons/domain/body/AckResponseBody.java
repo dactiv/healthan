@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.commons.domain.body;
 
 import com.github.dactiv.healthan.commons.enumerate.support.AckStatus;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import java.util.Map;
  */
 public class AckResponseBody implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -504725054089049434L;
 
     /**

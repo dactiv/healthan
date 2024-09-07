@@ -9,6 +9,7 @@ import com.github.dactiv.healthan.spring.security.authentication.config.Remember
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,8 +47,17 @@ public class SpringSecurityAuditTest {
     @Autowired
     private CacheManager cacheManager;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
     @Test
     public void testAuditFunction() throws Exception {
+
+        String authenticationCacheName = authenticationProperties.getAuthenticationCache().getName("test:test");
+        String authorizationCacheName = authenticationProperties.getAuthorizationCache().getName("test:1:test");
+
+        redissonClient.getBucket(authenticationCacheName).delete();
+        redissonClient.getBucket(authorizationCacheName).delete();
 
         MockHttpSession session = new MockHttpSession();
 
@@ -67,11 +77,9 @@ public class SpringSecurityAuditTest {
                 .getResponse()
                 .getCookie(rememberMeProperties.getCookieName());
 
-        String authenticationCacheName = authenticationProperties.getAuthenticationCache().getName("test:test");
         SecurityPrincipal principal = cacheManager.getSecurityPrincipal(CacheProperties.of(authenticationCacheName));
         Assertions.assertNotNull(principal);
 
-        String authorizationCacheName = authenticationProperties.getAuthorizationCache().getName("test:1:test");
         Collection<GrantedAuthority> authorities = cacheManager.getGrantedAuthorities(CacheProperties.of(authorizationCacheName));
         Assertions.assertEquals(1, authorities.size());
 

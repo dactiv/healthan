@@ -10,6 +10,7 @@ import com.github.dactiv.healthan.crypto.algorithm.exception.CodecException;
 import com.github.dactiv.healthan.crypto.algorithm.exception.UnknownAlgorithmException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -34,7 +35,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class Hash extends AbstractByteSource implements Serializable {
 
-    
+    @Serial
     private static final long serialVersionUID = 6396657711027799821L;
 
     /**

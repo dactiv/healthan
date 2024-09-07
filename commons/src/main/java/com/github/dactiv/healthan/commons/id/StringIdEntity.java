@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.commons.id;
 
 
+import java.io.Serial;
 import java.util.Date;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Date;
  */
 public class StringIdEntity extends IdEntity<String> {
 
-    
+    @Serial
     private static final long serialVersionUID = 6774769809276207267L;
 
     /**

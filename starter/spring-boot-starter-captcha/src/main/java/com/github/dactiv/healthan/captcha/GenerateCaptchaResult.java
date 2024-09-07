@@ -1,5 +1,6 @@
 package com.github.dactiv.healthan.captcha;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -9,6 +10,7 @@ import java.io.Serializable;
  */
 public class GenerateCaptchaResult implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1739665352581051182L;
     /**
      * 结果集

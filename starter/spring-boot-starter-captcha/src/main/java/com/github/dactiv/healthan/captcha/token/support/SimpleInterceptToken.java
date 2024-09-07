@@ -5,6 +5,7 @@ import com.github.dactiv.healthan.captcha.token.InterceptToken;
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.commons.TimeProperties;
 
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -17,6 +18,7 @@ import java.util.Map;
  */
 public class SimpleInterceptToken extends ConstructionCaptchaMeta implements InterceptToken {
 
+    @Serial
     private static final long serialVersionUID = -7503502769793672985L;
 
     /**

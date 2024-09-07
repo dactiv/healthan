@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.nacos.event;
 
 import org.springframework.context.ApplicationEvent;
 
+import java.io.Serial;
 
 
 /**
@@ -11,7 +12,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public class NacosServiceSubscribeEvent extends ApplicationEvent {
 
-    
+    @Serial
     private static final long serialVersionUID = -7678924793531762050L;
 
     public NacosServiceSubscribeEvent(NacosService nacosService) {

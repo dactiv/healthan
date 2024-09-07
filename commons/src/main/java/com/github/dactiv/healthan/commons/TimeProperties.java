@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.commons;
 
 import com.github.dactiv.healthan.commons.annotation.Time;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -14,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class TimeProperties implements Serializable {
 
-    
+    @Serial
     private static final long serialVersionUID = 2842217678288186207L;
     /**
      * 值

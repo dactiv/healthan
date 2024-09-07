@@ -2,6 +2,7 @@
 package com.github.dactiv.healthan.crypto.algorithm.exception;
 
 
+import java.io.Serial;
 
 /**
  * 校验签名异常，在非对称解密校验错误时抛出
@@ -10,7 +11,7 @@ package com.github.dactiv.healthan.crypto.algorithm.exception;
  */
 public class VerifyException extends CryptoException {
 
-    
+    @Serial
     private static final long serialVersionUID = 6695940887376029091L;
 
     /**

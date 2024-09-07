@@ -1,6 +1,7 @@
 package com.github.dactiv.healthan.commons.page;
 
 
+import java.io.Serial;
 
 /**
  * 分页请求对象
@@ -9,7 +10,7 @@ package com.github.dactiv.healthan.commons.page;
  **/
 public class PageRequest extends ScrollPageRequest {
 
-    
+    @Serial
     private static final long serialVersionUID = -7063877675141922463L;
 
     public static final String PAGE_FIELD_NAME = "page";

@@ -6,6 +6,7 @@ import com.github.dactiv.healthan.spring.web.query.Property;
 import com.github.dactiv.healthan.spring.web.query.generator.WildcardParser;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,7 +71,7 @@ public abstract class AbstractJsonFunctionWildcardParser<T> implements WildcardP
      */
     public static class ApplyObject implements Serializable {
 
-        
+        @Serial
         private static final long serialVersionUID = -4857566069778364200L;
 
         /**

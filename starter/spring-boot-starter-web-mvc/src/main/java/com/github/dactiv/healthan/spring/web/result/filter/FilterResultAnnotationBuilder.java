@@ -27,6 +27,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.SystemPropertyUtils;
 
 import java.beans.PropertyDescriptor;
+import java.io.Serial;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -38,8 +39,9 @@ import java.util.*;
  */
 public class FilterResultAnnotationBuilder extends JacksonAnnotationIntrospector {
 
-    
+    @Serial
     private static final long serialVersionUID = -72593450166134217L;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterResultAnnotationBuilder.class);
 
     public static final String DEFAULT_INCLUDE_PREFIX = "include";

@@ -2,6 +2,7 @@
 package com.github.dactiv.healthan.crypto.algorithm.exception;
 
 
+import java.io.Serial;
 
 /**
  * 签名错误异常，在非对称加密后密文签名错误时抛出
@@ -10,7 +11,7 @@ package com.github.dactiv.healthan.crypto.algorithm.exception;
  */
 public class SignException extends CryptoException {
 
-    
+    @Serial
     private static final long serialVersionUID = -3663930076173498754L;
 
     /**

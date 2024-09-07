@@ -1,5 +1,6 @@
 package com.github.dactiv.healthan.canal.domain.meta;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -9,11 +10,12 @@ import java.io.Serializable;
  */
 public class TableColumnInfoMeta implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = 485451195258828391L;
+
     public static final String MYSQL_COLUMN_NAME = "COLUMN_NAME";
 
     public static final String MYSQL_COLUMN_COMMENT = "COLUMN_COMMENT";
-
-    private static final long serialVersionUID = 485451195258828391L;
 
     /**
      * 列名称

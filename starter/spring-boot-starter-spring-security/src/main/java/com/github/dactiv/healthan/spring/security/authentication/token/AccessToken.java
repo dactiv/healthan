@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.spring.security.authentication.token;
 
 import com.github.dactiv.healthan.commons.TimeProperties;
 
+import java.io.Serial;
 import java.util.Date;
 
 /**
@@ -11,6 +12,7 @@ import java.util.Date;
  */
 public class AccessToken implements ExpiredToken {
 
+    @Serial
     private static final long serialVersionUID = -8600594693881884136L;
 
     /**

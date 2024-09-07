@@ -31,9 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SaveContextOnUpdateOrErrorResponseWrapper;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.util.WebUtils;
 
 import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
@@ -204,12 +202,7 @@ public class AccessTokenContextRepository extends HttpSessionSecurityContextRepo
 
     @Override
     public void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
-        SaveContextOnUpdateOrErrorResponseWrapper responseWrapper = WebUtils.getNativeResponse(response,
-                SaveContextOnUpdateOrErrorResponseWrapper.class);
-        if (Objects.nonNull(responseWrapper)) {
-            super.saveContext(context, request, response);
-        }
-
+        super.saveContext(context, request, response);
         saveRedissonSecurityContext(context, request, response);
     }
 

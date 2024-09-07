@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.captcha.tianai.config;
 
 import cloud.tianai.captcha.resource.ResourceProvider;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -12,9 +13,10 @@ import java.io.Serializable;
  */
 public class ResourceProperties implements Serializable {
 
-    public static final String DEFAULT_TAG_NAME = "default";
-
+    @Serial
     private static final long serialVersionUID = -1796848512858498745L;
+
+    public static final String DEFAULT_TAG_NAME = "default";
 
     /** 类型. */
     private String type;

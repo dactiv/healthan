@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -42,6 +43,16 @@ public class AuthenticationProperties {
      * 默认的登陆密码参数名
      */
     public static final String SECURITY_FORM_PASSWORD_PARAM_NAME = "password";
+
+    /**
+     * 默认同意的来源类型值
+     */
+    public static final List<String> DEFAULT_PLUGIN_AUTHORIZATION_MANAGER_SOURCES = Arrays.asList("SYSTEM","ALL");
+
+    /**
+     * 用户类型表决器默认同意的来源类型
+     */
+    private List<String> pluginAuthorizationManagerSources = DEFAULT_PLUGIN_AUTHORIZATION_MANAGER_SOURCES;
 
     /**
      * 方法的接口路径
@@ -127,6 +138,24 @@ public class AuthenticationProperties {
      * 要忽略的审计操作数据最终用户名称
      */
     private List<String> ignoreOperationDataTracePrincipals;
+
+    /**
+     * 获取用户类型表决器默认同意的来源类型
+     *
+     * @return 用户类型表决器默认同意的来源类型
+     */
+    public List<String> getPluginAuthorizationManagerSources() {
+        return pluginAuthorizationManagerSources;
+    }
+
+    /**
+     * 设置用户类型表决器默认同意的来源类型
+     *
+     * @param pluginAuthorizationManagerSources 用户类型表决器默认同意的来源类型
+     */
+    public void setPluginAuthorizationManagerSources(List<String> pluginAuthorizationManagerSources) {
+        this.pluginAuthorizationManagerSources = pluginAuthorizationManagerSources;
+    }
 
     /**
      * 是否隐藏找不到用户异常

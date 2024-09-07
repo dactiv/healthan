@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.mybatis.interceptor.audit;
 
 import com.github.dactiv.healthan.mybatis.enumerate.OperationDataType;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 public class OperationDataTraceRecord implements Serializable {
 
-    
+    @Serial
     private static final long serialVersionUID = 1987280604707609834L;
 
     public static final String SUBMIT_DATA_FIELD = "submitData";

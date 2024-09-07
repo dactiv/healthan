@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.security.audit;
 
 import org.springframework.boot.actuate.audit.AuditEvent;
 
+import java.io.Serial;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -13,7 +14,7 @@ import java.util.UUID;
  */
 public class IdAuditEvent extends AuditEvent {
 
-    
+    @Serial
     private static final long serialVersionUID = 8633684304971875621L;
 
     public static final String PRINCIPAL_FIELD_NAME = "principal";

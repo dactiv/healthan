@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
 
 import java.io.IOException;
+import java.io.Serial;
 
 
 /**
@@ -17,7 +18,7 @@ import java.io.IOException;
  */
 public class FilterResultSerializerProvider extends DefaultSerializerProvider {
 
-    
+    @Serial
     private static final long serialVersionUID = 9019736618410718003L;
 
     public FilterResultSerializerProvider() {

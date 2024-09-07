@@ -3,8 +3,10 @@ package com.github.dactiv.healthan.spring.security;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.security.entity.RoleAuthority;
-import com.github.dactiv.healthan.security.plugin.Plugin;
-import com.github.dactiv.healthan.spring.security.authentication.*;
+import com.github.dactiv.healthan.spring.security.authentication.AccessTokenContextRepository;
+import com.github.dactiv.healthan.spring.security.authentication.IpAuthenticationFilter;
+import com.github.dactiv.healthan.spring.security.authentication.RememberMeAuthenticationDetailsSource;
+import com.github.dactiv.healthan.spring.security.authentication.RestResultAuthenticationEntryPoint;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.RememberMeProperties;
@@ -12,35 +14,23 @@ import com.github.dactiv.healthan.spring.security.authentication.provider.TypeRe
 import com.github.dactiv.healthan.spring.security.authentication.service.PersistentTokenRememberMeUserDetailsService;
 import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
 import com.github.dactiv.healthan.spring.security.authentication.service.TypeTokenBasedRememberMeServices;
-import com.github.dactiv.healthan.spring.security.plugin.PluginSourceAuthorizationManager;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
-import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.aop.support.Pointcuts;
-import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authorization.AuthorizationEventPublisher;
-import org.springframework.security.authorization.method.AuthorizationInterceptorsOrder;
-import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -63,9 +53,9 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  */
 @Configuration
-@EnableMethodSecurity(securedEnabled = true)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableConfigurationProperties({AuthenticationProperties.class, RememberMeProperties.class})
+@ConditionalOnProperty(prefix = "healthan.authentication.spring.security", value = "enabled", matchIfMissing = true)
 public class DefaultWebSecurityAutoConfiguration {
 
     private final AccessTokenContextRepository accessTokenContextRepository;
@@ -204,32 +194,6 @@ public class DefaultWebSecurityAutoConfiguration {
             userDetails.add(new User(user.getName(), passwordEncoder.encode(user.getPassword()), roleAuthorities));
         }
         return new InMemoryUserDetailsManager(userDetails);
-    }
-
-    @Bean
-    public DefaultMethodSecurityExpressionHandler methodSecurityExpressionHandler(ObjectProvider<GrantedAuthorityDefaults> defaultsProvider,
-                                                                                  ApplicationContext context) {
-        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
-        handler.setTrustResolver(new AuthenticationSuccessTokenTrustResolver());
-        defaultsProvider.ifAvailable((d) -> handler.setDefaultRolePrefix(d.getRolePrefix()));
-        handler.setApplicationContext(context);
-        return handler;
-    }
-
-    @Bean
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    static MethodInterceptor pluginAuthorizationMethodInterceptor(ObjectProvider<SecurityContextHolderStrategy> strategyProvider,
-                                                                  ObjectProvider<AuthorizationEventPublisher> eventPublisherProvider) {
-
-        AuthorizationManagerBeforeMethodInterceptor interceptor = new AuthorizationManagerBeforeMethodInterceptor(
-                Pointcuts.union(new AnnotationMatchingPointcut(null, Plugin.class, true),
-                        new AnnotationMatchingPointcut(Plugin.class, true)), new PluginSourceAuthorizationManager());
-        interceptor.setOrder(AuthorizationInterceptorsOrder.PRE_AUTHORIZE.getOrder());
-
-        strategyProvider.ifAvailable(interceptor::setSecurityContextHolderStrategy);
-        eventPublisherProvider.ifAvailable(interceptor::setAuthorizationEventPublisher);
-
-        return interceptor;
     }
 
 }
