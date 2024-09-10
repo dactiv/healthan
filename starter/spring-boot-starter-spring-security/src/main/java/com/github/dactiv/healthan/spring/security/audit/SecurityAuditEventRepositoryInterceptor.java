@@ -10,7 +10,6 @@ import com.github.dactiv.healthan.spring.security.entity.AuditAuthenticationSucc
 import com.github.dactiv.healthan.spring.security.entity.RememberMeAuthenticationDetails;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.boot.actuate.audit.AuditEvent;
-import org.springframework.boot.actuate.security.AuthenticationAuditListener;
 import org.springframework.util.AntPathMatcher;
 
 /**
@@ -42,16 +41,14 @@ public class SecurityAuditEventRepositoryInterceptor implements AuditEventReposi
             return false;
         }
 
-        if (auditEvent.getType().equals(AuthenticationAuditListener.AUTHENTICATION_SUCCESS)) {
-            Object details = auditEvent.getData().get(AuditAuthenticationToken.DETAILS_KEY);
-            if (!AuditDetailsSource.class.isAssignableFrom(details.getClass())) {
-                return false;
-            }
+        Object details = auditEvent.getData().get(AuditAuthenticationToken.DETAILS_KEY);
+        if (!AuditDetailsSource.class.isAssignableFrom(details.getClass())) {
+            return false;
+        }
 
-            if (AuditAuthenticationSuccessDetails.class.isAssignableFrom(details.getClass())) {
-                AuditAuthenticationSuccessDetails auditDetails = Casts.cast(details);
-                return postAuditAuthenticationSuccessDetails(auditDetails, auditEvent);
-            }
+        if (AuditAuthenticationSuccessDetails.class.isAssignableFrom(details.getClass())) {
+            AuditAuthenticationSuccessDetails auditDetails = Casts.cast(details);
+            return postAuditAuthenticationSuccessDetails(auditDetails, auditEvent);
         }
 
         return AuditEventRepositoryInterceptor.super.preAddHandle(auditEvent);
