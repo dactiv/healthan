@@ -2,7 +2,7 @@ package com.github.dactiv.healthan.spring.security.test;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.spring.security.SpringSecurityAutoConfiguration;
-import com.github.dactiv.healthan.spring.security.authentication.FormLoginAuthenticationDetailsSource;
+import com.github.dactiv.healthan.spring.security.authentication.AuditAuthenticationDetailsSource;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
@@ -77,7 +78,9 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                         .clientSecret(passwordEncoder.encode("123456"))
                         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                         .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                        .clientAuthenticationMethods(c -> c.addAll(List.of(ClientAuthenticationMethod.CLIENT_SECRET_POST, ClientAuthenticationMethod.CLIENT_SECRET_JWT)))
                         .redirectUri("www.domain.com")
+                        .scopes(s -> s.addAll(List.of(OidcScopes.OPENID, OidcScopes.PROFILE)))
                         .build()
         );
     }
@@ -206,7 +209,7 @@ public class SpringSecurityConfig implements WebSecurityConfigurerAfterAdapter, 
                     .formLogin(f -> f.passwordParameter(authenticationProperties.getPasswordParamName())
                             .usernameParameter(authenticationProperties.getUsernameParamName())
                             .loginProcessingUrl(authenticationProperties.getLoginProcessingUrl())
-                            .authenticationDetailsSource(new FormLoginAuthenticationDetailsSource(authenticationProperties))
+                            .authenticationDetailsSource(new AuditAuthenticationDetailsSource(authenticationProperties))
                             .failureHandler(authenticationFailureHandler)
                             .successHandler(authenticationSuccessHandler)
                     )

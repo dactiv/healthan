@@ -16,7 +16,7 @@ import javax.swing.text.html.parser.Entity;
  * @author maurice.chen
  */
 @SpringBootTest
-public class TestConcurrentDataService {
+public class ConcurrentDataServiceTest {
 
     @Autowired
     private ConcurrentDataService concurrentDataService;

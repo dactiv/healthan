@@ -2,12 +2,12 @@ package com.github.dactiv.healthan.spring.security.authentication.provider;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
-import com.github.dactiv.healthan.spring.security.authentication.FormLoginAuthenticationDetails;
 import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
-import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
+import com.github.dactiv.healthan.spring.security.entity.AuditAuthenticationDetails;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -60,11 +60,11 @@ public class SecurityPrincipalAuthenticationProvider implements AuthenticationMa
 
         // 获取 token
         UsernamePasswordAuthenticationToken token = Casts.cast(authentication);
-        if (!FormLoginAuthenticationDetails.class.isAssignableFrom(token.getDetails().getClass())) {
+        if (!AuditAuthenticationDetails.class.isAssignableFrom(token.getDetails().getClass())) {
             return null;
         }
 
-        FormLoginAuthenticationDetails details = Casts.cast(token.getDetails());
+        AuditAuthenticationDetails details = Casts.cast(token.getDetails());
         RequestAuthenticationToken authenticationToken = new RequestAuthenticationToken(details, token);
 
         try {
@@ -162,8 +162,8 @@ public class SecurityPrincipalAuthenticationProvider implements AuthenticationMa
      * @param token     当前认真 token
      * @return spring security 认证信息
      */
-    public AuthenticationSuccessToken createSuccessAuthentication(SecurityPrincipal principal,
-                                                                  RequestAuthenticationToken token) {
+    public AuditAuthenticationToken createSuccessAuthentication(SecurityPrincipal principal,
+                                                                RequestAuthenticationToken token) {
         try {
 
             TypeSecurityPrincipalService typeSecurityPrincipalService = typeSecurityPrincipalManager.getTypeSecurityPrincipalService(token.getType());
@@ -171,7 +171,7 @@ public class SecurityPrincipalAuthenticationProvider implements AuthenticationMa
 
             return typeSecurityPrincipalService.createSuccessAuthentication(principal, token, grantedAuthorities);
         } catch (AuthenticationServiceException typeSecurityPrincipalService) {
-            return new AuthenticationSuccessToken(principal, token);
+            return new AuditAuthenticationToken(principal, token);
         }
 
     }

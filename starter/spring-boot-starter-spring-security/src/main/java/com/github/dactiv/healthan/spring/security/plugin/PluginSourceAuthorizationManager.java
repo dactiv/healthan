@@ -3,7 +3,7 @@ package com.github.dactiv.healthan.spring.security.plugin;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.plugin.Plugin;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -43,7 +43,7 @@ public class PluginSourceAuthorizationManager implements AuthorizationManager<Me
             return new AuthorizationDecision(false);
         }
 
-        if (!AuthenticationSuccessToken.class.isAssignableFrom(authentication.getClass())) {
+        if (!AuditAuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
             return new AuthorizationDecision(false);
         }
 
@@ -56,7 +56,7 @@ public class PluginSourceAuthorizationManager implements AuthorizationManager<Me
             return new AuthorizationDecision(true);
         }
 
-        AuthenticationSuccessToken token = Casts.cast(authentication);
+        AuditAuthenticationToken token = Casts.cast(authentication);
 
         if (!resourceTypes.contains(token.getPrincipalType())) {
             return new AuthorizationDecision(false);

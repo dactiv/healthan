@@ -6,11 +6,11 @@ import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
 import com.github.dactiv.healthan.spring.security.authentication.config.AccessTokenProperties;
 import com.github.dactiv.healthan.spring.security.authentication.token.AccessToken;
-import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
 import com.github.dactiv.healthan.spring.security.entity.AccessTokenDetails;
-import com.github.dactiv.healthan.spring.security.entity.AuthenticationSuccessDetails;
+import com.github.dactiv.healthan.spring.security.entity.AuditAuthenticationSuccessDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.security.core.context.SecurityContext;
@@ -47,7 +47,7 @@ public class TokenController {
                                                               @CurrentSecurityContext SecurityContext securityContext) {
 
         Assert.isTrue(
-                AuthenticationSuccessToken.class.isAssignableFrom(securityContext.getAuthentication().getClass()),
+                AuditAuthenticationToken.class.isAssignableFrom(securityContext.getAuthentication().getClass()),
                 "当前用户非安全用户明细"
         );
 
@@ -59,7 +59,7 @@ public class TokenController {
             return RestResult.of(validResult.getMessage(), validResult.getStatus(), validResult.getExecuteCode());
         }
 
-        AuthenticationSuccessToken authenticationToken = Casts.cast(securityContext.getAuthentication());
+        AuditAuthenticationToken authenticationToken = Casts.cast(securityContext.getAuthentication());
 
         Object details = authenticationToken.getDetails();
         if (!AccessTokenDetails.class.isAssignableFrom(details.getClass())) {
@@ -103,8 +103,8 @@ public class TokenController {
         result.put(accessTokenProperties.getRefreshTokenParamName(), Casts.of(refreshTokenValue, AccessToken.class));
         result.put(accessTokenProperties.getAccessTokenParamName(), refreshTokenValue.getAccessToken());
 
-        if (AuthenticationSuccessDetails.class.isAssignableFrom(accessTokenDetails.getClass())) {
-            AuthenticationSuccessDetails successDetails = Casts.cast(accessTokenDetails);
+        if (AuditAuthenticationSuccessDetails.class.isAssignableFrom(accessTokenDetails.getClass())) {
+            AuditAuthenticationSuccessDetails successDetails = Casts.cast(accessTokenDetails);
             successDetails.getMetadata().putAll(result);
         }
 

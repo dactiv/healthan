@@ -326,6 +326,17 @@ public class BasicService<M extends BaseMapper<T>, T extends Serializable> {
     }
 
     /**
+     * 是否存在数据
+     *
+     * @param wrapper where 条件
+     *
+     * @return true 是，否则 false
+     */
+    public boolean exist(Wrapper<T> wrapper) {
+        return baseMapper.exists(wrapper);
+    }
+
+    /**
      * 查找全部数据
      *
      * @return 数据集合

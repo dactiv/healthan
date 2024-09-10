@@ -2,7 +2,7 @@ package com.github.dactiv.healthan.spring.security.entity.support;
 
 import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
 import com.github.dactiv.healthan.spring.security.entity.AccessTokenDetails;
-import com.github.dactiv.healthan.spring.security.entity.AuthenticationSuccessDetails;
+import com.github.dactiv.healthan.spring.security.entity.AuditAuthenticationSuccessDetails;
 
 import java.util.Map;
 
@@ -11,13 +11,13 @@ import java.util.Map;
  *
  * @author maurice.chen
  */
-public class AccessTokenAuthenticationDetails extends AuthenticationSuccessDetails implements AccessTokenDetails {
+public class AccessTokenAuditAuthenticationSuccessDetails extends AuditAuthenticationSuccessDetails implements AccessTokenDetails {
 
     private ExpiredToken token;
 
-    public AccessTokenAuthenticationDetails(Object requestDetails,
-                                            Map<String, Object> metadata,
-                                            ExpiredToken token) {
+    public AccessTokenAuditAuthenticationSuccessDetails(Object requestDetails,
+                                                        Map<String, Object> metadata,
+                                                        ExpiredToken token) {
         super(requestDetails, metadata);
         this.token = token;
     }

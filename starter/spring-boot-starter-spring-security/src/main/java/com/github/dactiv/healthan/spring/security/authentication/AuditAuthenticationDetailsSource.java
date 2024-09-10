@@ -2,6 +2,7 @@ package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.entity.AuditAuthenticationDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
@@ -11,11 +12,11 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.Enumeration;
 
-public class FormLoginAuthenticationDetailsSource extends WebAuthenticationDetailsSource {
+public class AuditAuthenticationDetailsSource extends WebAuthenticationDetailsSource {
 
     private final AuthenticationProperties authenticationProperties;
 
-    public FormLoginAuthenticationDetailsSource(AuthenticationProperties authenticationProperties) {
+    public AuditAuthenticationDetailsSource(AuthenticationProperties authenticationProperties) {
         this.authenticationProperties = authenticationProperties;
     }
 
@@ -27,7 +28,7 @@ public class FormLoginAuthenticationDetailsSource extends WebAuthenticationDetai
             type = context.getHeader(authenticationProperties.getTypeHeaderName());
         }
         context.getHeaderNames();
-        return new FormLoginAuthenticationDetails(
+        return new AuditAuthenticationDetails(
                 webAuthenticationDetails,
                 type,
                 Casts.castMapToMultiValueMap(context.getParameterMap()),

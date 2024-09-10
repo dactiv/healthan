@@ -6,6 +6,7 @@ import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.test.entity.OperationDataEntity;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,8 +31,17 @@ public class SpringSecurityOperationDataTest {
     @Autowired
     private AuthenticationProperties authenticationProperties;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
     @Test
     public void testOperateData() throws Exception {
+        String authenticationCacheName = authenticationProperties.getAuthenticationCache().getName("test:test");
+        String authorizationCacheName = authenticationProperties.getAuthorizationCache().getName("test:1:test");
+
+        redissonClient.getBucket(authenticationCacheName).delete();
+        redissonClient.getBucket(authorizationCacheName).delete();
+
         MockHttpSession session = new MockHttpSession();
 
         mockMvc

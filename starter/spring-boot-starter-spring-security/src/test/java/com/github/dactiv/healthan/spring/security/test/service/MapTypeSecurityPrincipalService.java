@@ -4,6 +4,8 @@ import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.security.entity.support.SimpleSecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.AbstractTypeSecurityPrincipalService;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
+import com.github.dactiv.healthan.spring.security.authentication.oidc.OidcUserInfoAuthenticationResolver;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.TypeAuthenticationToken;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +13,15 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 @Component
-public class MapTypeSecurityPrincipalService extends AbstractTypeSecurityPrincipalService implements InitializingBean {
+public class MapTypeSecurityPrincipalService extends AbstractTypeSecurityPrincipalService implements InitializingBean, OidcUserInfoAuthenticationResolver {
 
     private static final Map<String, SimpleSecurityPrincipal> USER_DETAILS = Collections.synchronizedMap(new HashMap<>());
 
@@ -57,5 +62,18 @@ public class MapTypeSecurityPrincipalService extends AbstractTypeSecurityPrincip
     @Override
     public PasswordEncoder getPasswordEncoder() {
         return passwordEncoder;
+    }
+
+    @Override
+    public boolean isSupport(String type) {
+        return getType().contains(type);
+    }
+
+    @Override
+    public OidcUserInfo mappingOidcUserInfoClaims(OAuth2Authorization oAuth2Authorization, Map<String, Object> claims, AuditAuthenticationToken authenticationToken) {
+        if (oAuth2Authorization.getAuthorizedScopes().contains(OidcScopes.PROFILE)) {
+            claims.put(OidcScopes.PROFILE, authenticationToken.getName());
+        }
+        return new OidcUserInfo(claims);
     }
 }

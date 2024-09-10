@@ -91,7 +91,7 @@ public class SimpleInterceptToken extends ConstructionCaptchaMeta implements Int
 
         LocalDateTime expireTime = LocalDateTime
                 .ofInstant(getCreationTime().toInstant(), ZoneId.systemDefault())
-                .plus(time.getValue(), time.toChronoUnit());
+                .plus(time.getValue(), time.getUnit().toChronoUnit());
 
         return now.isAfter(expireTime);
     }

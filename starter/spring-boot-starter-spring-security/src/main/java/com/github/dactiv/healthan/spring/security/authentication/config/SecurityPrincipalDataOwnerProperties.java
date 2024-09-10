@@ -1,6 +1,6 @@
 package com.github.dactiv.healthan.spring.security.authentication.config;
 
-import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.security.Principal;
@@ -16,13 +16,13 @@ import java.util.List;
 public class SecurityPrincipalDataOwnerProperties {
 
     /**
-     * 要忽略的当前用户类型，配置后如果 {@link AuthenticationSuccessToken#getName()} 包含该值信息就不做数据权限控制
+     * 要忽略的当前用户类型，配置后如果 {@link AuditAuthenticationToken#getName()} 包含该值信息就不做数据权限控制
      */
     private List<String> ignorePrincipalTypes = new LinkedList<>();
 
     /**
-     * 要忽略的当前用户名称，配置后如果 {@link AuthenticationSuccessToken#getPrincipal#toString() }
-     * 或者  {@link AuthenticationSuccessToken#getPrincipal} 实现 {@link Principal} 并且 {@link Principal#getName()}
+     * 要忽略的当前用户名称，配置后如果 {@link AuditAuthenticationToken#getPrincipal#toString() }
+     * 或者  {@link AuditAuthenticationToken#getPrincipal} 实现 {@link Principal} 并且 {@link Principal#getName()}
      * 值包含该值信息就不做数据权限控制
      */
     private List<String> ignorePrincipalNames = new LinkedList<>();

@@ -3,7 +3,7 @@ package com.github.dactiv.healthan.spring.security.authentication.handler;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
-import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,9 +68,9 @@ public class JsonAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
                                         Authentication authentication) throws IOException{
 
         RestResult<Object> result = RestResult.of(HttpStatus.OK.getReasonPhrase());
-        if (authentication instanceof AuthenticationSuccessToken) {
-            AuthenticationSuccessToken authenticationSuccessToken = Casts.cast(authentication);
-            result.setData(authenticationSuccessToken.toMap());
+        if (authentication instanceof AuditAuthenticationToken) {
+            AuditAuthenticationToken auditAuthenticationToken = Casts.cast(authentication);
+            result.setData(auditAuthenticationToken.toMap());
         } else {
             result.setData(authentication);
         }

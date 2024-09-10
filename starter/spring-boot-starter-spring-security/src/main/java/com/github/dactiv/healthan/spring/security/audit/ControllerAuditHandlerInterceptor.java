@@ -4,7 +4,7 @@ import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.security.audit.Auditable;
 import com.github.dactiv.healthan.security.plugin.Plugin;
 import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditProperties;
-import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -82,9 +82,9 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             type = controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type;
             request.setAttribute(SecurityPrincipalOperationDataTraceResolver.OPERATION_DATA_TRACE_ATT_NAME, true);
             AuditEvent auditEvent;
-            if (AuthenticationSuccessToken.class.isAssignableFrom(principal.getClass())) {
-                AuthenticationSuccessToken authenticationToken = Casts.cast(principal);
-                data.put(AuthenticationSuccessToken.DETAILS_KEY, authenticationToken.getDetails());
+            if (AuditAuthenticationToken.class.isAssignableFrom(principal.getClass())) {
+                AuditAuthenticationToken authenticationToken = Casts.cast(principal);
+                data.put(AuditAuthenticationToken.DETAILS_KEY, authenticationToken.getDetails());
 
                 auditEvent = new AuditEvent(Instant.now(), authenticationToken.getName(), type, data);
             } else {
@@ -157,9 +157,9 @@ public class ControllerAuditHandlerInterceptor implements ApplicationEventPublis
             type = controllerAuditProperties.getAuditPrefixName() + Casts.UNDERSCORE + type;
         }
 
-        if (AuthenticationSuccessToken.class.isAssignableFrom(principal.getClass())) {
-            AuthenticationSuccessToken authenticationToken = Casts.cast(principal);
-            data.put(AuthenticationSuccessToken.DETAILS_KEY, authenticationToken.getDetails());
+        if (AuditAuthenticationToken.class.isAssignableFrom(principal.getClass())) {
+            AuditAuthenticationToken authenticationToken = Casts.cast(principal);
+            data.put(AuditAuthenticationToken.DETAILS_KEY, authenticationToken.getDetails());
             return new AuditEvent(Instant.now(), authenticationToken.getName(), type, data);
         } else {
             return new AuditEvent(Instant.now(), principal.toString(), type, data);

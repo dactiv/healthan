@@ -12,9 +12,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import javax.swing.text.html.parser.Entity;
 
 @SpringBootTest
-public class TestIdempotentDataService {
+public class IdempotentDataServiceTest {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(TestIdempotentDataService.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(IdempotentDataServiceTest.class);
 
     @Autowired
     private IdempotentDataService idempotentDataService;

@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationEventPublisher;
 import org.springframework.security.authorization.method.AuthorizationInterceptorsOrder;
 import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
@@ -45,12 +46,14 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.AbstractRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 
 import java.math.BigDecimal;
 import java.util.LinkedList;
@@ -104,7 +107,10 @@ public class DefaultWebSecurityAutoConfiguration {
                         .anyRequest()
                         .authenticated()
                 )
-                .httpBasic(b -> b.init(httpSecurity))
+                .httpBasic(b -> b
+                        .securityContextRepository(new RequestAttributeSecurityContextRepository())
+                        .authenticationDetailsSource(new AuditAuthenticationDetailsSource(authenticationProperties))
+                )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .rememberMe(AbstractHttpConfigurer::disable)
@@ -191,6 +197,14 @@ public class DefaultWebSecurityAutoConfiguration {
     }
 
     @Bean
+    public DaoAuthenticationProvider authenticationProvider(UserDetailsManager userDetailsManager, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsManager);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        return authenticationProvider;
+    }
+
+    @Bean
     public InMemoryUserDetailsManager userDetailsService(AuthenticationProperties authenticationProperties,
                                                          PasswordEncoder passwordEncoder) {
 
@@ -206,8 +220,6 @@ public class DefaultWebSecurityAutoConfiguration {
         }
         return new InMemoryUserDetailsManager(userDetails);
     }
-
-
 
     @Bean
     @ConditionalOnMissingBean(PluginSourceAuthorizationManager.class)

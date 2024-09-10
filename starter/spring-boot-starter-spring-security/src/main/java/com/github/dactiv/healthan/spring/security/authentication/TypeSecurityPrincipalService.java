@@ -2,13 +2,15 @@ package com.github.dactiv.healthan.spring.security.authentication;
 
 import com.github.dactiv.healthan.commons.CacheProperties;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
-import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RequestAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.TypeAuthenticationToken;
-import com.github.dactiv.healthan.spring.security.entity.AuthenticationSuccessDetails;
+import com.github.dactiv.healthan.spring.security.entity.AuditAuthenticationSuccessDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -75,15 +77,29 @@ public interface TypeSecurityPrincipalService {
      * @param grantedAuthorities 权限信息
      * @return 新的认证 token
      */
-    default AuthenticationSuccessToken createSuccessAuthentication(SecurityPrincipal principal,
-                                                                   RequestAuthenticationToken token,
-                                                                   Collection<? extends GrantedAuthority> grantedAuthorities) {
+    default AuditAuthenticationToken createSuccessAuthentication(SecurityPrincipal principal,
+                                                                 RequestAuthenticationToken token,
+                                                                 Collection<? extends GrantedAuthority> grantedAuthorities) {
 
-        AuthenticationSuccessToken result = new AuthenticationSuccessToken(principal, token, grantedAuthorities);
+        AuditAuthenticationToken result = new AuditAuthenticationToken(principal, token, grantedAuthorities);
         result.setAuthenticated(true);
         result.setRememberMe(false);
 
-        AuthenticationSuccessDetails successDetails = getPrincipalDetails(principal, token, grantedAuthorities);
+        AuditAuthenticationSuccessDetails successDetails = getPrincipalDetails(principal, token, grantedAuthorities);
+        successDetails.setRemember(result.isRememberMe());
+        result.setDetails(successDetails);
+
+        return result;
+    }
+
+    default Authentication createOidcUserInfoSuccessAuthentication(SecurityPrincipal principal,
+                                                                   TypeAuthenticationToken token,
+                                                                   JwtAuthenticationToken jwtAuthenticationToken) {
+        AuditAuthenticationToken result = new AuditAuthenticationToken(principal, token, jwtAuthenticationToken.getAuthorities());
+        result.setAuthenticated(true);
+        result.setRememberMe(false);
+
+        AuditAuthenticationSuccessDetails successDetails = getPrincipalDetails(principal, token, jwtAuthenticationToken.getAuthorities());
         successDetails.setRemember(result.isRememberMe());
         result.setDetails(successDetails);
 
@@ -98,15 +114,15 @@ public interface TypeSecurityPrincipalService {
      * @param grantedAuthorities 权限信息
      * @return 新的认证 token
      */
-    default AuthenticationSuccessToken createRememberMeAuthenticationSuccessToken(SecurityPrincipal principal,
-                                                                                  TypeAuthenticationToken token,
-                                                                                  Collection<? extends GrantedAuthority> grantedAuthorities) {
+    default AuditAuthenticationToken createRememberMeAuthenticationSuccessToken(SecurityPrincipal principal,
+                                                                                TypeAuthenticationToken token,
+                                                                                Collection<? extends GrantedAuthority> grantedAuthorities) {
 
-        AuthenticationSuccessToken result = new AuthenticationSuccessToken(principal, token, grantedAuthorities);
+        AuditAuthenticationToken result = new AuditAuthenticationToken(principal, token, grantedAuthorities);
         result.setAuthenticated(true);
         result.setRememberMe(true);
 
-        AuthenticationSuccessDetails successDetails = getPrincipalDetails(principal, token, grantedAuthorities);
+        AuditAuthenticationSuccessDetails successDetails = getPrincipalDetails(principal, token, grantedAuthorities);
         successDetails.setRemember(result.isRememberMe());
         result.setDetails(successDetails);
 
@@ -121,10 +137,10 @@ public interface TypeSecurityPrincipalService {
      * @param grantedAuthorities 权限信息
      * @return 用户明细信息
      */
-    default AuthenticationSuccessDetails getPrincipalDetails(SecurityPrincipal principal,
-                                                             TypeAuthenticationToken token,
-                                                             Collection<? extends GrantedAuthority> grantedAuthorities) {
-        return new AuthenticationSuccessDetails(token.getDetails(), new LinkedHashMap<>());
+    default AuditAuthenticationSuccessDetails getPrincipalDetails(Object principal,
+                                                                  Authentication token,
+                                                                  Collection<? extends GrantedAuthority> grantedAuthorities) {
+        return new AuditAuthenticationSuccessDetails(token.getDetails(), new LinkedHashMap<>());
     }
 
     /**

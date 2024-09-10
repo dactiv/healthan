@@ -12,11 +12,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 简单的用户认证 token
+ * 简单的用户认证审计 token
  *
  * @author maurice.chen
  */
-public class AuthenticationSuccessToken extends AbstractAuthenticationToken {
+public class AuditAuthenticationToken extends AbstractAuthenticationToken {
 
     @Serial
     private static final long serialVersionUID = 3747271533448473641L;
@@ -53,24 +53,24 @@ public class AuthenticationSuccessToken extends AbstractAuthenticationToken {
      * @param principal   当前用户
      * @param authorities 授权信息
      */
-    public AuthenticationSuccessToken(SecurityPrincipal principal,
-                                      String principalType,
-                                      Collection<? extends GrantedAuthority> authorities,
-                                      Date lastAuthenticationTime) {
+    public AuditAuthenticationToken(SecurityPrincipal principal,
+                                    String principalType,
+                                    Collection<? extends GrantedAuthority> authorities,
+                                    Date lastAuthenticationTime) {
         super(authorities);
         this.principal = principal;
         this.principalType = principalType;
         this.lastAuthenticationTime = lastAuthenticationTime;
     }
 
-    public AuthenticationSuccessToken(SecurityPrincipal principal,
-                                      TypeAuthenticationToken token) {
+    public AuditAuthenticationToken(SecurityPrincipal principal,
+                                    TypeAuthenticationToken token) {
         this(principal, token, new LinkedHashSet<>());
     }
 
-    public AuthenticationSuccessToken(SecurityPrincipal principal,
-                                      TypeAuthenticationToken token,
-                                      Collection<? extends GrantedAuthority> grantedAuthorities) {
+    public AuditAuthenticationToken(SecurityPrincipal principal,
+                                    TypeAuthenticationToken token,
+                                    Collection<? extends GrantedAuthority> grantedAuthorities) {
         this(principal, token.getType(), grantedAuthorities, new Date());
     }
 

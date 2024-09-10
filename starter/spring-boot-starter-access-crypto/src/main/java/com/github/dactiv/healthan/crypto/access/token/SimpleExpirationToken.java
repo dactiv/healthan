@@ -36,7 +36,7 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
     /**
      * 时间超时时间
      */
-    private LocalDateTime expirationTime = lastAccessedTime.plus(maxInactiveInterval.getValue(), maxInactiveInterval.toChronoUnit());
+    private LocalDateTime expirationTime = lastAccessedTime.plus(maxInactiveInterval.getValue(), maxInactiveInterval.getUnit().toChronoUnit());
 
     /**
      * 超时的 token
@@ -47,7 +47,7 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
     public SimpleExpirationToken(AccessToken token, TimeProperties maxInactiveInterval) {
         super(token.getType(), token.getToken(), token.getName(), token.getKey());
         this.maxInactiveInterval = maxInactiveInterval;
-        this.expirationTime = creationTime.plus(maxInactiveInterval.getValue(), maxInactiveInterval.toChronoUnit());
+        this.expirationTime = creationTime.plus(maxInactiveInterval.getValue(), maxInactiveInterval.getUnit().toChronoUnit());
     }
 
     /**
@@ -80,7 +80,7 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
         this.lastAccessedTime = lastAccessedTime;
         this.expirationTime = lastAccessedTime.plus(
                 maxInactiveInterval.getValue(),
-                maxInactiveInterval.toChronoUnit()
+                maxInactiveInterval.getUnit().toChronoUnit()
         );
     }
 
@@ -94,7 +94,7 @@ public class SimpleExpirationToken extends SimpleToken implements ExpirationToke
 
         return LocalDateTime
                 .now()
-                .plus(maxInactiveInterval.getValue(), maxInactiveInterval.toChronoUnit())
+                .plus(maxInactiveInterval.getValue(), maxInactiveInterval.getUnit().toChronoUnit())
                 .isAfter(this.lastAccessedTime);
     }
 

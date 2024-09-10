@@ -38,7 +38,7 @@ public class ExpiredCaptcha implements Expired, Serializable {
 
         LocalDateTime expire = LocalDateTime
                 .ofInstant(getCreationTime().toInstant(), ZoneId.systemDefault())
-                .plus(expireTime.getValue(), expireTime.toChronoUnit());
+                .plus(expireTime.getValue(), expireTime.getUnit().toChronoUnit());
 
         return now.isAfter(expire);
     }

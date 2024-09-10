@@ -6,7 +6,7 @@ import com.github.dactiv.healthan.mybatis.interceptor.audit.OperationDataTraceRe
 import com.github.dactiv.healthan.mybatis.plus.audit.MybatisPlusOperationDataTraceResolver;
 import com.github.dactiv.healthan.mybatis.plus.config.OperationDataTraceProperties;
 import com.github.dactiv.healthan.spring.security.audit.config.ControllerAuditProperties;
-import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.entity.SecurityPrincipalOperationDataTraceRecord;
 import com.github.dactiv.healthan.spring.web.mvc.SpringMvcUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -62,11 +62,11 @@ public class SecurityPrincipalOperationDataTraceResolver extends MybatisPlusOper
             return null;
         }
 
-        if (!AuthenticationSuccessToken.class.isAssignableFrom(context.getAuthentication().getClass())) {
+        if (!AuditAuthenticationToken.class.isAssignableFrom(context.getAuthentication().getClass())) {
             return null;
         }
 
-        AuthenticationSuccessToken authenticationToken = Casts.cast(context.getAuthentication());
+        AuditAuthenticationToken authenticationToken = Casts.cast(context.getAuthentication());
 
         List<OperationDataTraceRecord> records = super.createOperationDataTraceRecord(
                 mappedStatement,
@@ -106,14 +106,14 @@ public class SecurityPrincipalOperationDataTraceResolver extends MybatisPlusOper
         }
 
         SecurityPrincipalOperationDataTraceRecord dataTraceRecord = Casts.cast(record);
-        AuthenticationSuccessToken authenticationToken = Casts.cast(dataTraceRecord.getPrincipal());
+        AuditAuthenticationToken authenticationToken = Casts.cast(dataTraceRecord.getPrincipal());
 
         Map<String, Object> dataTraceRecordMap = Casts.convertValue(dataTraceRecord, Casts.MAP_TYPE_REFERENCE);
         dataTraceRecordMap.remove(NumberIdEntity.CREATION_TIME_FIELD_NAME);
-        dataTraceRecordMap.remove(AuthenticationSuccessToken.PRINCIPAL_KEY);
+        dataTraceRecordMap.remove(AuditAuthenticationToken.PRINCIPAL_KEY);
 
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put(AuthenticationSuccessToken.DETAILS_KEY, authenticationToken.getDetails());
+        data.put(AuditAuthenticationToken.DETAILS_KEY, authenticationToken.getDetails());
         data.put(OPERATION_DATA_TRACE_ATT_NAME, dataTraceRecordMap);
 
         syncControllerAuditEvent(data);

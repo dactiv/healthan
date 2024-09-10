@@ -4,6 +4,7 @@ package com.github.dactiv.healthan.spring.security;
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.crypto.algorithm.Base64;
 import com.github.dactiv.healthan.crypto.algorithm.cipher.RsaCipherService;
+import com.github.dactiv.healthan.spring.security.authentication.RedissonOAuth2AuthorizationService;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2AuthorizationConfigurerAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.adapter.OAuth2WebSecurityConfigurerAfterAdapter;
 import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
@@ -11,12 +12,14 @@ import com.github.dactiv.healthan.spring.security.authentication.config.OAuth2Pr
 import com.github.dactiv.healthan.spring.security.authentication.handler.*;
 import com.github.dactiv.healthan.spring.security.authentication.oidc.OidcUserInfoAuthenticationMapper;
 import com.github.dactiv.healthan.spring.security.authentication.oidc.OidcUserInfoAuthenticationResolver;
+import com.github.dactiv.healthan.spring.security.authentication.service.TypeSecurityPrincipalManager;
 import com.github.dactiv.healthan.spring.web.result.error.ErrorResultResolver;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -120,8 +123,25 @@ public class OAuth2WebSecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean(AuthorizationServerSettings.class)
-    public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().build();
+    public AuthorizationServerSettings authorizationServerSettings(OAuth2Properties oAuth2Properties) {
+        AuthorizationServerSettings.Builder builder = AuthorizationServerSettings
+                .builder()
+                .authorizationEndpoint(oAuth2Properties.getAuthorizeEndpoint())
+                .deviceAuthorizationEndpoint(oAuth2Properties.getDeviceAuthorizationEndpoint())
+                .deviceVerificationEndpoint(oAuth2Properties.getDeviceVerificationEndpoint())
+                .tokenEndpoint(oAuth2Properties.getTokenEndpoint())
+                .jwkSetEndpoint(oAuth2Properties.getJwkSetEndpoint())
+                .tokenRevocationEndpoint(oAuth2Properties.getTokenRevocationEndpoint())
+                .tokenIntrospectionEndpoint(oAuth2Properties.getTokenIntrospectionEndpoint())
+                .oidcClientRegistrationEndpoint(oAuth2Properties.getOidcClientRegistrationEndpoint())
+                .oidcUserInfoEndpoint(oAuth2Properties.getOidcUserInfoEndpoint())
+                .oidcLogoutEndpoint(oAuth2Properties.getOidcLogoutEndpoint());
+
+        if (StringUtils.isNotEmpty(oAuth2Properties.getIssuer())) {
+            builder.issuer(oAuth2Properties.getIssuer());
+        }
+
+        return builder.build();
     }
 
     @Bean
@@ -140,17 +160,19 @@ public class OAuth2WebSecurityAutoConfiguration {
     @ConditionalOnMissingBean(OAuth2WebSecurityConfigurerAfterAdapter.class)
     public OAuth2WebSecurityConfigurerAfterAdapter oAuth2WebSecurityConfigurerAfterAdapter(JsonAuthenticationFailureHandler jsonAuthenticationFailureHandler,
                                                                                            JsonAuthenticationSuccessHandler jsonAuthenticationSuccessHandler,
-                                                                                           OAuth2Properties oAuth2Properties,
                                                                                            OidcUserInfoAuthenticationMapper oidcUserInfoAuthenticationMapper,
                                                                                            ObjectProvider<OAuth2AuthorizationConfigurerAdapter> oAuth2AuthorizationConfigurerAdapters,
-                                                                                           ObjectProvider<ErrorResultResolver> resultResolvers) {
+                                                                                           ObjectProvider<ErrorResultResolver> resultResolvers,
+                                                                                           RedissonOAuth2AuthorizationService authenticationProvider,
+                                                                                           TypeSecurityPrincipalManager typeSecurityPrincipalManager) {
         return new OAuth2WebSecurityConfigurerAfterAdapter(
                 jsonAuthenticationFailureHandler,
                 jsonAuthenticationSuccessHandler,
                 oidcUserInfoAuthenticationMapper,
                 oAuth2AuthorizationConfigurerAdapters.orderedStream().collect(Collectors.toList()),
                 resultResolvers.orderedStream().collect(Collectors.toList()),
-                oAuth2Properties
+                authenticationProvider,
+                typeSecurityPrincipalManager
         );
     }
 }

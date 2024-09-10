@@ -1,6 +1,6 @@
 package com.github.dactiv.healthan.spring.security.authentication.oidc;
 
-import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 
@@ -32,5 +32,5 @@ public interface OidcUserInfoAuthenticationResolver {
      */
     OidcUserInfo mappingOidcUserInfoClaims(OAuth2Authorization oAuth2Authorization,
                                            Map<String, Object> claims,
-                                           AuthenticationSuccessToken authenticationToken);
+                                           AuditAuthenticationToken authenticationToken);
 }

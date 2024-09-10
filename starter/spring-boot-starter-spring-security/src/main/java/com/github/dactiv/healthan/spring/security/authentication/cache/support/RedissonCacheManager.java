@@ -7,7 +7,7 @@ import com.github.dactiv.healthan.commons.TimeProperties;
 import com.github.dactiv.healthan.commons.exception.ErrorCodeException;
 import com.github.dactiv.healthan.security.entity.SecurityPrincipal;
 import com.github.dactiv.healthan.spring.security.authentication.cache.CacheManager;
-import com.github.dactiv.healthan.spring.security.authentication.token.AuthenticationSuccessToken;
+import com.github.dactiv.healthan.spring.security.authentication.token.AuditAuthenticationToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.ExpiredToken;
 import com.github.dactiv.healthan.spring.security.authentication.token.RefreshToken;
 import org.redisson.api.RBucket;
@@ -86,7 +86,7 @@ public class RedissonCacheManager implements CacheManager {
             return ;
         }
 
-        AuthenticationSuccessToken authenticationToken = Casts.cast(context);
+        AuditAuthenticationToken authenticationToken = Casts.cast(context);
 
         RBucket<SecurityContext> bucket = getSecurityContextBucket(
                 authenticationToken.getPrincipalType(),
@@ -99,7 +99,7 @@ public class RedissonCacheManager implements CacheManager {
     @Override
     public void saveSecurityContext(SecurityContext context, CacheProperties accessTokenCache) {
 
-        AuthenticationSuccessToken authenticationToken = Casts.cast(context);
+        AuditAuthenticationToken authenticationToken = Casts.cast(context);
         //SecurityPrincipal securityPrincipal = Casts.cast(authenticationToken.getPrincipal());
         RBucket<SecurityContext> bucket = getSecurityContextBucket(
                 authenticationToken.getPrincipalType(),

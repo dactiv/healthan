@@ -1,4 +1,4 @@
-package com.github.dactiv.healthan.spring.security.authentication;
+package com.github.dactiv.healthan.spring.security.entity;
 
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;

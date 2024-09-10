@@ -42,7 +42,7 @@ public class ReusableCaptcha extends ExpiredCaptcha implements Serializable, Reu
 
         LocalDateTime expireTime = LocalDateTime
                 .ofInstant(getCreationTime().toInstant(), ZoneId.systemDefault())
-                .plus(retryTime.getValue(), retryTime.toChronoUnit());
+                .plus(retryTime.getValue(), retryTime.getUnit().toChronoUnit());
 
         return now.isAfter(expireTime);
     }

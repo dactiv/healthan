@@ -1,5 +1,7 @@
-package com.github.dactiv.healthan.spring.security.authentication;
+package com.github.dactiv.healthan.spring.security.entity;
 
+import com.github.dactiv.healthan.spring.security.audit.config.AuditDetailsSource;
+import com.github.dactiv.healthan.spring.security.authentication.TypeSecurityPrincipalService;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.util.MultiValueMap;
 
@@ -8,7 +10,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author maurice.chen
  */
-public class FormLoginAuthenticationDetails extends WebAuthenticationDetails {
+public class AuditAuthenticationDetails extends WebAuthenticationDetails implements AuditDetailsSource {
 
     /**
      * 登录类型，用于区分使用不同的 {@link TypeSecurityPrincipalService} 执行认证授权等业务
@@ -25,10 +27,10 @@ public class FormLoginAuthenticationDetails extends WebAuthenticationDetails {
      */
     private final MultiValueMap<String, String> requestHeaders;
 
-    public FormLoginAuthenticationDetails(WebAuthenticationDetails webAuthenticationDetails,
-                                          String type,
-                                          MultiValueMap<String, String> requestParameters,
-                                          MultiValueMap<String, String> requestHeaders) {
+    public AuditAuthenticationDetails(WebAuthenticationDetails webAuthenticationDetails,
+                                      String type,
+                                      MultiValueMap<String, String> requestParameters,
+                                      MultiValueMap<String, String> requestHeaders) {
         super(webAuthenticationDetails.getRemoteAddress(), webAuthenticationDetails.getSessionId());
         this.type = type;
         this.requestParameters = requestParameters;

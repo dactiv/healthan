@@ -21,54 +21,119 @@ import java.util.concurrent.TimeUnit;
 public class OAuth2Properties {
 
     /**
-     * 默认的授权页面 url
+     * 默认的授权终端
      */
-    public static final String DEFAULT_AUTHORIZE_PAGE_URI = "/oauth2/authorize";
+    public static final String DEFAULT_AUTHORIZE_ENDPOINT = "/oauth2/authorize";
 
     /**
-     * 默认的注销令牌 url
+     * 默认的注销令牌终端
      */
-    public static final String DEFAULT_TOKEN_REVOCATION_ENDPOINT_URI = "/oauth2/revoke";
+    public static final String DEFAULT_TOKEN_REVOCATION_ENDPOINT = "/oauth2/revoke";
 
     /**
-     * 默认的令牌 url
+     * 默认的令牌终端
      */
-    public static final String DEFAULT_TOKEN_ENDPOINT_URI = "/oauth2/token";
+    public static final String DEFAULT_TOKEN_ENDPOINT = "/oauth2/token";
 
     /**
-     * 默认的用户信息 url
+     * 默认的用户信息终端
      */
-    public static final String DEFAULT_OIDC_USER_INFO_ENDPOINT_URI = "/userinfo";
+    public static final String DEFAULT_OIDC_USER_INFO_ENDPOINT = "/oauth2/oidc/userinfo";
 
     /**
-     * 默认确认授权敏感信息 url
+     * 默认确认授权敏感信息页面
      */
     public static final String DEFAULT_CONSENT_PAGE_URI = "/oauth2/consent";
 
     /**
-     * 确认授权页面 url
+     * 默认设备认证终端
      */
-    private String consentPageUri = DEFAULT_CONSENT_PAGE_URI;
+    public static final String DEFAULT_DEVICE_AUTHORIZATION_ENDPOINT = "/oauth2/device/authorization";
 
     /**
-     * 用户信息 url
+     * 默认设备校验终端
      */
-    private String oidcUserInfoEndpointUri = DEFAULT_OIDC_USER_INFO_ENDPOINT_URI;
+    public static final String DEFAULT_DEVICE_VERIFICATION_ENDPOINT = "/oauth2/device/verification";
 
     /**
-     * 令牌 url
+     * 默认jwks 终端
      */
-    private String tokenEndpointUri = DEFAULT_TOKEN_ENDPOINT_URI;
+    public static final String DEFAULT_JWK_SET_ENDPOINT = "/oauth2/jwks";
 
     /**
-     * 注销令牌 url
+     * 默认访问令牌元数据终端
      */
-    private String tokenRevocationEndpointUri = DEFAULT_TOKEN_REVOCATION_ENDPOINT_URI;
+    public static final String DEFAULT_TOKEN_INTROSPECTION_ENDPOINT = "/oauth2/introspect";
 
     /**
-     * 授权页面 url
+     * 默认客户端注册终端
      */
-    private String authorizePageUri = DEFAULT_AUTHORIZE_PAGE_URI;
+    public static final String DEFAULT_OIDC_CLIENT_REGISTRATION_ENDPOINT = "/oauth2/oidc/client/register";
+
+    /**
+     * 默认 oidc 注销终端
+     */
+    public static final String DEFAULT_OIDC_LOGOUT_ENDPOINT = "/oauth2/oidc/logout";
+
+    /**
+     * 确认授权页面
+     */
+    private String consentPage = DEFAULT_CONSENT_PAGE_URI;
+
+    /**
+     * oidc 用户信息终端
+     */
+    private String oidcUserInfoEndpoint = DEFAULT_OIDC_USER_INFO_ENDPOINT;
+
+    /**
+     * 令牌终端
+     */
+    private String tokenEndpoint = DEFAULT_TOKEN_ENDPOINT;
+
+    /**
+     * 注销令牌终端
+     */
+    private String tokenRevocationEndpoint = DEFAULT_TOKEN_REVOCATION_ENDPOINT;
+
+    /**
+     * 授权页面终端
+     */
+    private String authorizeEndpoint = DEFAULT_AUTHORIZE_ENDPOINT;
+
+    /**
+     * 设备授权终端
+     */
+    private String deviceAuthorizationEndpoint = DEFAULT_DEVICE_AUTHORIZATION_ENDPOINT;
+
+    /**
+     * 设备校验终端
+     */
+    private String deviceVerificationEndpoint = DEFAULT_DEVICE_VERIFICATION_ENDPOINT;
+
+    /**
+     * jwk 终端
+     */
+    private String jwkSetEndpoint = DEFAULT_JWK_SET_ENDPOINT;
+
+    /**
+     * 访问令牌元数据终端
+     */
+    private String tokenIntrospectionEndpoint = DEFAULT_TOKEN_INTROSPECTION_ENDPOINT;
+
+    /**
+     * 默认 oidc 客户端注册终端
+     */
+    private String oidcClientRegistrationEndpoint = DEFAULT_OIDC_CLIENT_REGISTRATION_ENDPOINT;
+
+    /**
+     * 默认 oidc 注销终端
+     */
+    private String oidcLogoutEndpoint = DEFAULT_OIDC_LOGOUT_ENDPOINT;
+
+    /**
+     * 问题描述链接
+     */
+    private String issuer = StringUtils.EMPTY;
 
     /**
      * 授权缓存配置
@@ -101,12 +166,12 @@ public class OAuth2Properties {
     public OAuth2Properties() {
     }
 
-    public String getConsentPageUri() {
-        return consentPageUri;
+    public String getConsentPage() {
+        return consentPage;
     }
 
-    public void setConsentPageUri(String consentPageUri) {
-        this.consentPageUri = consentPageUri;
+    public void setConsentPage(String consentPage) {
+        this.consentPage = consentPage;
     }
 
     public CacheProperties getAuthorizationCache() {
@@ -149,56 +214,112 @@ public class OAuth2Properties {
         this.ignorePrincipalPropertiesMap = ignorePrincipalPropertiesMap;
     }
 
-    public String getOidcUserInfoEndpointUri() {
-        return oidcUserInfoEndpointUri;
+    public String getOidcUserInfoEndpoint() {
+        return oidcUserInfoEndpoint;
     }
 
-    public void setOidcUserInfoEndpointUri(String oidcUserInfoEndpointUri) {
-        this.oidcUserInfoEndpointUri = oidcUserInfoEndpointUri;
+    public void setOidcUserInfoEndpoint(String oidcUserInfoEndpoint) {
+        this.oidcUserInfoEndpoint = oidcUserInfoEndpoint;
     }
 
-    public String getTokenEndpointUri() {
-        return tokenEndpointUri;
+    public String getTokenEndpoint() {
+        return tokenEndpoint;
     }
 
-    public void setTokenEndpointUri(String tokenEndpointUri) {
-        this.tokenEndpointUri = tokenEndpointUri;
+    public void setTokenEndpoint(String tokenEndpoint) {
+        this.tokenEndpoint = tokenEndpoint;
     }
 
-    public String getTokenRevocationEndpointUri() {
-        return tokenRevocationEndpointUri;
+    public String getTokenRevocationEndpoint() {
+        return tokenRevocationEndpoint;
     }
 
-    public void setTokenRevocationEndpointUri(String tokenRevocationEndpointUri) {
-        this.tokenRevocationEndpointUri = tokenRevocationEndpointUri;
+    public void setTokenRevocationEndpoint(String tokenRevocationEndpoint) {
+        this.tokenRevocationEndpoint = tokenRevocationEndpoint;
     }
 
-    public String getAuthorizePageUri() {
-        return authorizePageUri;
+    public String getAuthorizeEndpoint() {
+        return authorizeEndpoint;
     }
 
-    public void setAuthorizePageUri(String authorizePageUri) {
-        this.authorizePageUri = authorizePageUri;
+    public void setAuthorizeEndpoint(String authorizeEndpoint) {
+        this.authorizeEndpoint = authorizeEndpoint;
+    }
+
+    public String getDeviceAuthorizationEndpoint() {
+        return deviceAuthorizationEndpoint;
+    }
+
+    public void setDeviceAuthorizationEndpoint(String deviceAuthorizationEndpoint) {
+        this.deviceAuthorizationEndpoint = deviceAuthorizationEndpoint;
+    }
+
+    public String getDeviceVerificationEndpoint() {
+        return deviceVerificationEndpoint;
+    }
+
+    public void setDeviceVerificationEndpoint(String deviceVerificationEndpoint) {
+        this.deviceVerificationEndpoint = deviceVerificationEndpoint;
+    }
+
+    public String getJwkSetEndpoint() {
+        return jwkSetEndpoint;
+    }
+
+    public void setJwkSetEndpoint(String jwkSetEndpoint) {
+        this.jwkSetEndpoint = jwkSetEndpoint;
+    }
+
+    public String getTokenIntrospectionEndpoint() {
+        return tokenIntrospectionEndpoint;
+    }
+
+    public void setTokenIntrospectionEndpoint(String tokenIntrospectionEndpoint) {
+        this.tokenIntrospectionEndpoint = tokenIntrospectionEndpoint;
+    }
+
+    public String getOidcClientRegistrationEndpoint() {
+        return oidcClientRegistrationEndpoint;
+    }
+
+    public void setOidcClientRegistrationEndpoint(String oidcClientRegistrationEndpoint) {
+        this.oidcClientRegistrationEndpoint = oidcClientRegistrationEndpoint;
+    }
+
+    public String getOidcLogoutEndpoint() {
+        return oidcLogoutEndpoint;
+    }
+
+    public void setOidcLogoutEndpoint(String oidcLogoutEndpoint) {
+        this.oidcLogoutEndpoint = oidcLogoutEndpoint;
+    }
+
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
     }
 
     public List<AntPathRequestMatcher> getOauth2Urls() {
 
         List<AntPathRequestMatcher> antPathRequestMatchers = new ArrayList<>();
 
-        if (StringUtils.isNotEmpty(getOidcUserInfoEndpointUri())) {
-            antPathRequestMatchers.add(new AntPathRequestMatcher(getOidcUserInfoEndpointUri()));
+        if (StringUtils.isNotEmpty(getOidcUserInfoEndpoint())) {
+            antPathRequestMatchers.add(new AntPathRequestMatcher(getOidcUserInfoEndpoint()));
         }
 
-        if (StringUtils.isNotEmpty(getTokenRevocationEndpointUri())) {
-            antPathRequestMatchers.add(new AntPathRequestMatcher(getTokenRevocationEndpointUri()));
+        if (StringUtils.isNotEmpty(getTokenRevocationEndpoint())) {
+            antPathRequestMatchers.add(new AntPathRequestMatcher(getTokenRevocationEndpoint()));
         }
 
-        if (StringUtils.isNotEmpty(getTokenEndpointUri())) {
-            antPathRequestMatchers.add(new AntPathRequestMatcher(getTokenEndpointUri()));
+        if (StringUtils.isNotEmpty(getTokenEndpoint())) {
+            antPathRequestMatchers.add(new AntPathRequestMatcher(getTokenEndpoint()));
         }
 
-        if (StringUtils.isNotEmpty(getAuthorizePageUri())) {
-            antPathRequestMatchers.add(new AntPathRequestMatcher(getAuthorizePageUri()));
+        if (StringUtils.isNotEmpty(getAuthorizeEndpoint())) {
+            antPathRequestMatchers.add(new AntPathRequestMatcher(getAuthorizeEndpoint()));
         }
 
         return antPathRequestMatchers;
