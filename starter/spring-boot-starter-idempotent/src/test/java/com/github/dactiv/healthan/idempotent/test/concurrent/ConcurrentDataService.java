@@ -12,7 +12,7 @@ public class ConcurrentDataService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConcurrentDataService.class);
 
-    public int count = 0;
+    private int count = 0;
 
     @Concurrent("increment:count")
     public int increment() {

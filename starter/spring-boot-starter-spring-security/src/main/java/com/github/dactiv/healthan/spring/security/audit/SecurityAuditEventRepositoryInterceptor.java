@@ -15,6 +15,7 @@ import org.springframework.util.AntPathMatcher;
 /**
  * spring security 审计仓库拦截，用于根据 {@link AuthenticationProperties#getIgnoreAuditTypes()} 和 {@link AuthenticationProperties#getIgnoreAuditTypes()}
  * 过滤具体的审计类型和审计用户使用，如:登录失败，认证失败等审计类型不需要写入审计里。
+ *
  * @author maurice.chen
  */
 public class SecurityAuditEventRepositoryInterceptor implements AuditEventRepositoryInterceptor {
