@@ -295,7 +295,7 @@ public class PluginEndpoint {
 
         List<PluginInfo> result = new ArrayList<>();
 
-        if (generateSources.stream().noneMatch(s -> parent.getSources().contains(s))) {
+        if (Objects.nonNull(parent) && generateSources.stream().noneMatch(s -> parent.getSources().contains(s))) {
             return result;
         }
 
