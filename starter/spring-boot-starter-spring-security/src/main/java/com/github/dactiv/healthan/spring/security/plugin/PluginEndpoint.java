@@ -318,11 +318,11 @@ public class PluginEndpoint {
                 target.setId(method.getName());
             }
 
-            if (StringUtils.isBlank(target.getParent())) {
+            if (StringUtils.isBlank(target.getParent()) && Objects.nonNull(parent)) {
                 target.setParent(parent.getId());
             }
 
-            if (CollectionUtils.isEmpty(target.getSources())) {
+            if (CollectionUtils.isEmpty(target.getSources())&& Objects.nonNull(parent)) {
                 target.setSources(parent.getSources());
             }
 
