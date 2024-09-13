@@ -45,7 +45,7 @@ public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationSe
             String cacheKey = oAuth2Properties.getAuthorizationCache().getName(OAuth2ParameterNames.ACCESS_TOKEN + CacheProperties.DEFAULT_SEPARATOR + md5AccessTokenKey);
 
             RBucket<OAuth2Authorization> accessTokenBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
-            accessTokenBucket.setAsync(authorization);
+            accessTokenBucket.set(authorization);
             if (Objects.nonNull(authorization.getAccessToken().getToken().getExpiresAt())) {
                 accessTokenBucket.expireAsync(authorization.getAccessToken().getToken().getExpiresAt());
             } else if (Objects.nonNull(time)) {
@@ -58,7 +58,7 @@ public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationSe
             String cacheKey = oAuth2Properties.getAuthorizationCache().getName(OAuth2ParameterNames.STATE + CacheProperties.DEFAULT_SEPARATOR + md5State);
 
             RBucket<OAuth2Authorization> authorizationCodeBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
-            authorizationCodeBucket.setAsync(authorization);
+            authorizationCodeBucket.set(authorization);
             if (Objects.nonNull(time)) {
                 authorizationCodeBucket.expireAsync(time.toDuration());
             }
@@ -71,7 +71,7 @@ public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationSe
                 String cacheKey = oAuth2Properties.getAuthorizationCache().getName(OAuth2ParameterNames.CODE + CacheProperties.DEFAULT_SEPARATOR + md5CodeKey);
 
                 RBucket<OAuth2Authorization> authorizationCodeBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
-                authorizationCodeBucket.setAsync(authorization);
+                authorizationCodeBucket.set(authorization);
                 if (Objects.nonNull(authorizationCode.getToken().getExpiresAt())) {
                     authorizationCodeBucket.expireAsync(authorizationCode.getToken().getExpiresAt());
                 } else if (Objects.nonNull(time)) {
@@ -87,7 +87,7 @@ public class RedissonOAuth2AuthorizationService implements OAuth2AuthorizationSe
             String cacheKey = oAuth2Properties.getAuthorizationCache().getName(OAuth2ParameterNames.REFRESH_TOKEN + CacheProperties.DEFAULT_SEPARATOR + md5RefreshKey);
 
             RBucket<OAuth2Authorization> refreshTokenBucket = redissonClient.getBucket(cacheKey, new SerializationCodec());
-            refreshTokenBucket.setAsync(authorization);
+            refreshTokenBucket.set(authorization);
             if (Objects.nonNull(authorization.getRefreshToken().getToken().getExpiresAt())) {
                 refreshTokenBucket.expireAsync(authorization.getRefreshToken().getToken().getExpiresAt());
             } else if (Objects.nonNull(time)) {
