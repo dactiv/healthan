@@ -2,13 +2,12 @@ package com.github.dactiv.healthan.spring.security.authentication.handler;
 
 import com.github.dactiv.healthan.commons.Casts;
 import com.github.dactiv.healthan.commons.RestResult;
-import com.github.dactiv.healthan.spring.security.authentication.config.AuthenticationProperties;
 import com.github.dactiv.healthan.spring.security.authentication.config.OAuth2Properties;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.AntPathMatcher;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
