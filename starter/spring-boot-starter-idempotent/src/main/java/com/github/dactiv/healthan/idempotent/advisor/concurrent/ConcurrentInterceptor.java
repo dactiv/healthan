@@ -103,7 +103,7 @@ public class ConcurrentInterceptor implements MethodInterceptor {
         try {
             return invocation.proceed();
         } catch (Throwable e) {
-            throw new SystemException(e.getMessage(), e);
+            throw new SystemException(e.getMessage());
         }
     }
 
