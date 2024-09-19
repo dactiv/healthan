@@ -13,6 +13,8 @@ import org.apache.commons.beanutils.Converter;
 import org.apache.commons.beanutils.converters.DateConverter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.objenesis.instantiator.util.ClassUtils;
@@ -21,7 +23,10 @@ import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,6 +37,8 @@ import java.util.stream.Collectors;
  * @author maurice.chen
  **/
 public abstract class Casts {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Casts.class);
 
     /**
      * 问号
@@ -439,11 +446,40 @@ public abstract class Casts {
      *
      */
     public static <K,V> MultiValueMap<K, V> castMapToMultiValueMap(Map<K,V[]> map) {
+        return castMapToMultiValueMap(map, false);
+    }
+
+    /**
+     * 将数组值的 map 数据转换成 MultiValueMap 对象
+     *
+     * @param map map 对象
+     * @param urlEncode 如果值为 String 类型是否 url 编码，true 是，否则 false
+     *
+     * @return MultiValueMap
+     *
+     */
+    public static <K,V> MultiValueMap<K, V> castMapToMultiValueMap(Map<K,V[]> map, boolean urlEncode) {
         MultiValueMap<K,V> result = new LinkedMultiValueMap<>();
 
-        map.forEach((key, value) -> result.put(key, Arrays.asList(value)));
+        for (Map.Entry<K, V[]> entry : map.entrySet()) {
+            List<V> values = Arrays
+                    .stream(entry.getValue())
+                    .map(v -> urlEncode ? urlEncode(v.toString(), Charset.defaultCharset().name()) : v)
+                    .map(v -> (V) v)
+                    .collect(Collectors.toList());
+            result.put(entry.getKey(), values);
+        }
 
         return result;
+    }
+
+    public static String urlEncode(String value, String enc) {
+        try {
+            return URLEncoder.encode(value, enc);
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.warn("url encode 时出现错误", e);
+            return value;
+        }
     }
 
     /**
