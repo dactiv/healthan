@@ -7,9 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -158,11 +156,6 @@ public class OAuth2Properties {
      */
     private String keyId = "7181d52e-6f98-4a57-ba32-b9b190267bb2";
 
-    /**
-     * 忽略当前用户的属性内容
-     */
-    private Map<String, List<String>> ignorePrincipalPropertiesMap = new LinkedHashMap<>();
-
     public OAuth2Properties() {
     }
 
@@ -204,14 +197,6 @@ public class OAuth2Properties {
 
     public void setKeyId(String keyId) {
         this.keyId = keyId;
-    }
-
-    public Map<String, List<String>> getIgnorePrincipalPropertiesMap() {
-        return ignorePrincipalPropertiesMap;
-    }
-
-    public void setIgnorePrincipalPropertiesMap(Map<String, List<String>> ignorePrincipalPropertiesMap) {
-        this.ignorePrincipalPropertiesMap = ignorePrincipalPropertiesMap;
     }
 
     public String getOidcUserInfoEndpoint() {

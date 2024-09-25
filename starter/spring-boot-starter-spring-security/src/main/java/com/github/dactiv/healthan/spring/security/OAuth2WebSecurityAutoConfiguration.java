@@ -99,9 +99,9 @@ public class OAuth2WebSecurityAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(OAuth2JsonAuthenticationSuccessResponse.class)
-    public OAuth2JsonAuthenticationSuccessResponse oAuth2JsonAuthenticationSuccessResponse(OAuth2Properties oAuth2Properties) {
-        return new OAuth2JsonAuthenticationSuccessResponse(oAuth2Properties);
+    @ConditionalOnMissingBean(IgnoreAuthenticationSuccessDataResponse.class)
+    public IgnoreAuthenticationSuccessDataResponse ignoreAuthenticationSuccessDataResponse(AuthenticationProperties properties) {
+        return new IgnoreAuthenticationSuccessDataResponse(properties);
     }
 
     /**

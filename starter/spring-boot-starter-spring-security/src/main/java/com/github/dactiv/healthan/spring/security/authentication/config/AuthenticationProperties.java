@@ -7,9 +7,7 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 认证配置
@@ -138,6 +136,11 @@ public class AuthenticationProperties {
      * 要忽略的审计操作数据最终用户名称
      */
     private List<String> ignoreOperationDataTracePrincipals;
+
+    /**
+     * 认证成功后需要忽略 {@link org.springframework.security.core.Authentication} 数据内容的映射
+     */
+    private Map<String, List<String>> ignoreAuthenticationSuccessDataMap = new LinkedHashMap<>();
 
     /**
      * 获取用户类型表决器默认同意的来源类型
@@ -461,5 +464,23 @@ public class AuthenticationProperties {
      */
     public void setIgnoreOperationDataTracePrincipals(List<String> ignoreOperationDataTracePrincipals) {
         this.ignoreOperationDataTracePrincipals = ignoreOperationDataTracePrincipals;
+    }
+
+    /**
+     * 获取认证成功后需要忽略 {@link org.springframework.security.core.Authentication} 数据内容的映射
+     *
+     * @return 要忽略 {@link org.springframework.security.core.Authentication} 数据内容的映射
+     */
+    public Map<String, List<String>> getIgnoreAuthenticationSuccessDataMap() {
+        return ignoreAuthenticationSuccessDataMap;
+    }
+
+    /**
+     * 设置认证成功后需要忽略 {@link org.springframework.security.core.Authentication} 数据内容的映射
+     *
+     * @param ignoreAuthenticationSuccessDataMap 要忽略 {@link org.springframework.security.core.Authentication} 数据内容的映射
+     */
+    public void setIgnoreAuthenticationSuccessDataMap(Map<String, List<String>> ignoreAuthenticationSuccessDataMap) {
+        this.ignoreAuthenticationSuccessDataMap = ignoreAuthenticationSuccessDataMap;
     }
 }
