@@ -222,7 +222,6 @@ public abstract class AbstractAsymmetricCipherService extends AbstractBlockCiphe
         } else {
             return getPrivateKey(key);
         }
-
     }
 
     /**
