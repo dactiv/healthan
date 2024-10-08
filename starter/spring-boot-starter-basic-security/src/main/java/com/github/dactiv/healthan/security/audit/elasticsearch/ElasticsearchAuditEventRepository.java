@@ -212,4 +212,8 @@ public class ElasticsearchAuditEventRepository extends AbstractExtendAuditEventR
     public ElasticsearchOperations getElasticsearchOperations() {
         return elasticsearchOperations;
     }
+
+    public IndexGenerator getIndexGenerator() {
+        return indexGenerator;
+    }
 }

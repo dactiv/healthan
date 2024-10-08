@@ -9,20 +9,16 @@ spring:
       WRITE_DATES_AS_TIMESTAMPS: true
     deserialization:
       FAIL-ON-UNKNOWN-PROPERTIES: false
-  data:
-    mongodb:
-      uri: mongodb://admin:19880602@localhost:27017/?authSource=admin
-      database: system_audit
-      field-naming-strategy: org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy
-  elasticsearch:
-    uris: http://16.1.4.48:9200
-    username: elastic
-    password: Dd4#dfafBda52h
+
 ---
 spring:
   config:
     activate:
       on-profile: elasticsearch
+  elasticsearch:
+    uris: http://16.1.4.48:9200
+    username: elastic
+    password: Dd4#dfafBda52h
 
 healthan:
   security:
@@ -30,12 +26,44 @@ healthan:
       type: elasticsearch
       index:
         prefix: ix_test_audit_event
+        kafka:
+          enabled: false
 
+---
+spring:
+  kafka:
+    bootstrap-servers: 16.1.4.48:9092,16.1.4.49:9092,16.1.4.50:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3  # 重试次数
+      acks: all   # 确保消息已被所有副本确认
+  config:
+    activate:
+      on-profile: elasticsearch-kafka
+  elasticsearch:
+    uris: http://16.1.4.48:9200
+    username: elastic
+    password: Dd4#dfafBda52h
+
+healthan:
+  security:
+    audit:
+      type: elasticsearch
+      index:
+        prefix: ix_test_audit_event
+        kafka:
+          topic: mdm-system-test-log
 ---
 spring:
   config:
     activate:
       on-profile: mongo
+  data:
+    mongodb:
+      uri: mongodb://admin:19880602@localhost:27017/?authSource=admin
+      database: system_audit
+      field-naming-strategy: org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy
 
 healthan:
   security:
