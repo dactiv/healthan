@@ -25,12 +25,10 @@ import java.util.Map;
  */
 public abstract class AbstractOperationDataTraceResolver implements OperationDataTraceResolver {
 
-    public static final String DEFAULT_DATE_FORMATTER_PATTERN = "yyyy-MM-dd HH:mm:ss";
-
     private final DateFormat dateFormat;
 
     public AbstractOperationDataTraceResolver() {
-        dateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMATTER_PATTERN);
+        dateFormat = new SimpleDateFormat(Casts.DEFAULT_DATE_TIME_FORMATTER_PATTERN);
     }
 
     public AbstractOperationDataTraceResolver(String dateFormatPattern) {

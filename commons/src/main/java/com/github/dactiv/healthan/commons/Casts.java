@@ -100,6 +100,12 @@ public abstract class Casts {
      */
     public static final String RIGHT_BRACKET = ")";
 
+    public static final String DEFAULT_DATE_FORMATTER_PATTERN = "yyyy-MM-dd";
+
+    public static final String DEFAULT_time_FORMATTER_PATTERN = "HH:mm:ss";
+
+    public static final String DEFAULT_DATE_TIME_FORMATTER_PATTERN = DEFAULT_DATE_FORMATTER_PATTERN + StringUtils.SPACE + DEFAULT_time_FORMATTER_PATTERN;
+
     /**
      *  map 类型范型引用
      */
@@ -214,13 +220,11 @@ public abstract class Casts {
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(String json, Class<T> type) {
-
         try {
             return objectMapper.readValue(json, type);
         } catch (IOException e) {
             throw new SystemException(e);
         }
-
     }
 
     /**
@@ -232,13 +236,11 @@ public abstract class Casts {
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(String json, TypeReference<T> type) {
-
         try {
             return objectMapper.readValue(json, type);
         } catch (IOException e) {
             throw new SystemException(e);
         }
-
     }
 
     /**
@@ -282,13 +284,11 @@ public abstract class Casts {
      * @return 指定类型的对象实例
      */
     public static <T> T readValue(InputStream stream, TypeReference<T> type) {
-
         try {
             return objectMapper.readValue(stream, type);
         } catch (Exception e) {
             throw new SystemException(e);
         }
-
     }
 
     /**
@@ -547,7 +547,7 @@ public abstract class Casts {
     }
 
     static {
-        registerDateConverter("yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss");
+        registerDateConverter(DEFAULT_DATE_FORMATTER_PATTERN, DEFAULT_DATE_TIME_FORMATTER_PATTERN);
         registerCollectionConverter();
     }
 

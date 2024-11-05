@@ -1,6 +1,6 @@
 package com.github.dactiv.healthan.mybatis.plus.config;
 
-import com.github.dactiv.healthan.mybatis.interceptor.audit.AbstractOperationDataTraceResolver;
+import com.github.dactiv.healthan.commons.Casts;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -21,7 +21,7 @@ public class OperationDataTraceProperties {
     /**
      * 日志格式化内容
      */
-    private String dateFormat = AbstractOperationDataTraceResolver.DEFAULT_DATE_FORMATTER_PATTERN;
+    private String dateFormat = Casts.DEFAULT_DATE_TIME_FORMATTER_PATTERN;
 
     public OperationDataTraceProperties() {
     }
